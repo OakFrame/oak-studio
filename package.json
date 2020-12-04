@@ -1,0 +1,58 @@
+{
+  "name": "oak-studio",
+  "version": "0.0.1",
+  "description": "`npm install -g ts-node` `npm install -g typescript`",
+  "main": "index.js",
+  "scripts": {
+    "express": "bash scripts/clean.sh && cd service/spa && ts-node express.ts",
+    "test": "nyc mocha -r ts-node/register **/*.spec.ts"
+  },
+  "bin": {
+    "oak": "./cli.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.2.10",
+    "@types/expect": "^24.3.0",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.7.7",
+    "aws-sdk": "^2.634.0",
+    "chai": "^4.2.0",
+    "cookie-session": "^1.4.0",
+    "html-loader": "^0.5.5",
+    "istanbul": "^0.4.5",
+    "mocha": "^7.1.0",
+    "nyc": "^15.0.0",
+    "raw-loader": "^4.0.1",
+    "request": "^2.88.2",
+    "source-map": "^0.7.3",
+    "systeminformation": "^4.26.9",
+    "ts-node": "^8.6.2",
+    "typings": "^2.1.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "websocket": "^1.0.31"
+  },
+  "dependencies": {
+    "@types/source-map": "^0.5.7",
+    "canvas": "^2.6.1",
+    "cookie-parser": "^1.4.5",
+    "cookies": "^0.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "ejs-compiled-loader": "^3.0.0",
+    "ejs-loader": "^0.5.0",
+    "ejs-webpack-loader": "^2.2.2",
+    "express": "^4.17.1",
+    "express-ws": "^4.0.0",
+    "html-webpack-plugin": "^4.3.0",
+    "mongodb": "^3.6.0",
+    "oakframe-interactive": "git+https://github.com/arkamedus/OakFrame-Interactive.git",
+    "passport": "^0.4.1",
+    "passport-google-oauth": "^2.0.0",
+    "url-parse": "^1.4.7",
+    "uuid": "latest"
+  }
+}

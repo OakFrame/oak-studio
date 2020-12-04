@@ -1,0 +1,13 @@
+.idea
+*.iml
+out
+gen
+tmp
+.DS_Store
+.nyc_output
+node_modules
+release
+client/*
+demo/*
+lib/schema/*
+lib/model/private/*
