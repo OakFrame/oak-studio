@@ -1,5 +1,7 @@
 #!/usr/bin/env ts-node
 
+import * as fs from "fs";
+
 const args = (process.argv.slice(2));
 let cmd = args[0] || 'help';
 
@@ -33,7 +35,8 @@ switch (cmd) {
 }
 
 function version(args?) {
-    return "Oak-Studio CLI v0.0.1";
+    const version = JSON.parse(fs.readFileSync('package.json').toString()).version
+    return `Oak-Studio CLI v${version}`;
 }
 
 function help(args?) {

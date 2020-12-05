@@ -1,7 +1,7 @@
 ///<reference path="GraphNodeHTMLElement.ts"/>
 
 import {GraphNodeHTMLElement} from "./GraphNodeHTMLElement";
-import {Graph} from "../model/Graph";
+import {Graph} from "../model/graph/Graph";
 
 //** @interface GraphNode is an atomic unit within the node-graph relationship
 export interface GraphNode {

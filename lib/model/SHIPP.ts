@@ -1,4 +1,4 @@
-import {Vec2} from "./Vec2";
+import {Vec2} from "./math/Vec2";
 
 function lerp(v0, v1, t) {
     return v0 * (1 - t) + v1 * t

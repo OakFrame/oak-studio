@@ -1,7 +1,7 @@
-///<reference path="../interface/GraphEvent.ts"/>
-///<reference path="../interface/GraphNode.ts"/>
+///<reference path="../../interface/GraphEvent.ts"/>
+///<reference path="../../interface/GraphNode.ts"/>
 
-import {GraphNode} from "../interface/GraphNode";
+import {GraphNode} from "../../interface/GraphNode";
 
 export class Graph implements GraphEvent {
 

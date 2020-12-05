@@ -1,4 +1,4 @@
-import {Graph} from "../Graph";
+import {Graph} from "./Graph";
 import {GraphNode} from "../../interface/GraphNode";
 import {GraphNodeHTMLElement} from "../../interface/GraphNodeHTMLElement";
 

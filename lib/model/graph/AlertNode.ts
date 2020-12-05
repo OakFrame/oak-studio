@@ -1,6 +1,6 @@
 /** @class AlertNode **/
 import {GraphNode} from "../../interface/GraphNode";
-import {Graph} from "../Graph";
+import {Graph} from "./Graph";
 import {GraphNodeHTMLElement} from "../../interface/GraphNodeHTMLElement";
 
 export class AlertNode implements GraphNode {
