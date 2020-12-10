@@ -58,7 +58,7 @@ export class Room {
 
     depthSort(camera) {
         var co = 0;
-        var sw = 0; // ti = performance.now();
+        var sw = 0;
         let _v1 = new Vec3();
 
         for (var index = 0; index < this.objects.length; index++) {
@@ -90,6 +90,10 @@ export class Room {
             }
             times++;
         } while (loop);
+    }
+
+    update(){
+
     }
 
 }

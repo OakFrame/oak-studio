@@ -1,16 +1,18 @@
 import {Vec3} from "../math/Vec3";
+import { Sprite } from "../rendering/Sprite";
 import {HasComponent} from "./Component";
+import {Mesh} from "../rendering/Mesh";
 
 export class RoomObject extends HasComponent {
     private _tmp: number;
-    public position;
+    public position:Vec3;
     public scale;
     public velocity;
     private game_object: number;
     public name;
     public depth;
     public decal: boolean;
-    public mesh;
+    public mesh:Mesh;
     public path;
     public actions;
     public tags;
@@ -20,7 +22,7 @@ export class RoomObject extends HasComponent {
     public timeline;
     public task_manager;
     public entity_behavior;
-    public sprite;
+    public sprite:Sprite;
 
     constructor(object?: RoomObject) {
         super();
@@ -52,7 +54,7 @@ export class RoomObject extends HasComponent {
             this.action = object.action||null;
             this.actions = object.actions||[];
             this.decal = object.decal || false;
-            this.mesh= object.mesh || false;
+            this.mesh= object.mesh;
             this._tmp = object._tmp;
             this.tags = object.tags || [];
             this.name = object.name;

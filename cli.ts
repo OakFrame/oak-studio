@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 
-import * as fs from "fs";
+const fs = require("fs");
 
 const args = (process.argv.slice(2));
 let cmd = args[0] || 'help';
@@ -29,16 +29,16 @@ switch (cmd) {
         break;
 
     default:
-        console.error(`Oak: "${cmd}" is not a valid option.`);
+        console.error(`oak: "${cmd}" is not a valid option.`);
         console.log(help(args));
         break;
 }
 
 function version(args?) {
-    const version = JSON.parse(fs.readFileSync('package.json').toString()).version
+    const version = JSON.parse(fs.readFileSync(__dirname+'/package.json').toString()).version
     return `Oak-Studio CLI v${version}`;
 }
 
 function help(args?) {
-    return "Usage: oak [options]\n\nOptions:\nhelp, -h\t\t\tdisplay help information\nversion, -v\t\t\tdisplay oak-studio version";
+    return "Usage: oak [options]\n\nOptions:\nhelp, -h\t\t\tdisplay help information\nversion, -v\t\t\tdisplay Oak-Studio version";
 }

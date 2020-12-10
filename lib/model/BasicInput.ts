@@ -401,13 +401,13 @@ export class BasicInput {
 
              let run = 60;
              if (TILTD.x.length === 0 && TILTD.y.length === 0) {
-             TILTD.x.push(sx);
+             TILTD.x.push(from_camera_scale_x);
              TILTD.y.push(sy);
              } else {
-             //TILTD.x += sx;
+             //TILTD.x += from_camera_scale_x;
              //TILTD.y += sy;
              //if ( Main.getTick() % 5 === 0) {
-             TILTD.x.push(sx);
+             TILTD.x.push(from_camera_scale_x);
              TILTD.y.push(sy);
              //}
 
@@ -425,7 +425,7 @@ export class BasicInput {
 
              ///TILTD.x /= 2;
              //T/ILTD.y /= 2;
-             //TILTD.x = (sx*0.25)+(TILTD.x*.75);
+             //TILTD.x = (from_camera_scale_x*0.25)+(TILTD.x*.75);
              //TILTD.x = (sy*0.25)+(TILTD.y*.75);
              }
              //console.log(TILT,TILTD)

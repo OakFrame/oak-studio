@@ -23,7 +23,6 @@ export class SHIPP {
         for (let i = 0; i < b.getMap().length; i++) {
             this.map[i] += b.map[i];
         }
-
     }
 
     getMap() {
@@ -306,10 +305,10 @@ export class SHIPP {
     multiply(b) {
         let a = this;
 
-        let w = a.getWidth() * b.getWidth();
-        let h = a.getHeight() * b.getHeight();
+        let w = a.getWidth();
+        let h = a.getHeight();
 
-        let f = new SHIPP(w, h);
+        let f = new SHIPP(this.getWidth(), this.getHeight());
 
         for (let x = 0; x < w; x++) {
             for (let y = 0; y < h; y++) {

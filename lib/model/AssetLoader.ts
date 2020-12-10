@@ -10,7 +10,7 @@ export class AssetLoader {
     loadSprite(src, preload = true){
         let self = this;
         this.queued ++;
-        let s = new Sprite({src: src});
+        let s = new Sprite(src);
         s.on('load',function(){
             self.loaded++;
             if (self.loaded >= self.queued){

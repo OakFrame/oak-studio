@@ -4,6 +4,9 @@
 import {Vec3} from "../math/Vec3";
 import {Projection} from "../math/Projection";
 import {Vec2} from "../math/Vec2";
+import {Surface} from "../rendering/Surface";
+import {RoomObject} from "./RoomObject";
+import {Face3} from "../rendering/Mesh";
 
 export class Camera {
 
@@ -48,8 +51,8 @@ export class Camera {
             drawntris: 0,
             culltris: 0,
             _t: [],
-            sx: 0,
-            sy: 0,
+            from_camera_scale_x: 0,
+            from_camera_scale_y: 0,
             sr: 0,
             sh: 0,
             sc: 0,
@@ -92,7 +95,7 @@ export class Camera {
     }
 
 
-    drawActor(surface, actor) {
+    drawActor(surface: Surface, actor: RoomObject) {
 
         let _tick = Date.now() / 16;
 
@@ -103,34 +106,34 @@ export class Camera {
 
         this.projection.toScreen(surface, this._tmp.v1, this.from, this._tmp.p2);
 
-        this._tmp.sx = (this._tmp.p2.dist(this._tmp.p1) / 24);
-        this._tmp.sy = this._tmp.sx;
+        this._tmp.from_camera_scale_x = (this._tmp.p2.dist(this._tmp.p1) / 24);
+        this._tmp.from_camera_scale_y = this._tmp.from_camera_scale_x;
         this._tmp.sr = (((Math.sin(((_tick / 6)) + actor.rand)) * (Math.pow(actor.velocity.mag(), 2) * 500) * 1.5));
 
         this._tmp.sh = 1;//60 * (1 + (Math.sin((_tick / 2.5) + actor.rand) * 1)) * actor.velocity.mag() / 3;
 
         this._tmp.sc = actor.scale.x || 1;
-        this._tmp.vx = this._tmp.p1.x - ((actor.getSprite().getImage().width / 2) * this._tmp.sx * this._tmp.sc);
-        this._tmp.vy = (this._tmp.p1.y - (actor.getSprite().getImage().height * this._tmp.sy * this._tmp.sc) - this._tmp.sh) - ((((1 + Math.sin((_tick / 3))) * (Math.pow(actor.velocity.mag(), 2)) * 500.5)) * (this._tmp.sx / 2));
+        this._tmp.vx = this._tmp.p1.x - ((actor.getSprite().getImage().width / 2) * this._tmp.from_camera_scale_x * this._tmp.sc);
+        this._tmp.vy = (this._tmp.p1.y - (actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc) - this._tmp.sh) - ((((1 + Math.sin((_tick / 3))) * (Math.pow(actor.velocity.mag(), 2)) * 500.5)) * (this._tmp.from_camera_scale_x / 2));
 
 
-        if (this._tmp.p1.x - (actor.getSprite().getImage().width * this._tmp.sx * this._tmp.sc) / 2 > surface._width || this._tmp.p1.x + (actor.getSprite().getImage().width * this._tmp.sx * this._tmp.sc) / 2 < 0 || this._tmp.p1.y < 0 || this._tmp.p1.y - (actor.getSprite().getImage().height * this._tmp.sy * this._tmp.sc) > surface._height) { // horizontal
+        if (this._tmp.p1.x - (actor.getSprite().getImage().width * this._tmp.from_camera_scale_x * this._tmp.sc) / 2 > surface.getWidth() || this._tmp.p1.x + (actor.getSprite().getImage().width * this._tmp.from_camera_scale_x * this._tmp.sc) / 2 < 0 || this._tmp.p1.y < 0 || this._tmp.p1.y - (actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc) > surface.getHeight()) { // horizontal
 
             return false;
         } else {
 
 
-            surface.context.save();
+            surface.getContext().save();
 
-            surface.context.translate((0.5 + this._tmp.vx + (actor.getSprite().getImage().width * this._tmp.sx * this._tmp.sc / 2)), (0.5 + this._tmp.vy + (actor.getSprite().getImage().height * this._tmp.sy * this._tmp.sc / 2)));
+            surface.getContext().translate((0.5 + this._tmp.vx + (actor.getSprite().getImage().width * this._tmp.from_camera_scale_x * this._tmp.sc / 2)), (0.5 + this._tmp.vy + (actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc / 2)));
             //if (this._tmp.sr != 0) {
-            surface.context.rotate(this._tmp.sr);
+            surface.getContext().rotate(this._tmp.sr);
             // }
 
-            surface.context.drawImage(actor.getSprite().getImage(), (0.5 - (actor.getSprite().getImage().width * this._tmp.sc * this._tmp.sx / 2)), -(0.5 + (actor.getSprite().getImage().height * this._tmp.sc * this._tmp.sy / 2)), actor.getSprite().getImage().width * this._tmp.sx * this._tmp.sc, actor.getSprite().getImage().height * this._tmp.sy * this._tmp.sc);
+            surface.getContext().drawImage(actor.getSprite().getImage(), (0.5 - (actor.getSprite().getImage().width * this._tmp.sc * this._tmp.from_camera_scale_x / 2)), -(0.5 + (actor.getSprite().getImage().height * this._tmp.sc * this._tmp.from_camera_scale_y / 2)), actor.getSprite().getImage().width * this._tmp.from_camera_scale_x * this._tmp.sc, actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc);
             // surface.fill("#111");
 
-            surface.fillStyle = "#fff";
+            surface.getContext().fillStyle = "#fff";
 
             // surface.drawText(0, 40, actor.timeline_index);
             // surface.drawText(0, 20, actor.getName());
@@ -160,13 +163,13 @@ export class Camera {
                 surface.drawText(0, -40, actor.bark);
             }
 
-            surface.context.restore();
+            surface.getContext().restore();
 
         }
 
     };
 
-    drawFace3(surface, v1, v2, v3, color) {
+    drawFace3(surface: Surface, v1, v2, v3, color) {
         this.projection.toScreen(surface, v1, this.from, this._tmp.p1);
         this.projection.toScreen(surface, v2, this.from, this._tmp.p2);
         this.projection.toScreen(surface, v3, this.from, this._tmp.p3);
@@ -185,36 +188,72 @@ export class Camera {
         m = Math.sqrt(rx * rx + ry * ry + rz * rz);
 
         //triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 2);
-        surface.context.fillStyle = color || "#000";
-        surface.context.beginPath();
-        surface.context.moveTo(this._tmp.p1.x, this._tmp.p1.y);
-        surface.context.lineTo(this._tmp.p2.x, this._tmp.p2.y);
-        surface.context.lineTo(this._tmp.p3.x, this._tmp.p3.y);
-        surface.context.fill();
+        surface.getContext().fillStyle = color || "#000";
+        surface.getContext().beginPath();
+        surface.getContext().moveTo(this._tmp.p1.x, this._tmp.p1.y);
+        surface.getContext().lineTo(this._tmp.p2.x, this._tmp.p2.y);
+        surface.getContext().lineTo(this._tmp.p3.x, this._tmp.p3.y);
+        surface.getContext().fill();
 
-        surface.context.strokeStyle = color || '#f00';
-        surface.context.stroke();
+        surface.getContext().strokeStyle = color || '#f00';
+        surface.getContext().stroke();
     };
 
-    drawFace(surface, tri, parent, texture, scale, depth = 1) {
+    drawFace(surface: Surface, face3: Face3, parent, texture, scale, depth = 9) {
 
         //this._tmp.drawntris++;
 
-        /*if (depth>=1){
-            depth --;
+        if (face3.getcenter().dist(this.from) < Math.pow(1.8,depth-1) && depth >= 1) {
 
-            let t0 = new Face3();
-            t0.pos1 = new Vec3();
+            let new_depth = depth-1;
+
+            let A = new Vec3().copy(face3.pos1);
+            let B = new Vec3().copy(face3.pos2);
+            let C = new Vec3().copy(face3.pos3);
+
+            let d = (new Vec3()).add(A).add(B).divI(2);
+            let e = (new Vec3()).add(B).add(C).divI(2);
+            let f = (new Vec3()).add(C).add(A).divI(2);
+
+            let uvA = new Vec2().copy(face3.uv1);
+            let uvB = new Vec2().copy(face3.uv2);
+            let uvC = new Vec2().copy(face3.uv3);
+
+            let uvd = (new Vec2()).add(uvA).add(uvB).divI(2);
+            let uve = (new Vec2()).add(uvB).add(uvC).divI(2);
+            let uvf = (new Vec2()).add(uvC).add(uvA).divI(2);
+
+            let color = face3.color1;
+
+            let one = new Face3();
+            one.pos1.copy(C);one.pos2.copy(f);one.pos3.copy(e);
+            one.uv1.copy(uvC);one.uv2.copy(uvf);one.uv3.copy(uve);
+            one.color1 = color;one.color2 = color;one.color3 = color;
+            this.drawFace(surface, one, parent, texture, scale, new_depth);
+
+            let two = new Face3();
+            two.pos1.copy(e);two.pos2.copy(d);two.pos3.copy(B);
+            two.uv1.copy(uve);two.uv2.copy(uvd);two.uv3.copy(uvB);
+            two.color1 = color;two.color2 = color;two.color3 = color;
+            this.drawFace(surface, two, parent, texture, scale, new_depth);
+
+            let three = new Face3();
+            three.pos1.copy(f);three.pos2.copy(A);three.pos3.copy(d);
+            three.uv1.copy(uvf);three.uv2.copy(uvA);three.uv3.copy(uvd);
+            three.color1 = color;three.color2 = color;three.color3 = color;
+            this.drawFace(surface, three, parent, texture, scale, new_depth);
+
+            let four = new Face3();
+            four.pos1.copy(f);four.pos2.copy(e);four.pos3.copy(d);
+            four.uv1.copy(uvf);four.uv2.copy(uve);four.uv3.copy(uvd);
+            four.color1 = color;four.color2 = color;four.color3 = color;
+            this.drawFace(surface, four, parent, texture, scale, new_depth);
 
 
-            this.drawFace(surface, t0, parent, scale, depth);
+            return false;
 
-            return;
 
         }
-
-
-*/
 
 
         function triangleGrow(p1, p2, p3, amt) {
@@ -233,9 +272,9 @@ export class Camera {
 
         // console.log(tri);
 
-        this.projection.toScreen(surface, this._tmp.v1.copy(parent.position).divI(1).add(this._tmp.v4.copy(tri.pos1).mulI(scale)), this.from, this._tmp.p1);
-        this.projection.toScreen(surface, this._tmp.v2.copy(parent.position).divI(1).add(this._tmp.v4.copy(tri.pos2).mulI(scale)), this.from, this._tmp.p2);
-        this.projection.toScreen(surface, this._tmp.v3.copy(parent.position).divI(1).add(this._tmp.v4.copy(tri.pos3).mulI(scale)), this.from, this._tmp.p3);
+        this.projection.toScreen(surface, this._tmp.v1.copy(parent.position).divI(1).add(this._tmp.v4.copy(face3.pos1).mulI(scale)), this.from, this._tmp.p1);
+        this.projection.toScreen(surface, this._tmp.v2.copy(parent.position).divI(1).add(this._tmp.v4.copy(face3.pos2).mulI(scale)), this.from, this._tmp.p2);
+        this.projection.toScreen(surface, this._tmp.v3.copy(parent.position).divI(1).add(this._tmp.v4.copy(face3.pos3).mulI(scale)), this.from, this._tmp.p3);
 
         // camera.projection.toScreen(this, tri.pos1, camera.from, this._tmp.p1);
         // camera.projection.toScreen(this, tri.pos2, camera.from, this._tmp.p2);
@@ -243,7 +282,7 @@ export class Camera {
 
         //console.log(this._tmp.p1,this._tmp.p2,this._tmp.p3);
 
-        triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 1);
+       // triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 1);
 
 
         /*if ((this._tmp.p3.x === -99 && this._tmp.p3.y === -99) || (this._tmp.p2.x === -99 && this._tmp.p2.y === -99) || (this._tmp.p1.x === -99 && this._tmp.p1.y === -99)) {
@@ -255,14 +294,14 @@ export class Camera {
 
         //console.log('DRAWING');
 
-        surface.context.beginPath();
-        //  surface.context.strokeStyle = "#000";
-        surface.context.moveTo((0.5 + this._tmp.p1.x), (0.5 + this._tmp.p1.y));
-        surface.context.lineTo((0.5 + this._tmp.p2.x), (0.5 + this._tmp.p2.y));
-        surface.context.lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
+        surface.getContext().beginPath();
+        surface.getContext().strokeStyle = "#FFF";
+        surface.getContext().moveTo((0.5 + this._tmp.p1.x), (0.5 + this._tmp.p1.y));
+        surface.getContext().lineTo((0.5 + this._tmp.p2.x), (0.5 + this._tmp.p2.y));
+        surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
 
-        // surface.context.closePath();
-        //surface.context.stroke();
+         surface.getContext().closePath();
+        surface.getContext().stroke();
 
         this._tmp._t[20] = 0;
         this._tmp._t[21] = 0;
@@ -278,14 +317,14 @@ export class Camera {
         this._tmp._t[12] = this._tmp.p3.x;
         this._tmp._t[13] = this._tmp.p3.y;
 
-        this._tmp._t[14] = (tri.uv1.x + this._tmp._t[20]) * this._tmp._t[22];
-        this._tmp._t[15] = (tri.uv1.y + this._tmp._t[21]) * this._tmp._t[23];
+        this._tmp._t[14] = (face3.uv1.x + this._tmp._t[20]) * this._tmp._t[22];
+        this._tmp._t[15] = (face3.uv1.y + this._tmp._t[21]) * this._tmp._t[23];
 
-        this._tmp._t[16] = (tri.uv2.x + this._tmp._t[20]) * this._tmp._t[22];
-        this._tmp._t[17] = (tri.uv2.y + this._tmp._t[21]) * this._tmp._t[23];
+        this._tmp._t[16] = (face3.uv2.x + this._tmp._t[20]) * this._tmp._t[22];
+        this._tmp._t[17] = (face3.uv2.y + this._tmp._t[21]) * this._tmp._t[23];
 
-        this._tmp._t[18] = (tri.uv3.x + this._tmp._t[20]) * this._tmp._t[22];
-        this._tmp._t[19] = (tri.uv3.y + this._tmp._t[21]) * this._tmp._t[23];
+        this._tmp._t[18] = (face3.uv3.x + this._tmp._t[20]) * this._tmp._t[22];
+        this._tmp._t[19] = (face3.uv3.y + this._tmp._t[21]) * this._tmp._t[23];
 
         this._tmp._t[10] -= this._tmp._t[8];
         this._tmp._t[11] -= this._tmp._t[9];
@@ -314,11 +353,11 @@ export class Camera {
         this._tmp._t[5] = this._tmp._t[9] - this._tmp._t[1] * this._tmp._t[14] - this._tmp._t[3] * this._tmp._t[15];
 
 
-        surface.context.save();
-        surface.context.clip();
-        surface.context.transform(this._tmp._t[0], this._tmp._t[1], this._tmp._t[2], this._tmp._t[3], this._tmp._t[4], this._tmp._t[5]);
-        surface.context.drawImage(texture, 0, 0);
-        surface.context.restore();
+        surface.getContext().save();
+        surface.getContext().clip();
+        surface.getContext().transform(this._tmp._t[0], this._tmp._t[1], this._tmp._t[2], this._tmp._t[3], this._tmp._t[4], this._tmp._t[5]);
+        surface.getContext().drawImage(texture, 0, 0);
+        surface.getContext().restore();
 
         //}
         //surface.context.strokeStyle = "red";

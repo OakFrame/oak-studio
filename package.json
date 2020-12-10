@@ -6,7 +6,7 @@
   "scripts": {
     "express": "bash scripts/clean.sh && cd service/spa && ts-node express.ts",
     "test": "nyc mocha -r ts-node/register **/*.spec.ts",
-    "package:web": "bash scripts/clean.sh && "
+    "package:web": "bash scripts/clean.sh && cd package && tsc && webpack && rm -rf ./tmp"
   },
   "bin": {
     "oak": "./cli.ts"
@@ -50,7 +50,6 @@
     "express-ws": "^4.0.0",
     "html-webpack-plugin": "^4.3.0",
     "mongodb": "^3.6.0",
-    "oakframe-interactive": "git+https://github.com/arkamedus/OakFrame-Interactive.git",
     "passport": "^0.4.1",
     "passport-google-oauth": "^2.0.0",
     "url-parse": "^1.4.7",

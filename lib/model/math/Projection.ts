@@ -3,6 +3,7 @@
  */
 import {Vec3} from "./Vec3";
 import {Vec2} from "./Vec2";
+import {Surface} from "../rendering/Surface";
 
 export class Projection {
 
@@ -17,6 +18,8 @@ export class Projection {
     private tfov: number;
     private tfovpower: number;
     private tfovpoweraspect: number;
+
+    private _set=false;
 
 
     constructor() {
@@ -35,6 +38,7 @@ export class Projection {
     }
 
     set(camera) {
+        this._set = true;
         this.d.copy(camera.to).sub(camera.from);
 
         this.mm = Math.sqrt(this.d.x * this.d.x + this.d.y * this.d.y + this.d.z * this.d.z);
@@ -60,10 +64,10 @@ export class Projection {
 
     }
 
-    toWorld(surface, mousePosition, from, target) {
-
-        this.s.x = 2 * mousePosition.x / surface._width - 1;
-        this.s.y = 1 - 2 * mousePosition.y / surface._height;
+    toWorld(surface:Surface, mousePosition, from, target) {
+        if (!this._set){console.error("Projection has not been set from Camera source");this._set=true;}
+        this.s.x = 2 * mousePosition.x / surface.getWidth() - 1;
+        this.s.y = 1 - 2 * mousePosition.y / surface.getHeight();
         this.p.x = this.d.x + this.u.x * this.s.y + this.v.x * this.s.x;
         this.p.y = this.d.y + this.u.y * this.s.y + this.v.y * this.s.x;
         this.p.z = this.d.z + this.u.z * this.s.y + this.v.z * this.s.x;
@@ -75,15 +79,16 @@ export class Projection {
 
     }
 
-    toScreen(surface, position, from, target) {
+    toScreen(surface:Surface, position, from, target) {
+        if (!this._set){console.error("Projection has not been set from Camera source");this._set=true;}
         this.p.set(position.x - from.x, position.y - from.y, position.z - from.z);
         this.mm = this.p.dot(this.d);
         if (this.mm > 0) {
             this.p.divI(this.mm);
             this.mm = this.p.dot(this.v) / this.tfovpoweraspect;
-            target.x = (this.mm + 1) / 2 * surface._width;
+            target.x = (this.mm + 1) / 2 * surface.getWidth();
             this.mm = this.p.dot(this.u) / this.tfovpower;
-            target.y = (1 - this.mm) / 2 * surface._height;
+            target.y = (1 - this.mm) / 2 * surface.getHeight();
         } else {
             target.set(-99, -99);
         }
