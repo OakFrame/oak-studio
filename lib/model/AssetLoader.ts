@@ -3,22 +3,32 @@ import {Sprite} from "./rendering/Sprite";
 export class AssetLoader {
     public queued;
     public loaded;
-    constructor (){
+
+    private spriteCache = [];
+
+    constructor() {
         this.queued = 0;
         this.loaded = 0;
     }
-    loadSprite(src, preload = true){
-        let self = this;
-        this.queued ++;
+
+    loadSprite(src, preload = true) {
+        this.queued++;
         let s = new Sprite(src);
-        s.on('load',function(){
-            self.loaded++;
-            if (self.loaded >= self.queued){
-                self.publish("loaded",true)
+        this.spriteCache[src] = s;
+        s.on('load', () => {
+            this.loaded++;
+            if (this.loaded >= this.queued) {
+                this.publish("loaded", true);
             }
         });
-        if (preload) { s.getImage(); }
+        if (preload) {
+            s.getImage();
+        }
         return s;
+    }
+
+    getSpriteFromCache(src) {
+        return this.spriteCache[src];
     }
 
     static loadFile(src, func) {
@@ -42,7 +52,7 @@ export class AssetLoader {
         xmlhttp.send();
     }
 
-    publish(key, value){
+    publish(key, value) {
         return null;
     }
 }

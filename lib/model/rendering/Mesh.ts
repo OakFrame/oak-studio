@@ -315,7 +315,7 @@ export class Mesh {
     };
 
     scale(scale) {
-        this._children.forEach(function (tri) {
+        this._children.forEach(function (tri:Face3) {
 
             tri.scale(scale);
 
@@ -333,15 +333,13 @@ export class Mesh {
     };
 
 
-    drawUV(surface, camera, parent, texture, scale) {
+    drawUV(surface, camera, parent, texture, scale, depth?) {
         this._children.forEach(function (tri) {
-
             //  tri.center=tri.getcenter().rotY(parent.rotation.y).add(parent.position)
             //if (tri._cullvec.copy(tri._dotvec.copy(tri.normal).mul(parent.scale).normalize().rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z)).dot(tri._dotvec.copy(tri.center).mul(parent.scale).rotZ(parent.rotation.z).add(parent.position).pointTo(camera.from).invert()) > 0) {
-            camera.drawFace(surface, tri, parent, texture, scale);
+            camera.drawFace(surface, tri, parent, texture, scale, depth);
             // }
             //camera.drawFace3(canvas, tri.pos1, tri.pos2, tri.pos3, tri.color1.toHex());
-
         });
         return this;
     };

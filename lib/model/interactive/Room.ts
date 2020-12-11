@@ -57,12 +57,11 @@ export class Room {
     }
 
     depthSort(camera) {
-        var co = 0;
-        var sw = 0;
-        let _v1 = new Vec3();
 
+        let _v1 = new Vec3();
+        _v1.copy(camera.from);
         for (var index = 0; index < this.objects.length; index++) {
-             _v1.copy(camera.from).z = 0;
+            //_v1.x = this.objects[index].position.x;
             this.objects[index].depth = _v1.dist(this.objects[index].position);
             if (this.objects[index].decal) {
                 this.objects[index].depth += 1000000;
@@ -71,16 +70,14 @@ export class Room {
         }
         var loop = true;
         var times = 0;
-        var val = null;
 
         do {
             loop = false;
 
-            for (var i = 0; i < this.objects.length - (1 + times); i++) {
-                //co += 1;
+            for (var i = 0; i < this.objects.length - (1); i++) {
 
                 if (this.objects[i].depth < this.objects[i + 1].depth) {
-                    //sw += 1;
+                    var val = null;
                     val = this.objects[i];
                     this.objects[i] = this.objects[i + 1];
                     this.objects[i + 1] = val;

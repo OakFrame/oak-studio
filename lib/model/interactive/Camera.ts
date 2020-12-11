@@ -282,7 +282,7 @@ export class Camera {
 
         //console.log(this._tmp.p1,this._tmp.p2,this._tmp.p3);
 
-       // triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 1);
+        triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 0.45);
 
 
         /*if ((this._tmp.p3.x === -99 && this._tmp.p3.y === -99) || (this._tmp.p2.x === -99 && this._tmp.p2.y === -99) || (this._tmp.p1.x === -99 && this._tmp.p1.y === -99)) {
@@ -295,13 +295,13 @@ export class Camera {
         //console.log('DRAWING');
 
         surface.getContext().beginPath();
-        surface.getContext().strokeStyle = "#FFF";
+     //   surface.getContext().strokeStyle = "#FFF";
         surface.getContext().moveTo((0.5 + this._tmp.p1.x), (0.5 + this._tmp.p1.y));
         surface.getContext().lineTo((0.5 + this._tmp.p2.x), (0.5 + this._tmp.p2.y));
         surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
 
-         surface.getContext().closePath();
-        surface.getContext().stroke();
+        // surface.getContext().closePath();
+       // surface.getContext().stroke();
 
         this._tmp._t[20] = 0;
         this._tmp._t[21] = 0;

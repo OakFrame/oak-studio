@@ -2,9 +2,9 @@
  * @constructor
  */
 export class Vec3 {
-    x:number;
-    y:number;
-    z:number;
+    x: number;
+    y: number;
+    z: number;
 
     constructor() {
         this.x = 0 | 0;
@@ -20,7 +20,6 @@ export class Vec3 {
         this.z = 0;
         return this;
     }
-    ;
 
     /** @type {function(number,number,number):Vec3} */
     set(x, y, z) {
@@ -29,7 +28,6 @@ export class Vec3 {
         this.z = z;
         return this;
     }
-    ;
 
     /** @type {function(Vec3):Vec3} */
     add(vec3) {
@@ -39,7 +37,6 @@ export class Vec3 {
         //this.z += vec3.;
         return this;
     }
-    ;
 
     /** @type {function(Vec3):Vec3} */
     sub(vec3) {
@@ -48,7 +45,6 @@ export class Vec3 {
         this.z -= vec3.z;
         return this;
     }
-    ;
 
     /** @type {function(Vec3):Vec3} */
     mul(vec3) {
@@ -57,7 +53,6 @@ export class Vec3 {
         this.z *= vec3.z;
         return this;
     }
-    ;
 
     /** @type {function(Vec3):Vec3} */
     div(vec3) {
@@ -66,7 +61,6 @@ export class Vec3 {
         this.z /= vec3.z;
         return this;
     }
-    ;
 
     /** @type {function(number):Vec3} */
     mulI(a) {
@@ -141,7 +135,6 @@ export class Vec3 {
     dot(a) {
         return (this.x * a.x + this.y * a.y + this.z * a.z);
     }
-    ;
 
     /** @type {function(Vec3):Vec3} */
     copy(a) {
@@ -157,7 +150,7 @@ export class Vec3 {
         // a.sub(vec).divI(a.dist(vec));
         // let d = this.dist(vec);
         this.sub(vec).invert().normalize();
-       return this;
+        return this;
         // return a;
     }
 

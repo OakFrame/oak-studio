@@ -6,19 +6,18 @@ export class Sprite {
 
     public ready;
 
-    constructor(sprite:(Array<string>|string)) {
+    constructor(sprite: (Array<string> | string)) {
         this.src = [];
         this.images = [];
         if (sprite) {
             //this.src = ((sprite.src) ? (Array.isArray(sprite.src) ? sprite.src : [sprite.src]) : []);
-           this.src =  (Array.isArray(sprite) ? sprite : [sprite]);
+            this.src = (Array.isArray(sprite) ? sprite : [sprite]);
         }
-       // this.listener = new Listeners();
+        // this.listener = new Listeners();
         this.ready = false;
     }
 
-    getImage():HTMLImageElement|false {
-        let self = this;
+    getImage(): HTMLImageElement | false {
         this.image_index = (Date.now() / 250) | 0;
         this.image_index = this.image_index % this.src.length;
 
@@ -27,7 +26,7 @@ export class Sprite {
             let new_img: any = new Image();
             new_img.src = this.src[this.image_index];
             new_img.isReady = false;
-            new_img.onload = function () {
+            new_img.onload = () => {
                 new_img.isReady = true;
             };
 
@@ -38,8 +37,8 @@ export class Sprite {
         if (img) {
             // @ts-ignore
             //if (img.isReady) {
-                return img;
-           // }
+            return img;
+            // }
         }
         return false;
     }
