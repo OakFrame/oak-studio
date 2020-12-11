@@ -1,7 +1,7 @@
 import {Subscriber} from "./Subscriber";
 import {SubscribeInterface} from "../../interface/SubscribeInterface";
 
-export class Subscribe implements SubscribeInterface{
+export class Subscribe implements SubscribeInterface {
 
     private _subscribers: any[];
 

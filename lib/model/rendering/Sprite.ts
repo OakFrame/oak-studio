@@ -1,10 +1,13 @@
-export class Sprite {
+import {EventModel} from "../EventModel";
+
+export class Sprite implements EventModel {
     private src: Array<String>;
     public images: Array<HTMLImageElement>;
     private image_index;
     private image_speed;
 
     public ready;
+    private listeners;
 
     constructor(sprite: (Array<string> | string)) {
         this.src = [];
@@ -13,7 +16,7 @@ export class Sprite {
             //this.src = ((sprite.src) ? (Array.isArray(sprite.src) ? sprite.src : [sprite.src]) : []);
             this.src = (Array.isArray(sprite) ? sprite : [sprite]);
         }
-        // this.listener = new Listeners();
+        this.listeners = [];
         this.ready = false;
     }
 
@@ -47,8 +50,20 @@ export class Sprite {
         return JSON.stringify({src: this.src});
     }
 
+    publish(notice, data) {
+        if (!this.listeners[notice]) {
+            return;
+        }
+        this.listeners[notice].forEach((cb) => {
+            cb(data);
+        });
+    }
+
     on(notice, callback) {
-        //this.listener.subscribe(notice, callback);
+        if (!this.listeners[notice]) {
+            this.listeners[notice] = [];
+        }
+        this.listeners[notice].push(callback);
     }
 
 }

@@ -211,4 +211,8 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         }
     }
 
+    getURLPath(){
+        return window.location.pathname || window.location.href;
+    }
+
 }

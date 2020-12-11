@@ -15,7 +15,7 @@ export class AssetLoader {
         this.queued++;
         let s = new Sprite(src);
         this.spriteCache[src] = s;
-        s.on('load', () => {
+        s.on('ready', () => {
             this.loaded++;
             if (this.loaded >= this.queued) {
                 this.publish("loaded", true);
