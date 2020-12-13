@@ -4,7 +4,7 @@ import {GraphNode} from "./GraphNode";
 export class GraphNodeHTMLElement {
 
 	private readonly _parent: GraphNode;
-	private readonly _element: HTMLElement;
+	readonly _element: HTMLElement;
 
 	constructor(parent: GraphNode, tagName: string, className: string) {
 		this._parent = parent;

@@ -34,6 +34,15 @@ export class TextNode implements GraphNode {
 		}
 	}
 
+
+	_renderNodes(){
+		this._outputs.forEach(()=>{
+			let output_node = document.createElement("div");
+			output_node.className = "output_node";
+			this._element.element.appendChild(output_node);
+		});
+	}
+
 	_evaluate(input:any): void {
 		console.log('text node evaluate', this._value);
 		for (let i = 0; i < this._outputs.length; i++) {

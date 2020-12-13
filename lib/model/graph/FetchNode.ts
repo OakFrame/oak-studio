@@ -1,6 +1,7 @@
 import {Graph} from "./Graph";
 import {GraphNode} from "../../interface/GraphNode";
 import {GraphNodeHTMLElement} from "../../interface/GraphNodeHTMLElement";
+import {SVGConnectionGenerator} from "./SVGConnectionGenerator";
 
 /** @class FetchNode **/
 export class FetchNode implements GraphNode {
@@ -32,6 +33,17 @@ export class FetchNode implements GraphNode {
         input.onkeyup = function () {
             self._value = input.value;
         }
+    }
+
+    _renderNodes(){
+        this._outputs.forEach((graph_node:GraphNode)=>{
+            let output_node = document.createElement("div");
+            output_node.className = "connection_node";
+            this._element.element.appendChild(output_node);
+
+            let svg_connector = SVGConnectionGenerator(output_node, graph_node._element);
+            output_node.appendChild(svg_connector);
+        });
     }
 
     _evaluate(input: any): void {

@@ -20,8 +20,8 @@ export class Graph implements GraphEvent {
     render(element: HTMLElement) {
         this._nodes.forEach(function (node) {
             node._render(element);
+            node._renderNodes();
         });
-
 
         var isMouseDown, initX, initY, clickX, clickY,
             height = 0,

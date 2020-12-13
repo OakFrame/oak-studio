@@ -1,6 +1,7 @@
 import {Graph} from "./Graph";
 import {GraphNode} from "../../interface/GraphNode";
 import {GraphNodeHTMLElement} from "../../interface/GraphNodeHTMLElement";
+import {SVGConnectionGenerator} from "./SVGConnectionGenerator";
 
 /** @class LogNode **/
 export class LogNode implements GraphNode {
@@ -30,6 +31,18 @@ export class LogNode implements GraphNode {
 		console.log(element);
 		console.log(this._name);
 		element.appendChild(this._element.element);
+	}
+
+
+	_renderNodes(){
+		this._outputs.forEach((graph_node:GraphNode)=>{
+			let output_node = document.createElement("div");
+			output_node.className = "connection_node";
+			this._element.element.appendChild(output_node);
+
+			let svg_connector = SVGConnectionGenerator(output_node, graph_node._element._element);
+			output_node.appendChild(svg_connector);
+		});
 	}
 
 	_evaluate(log: string): void {

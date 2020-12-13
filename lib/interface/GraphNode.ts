@@ -15,6 +15,7 @@ export interface GraphNode {
 	_evaluate(input: any): any;
 
 	_render(element: HTMLElement): any;
+	_renderNodes():void;
 
 	_value: any;
 

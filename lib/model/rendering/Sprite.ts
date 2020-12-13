@@ -1,7 +1,7 @@
 import {EventModel} from "../EventModel";
 
 export class Sprite implements EventModel {
-    private src: Array<String>;
+    public src: Array<String>;
     public images: Array<HTMLImageElement>;
     private image_index;
     private image_speed;
@@ -20,7 +20,7 @@ export class Sprite implements EventModel {
         this.ready = false;
     }
 
-    getImage(): HTMLImageElement | false {
+    getImage(): HTMLImageElement {
         this.image_index = (Date.now() / 250) | 0;
         this.image_index = this.image_index % this.src.length;
 
@@ -34,7 +34,7 @@ export class Sprite implements EventModel {
             };
 
             this.images.push(new_img);
-            return false;
+            return null;
         }
 
         if (img) {
@@ -43,7 +43,7 @@ export class Sprite implements EventModel {
             return img;
             // }
         }
-        return false;
+        return null;
     }
 
     toString() {

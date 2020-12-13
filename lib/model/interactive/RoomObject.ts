@@ -1,18 +1,18 @@
 import {Vec3} from "../math/Vec3";
-import { Sprite } from "../rendering/Sprite";
+import {Sprite} from "../rendering/Sprite";
 import {HasComponent} from "./Component";
 import {Mesh} from "../rendering/Mesh";
 
 export class RoomObject extends HasComponent {
     private _tmp: number;
-    public position:Vec3;
+    public position: Vec3;
     public scale;
     public velocity;
     private game_object: number;
     public name;
     public depth;
     public decal: boolean;
-    public mesh:Mesh;
+    public mesh: Mesh;
     public path;
     public actions;
     public tags;
@@ -22,7 +22,8 @@ export class RoomObject extends HasComponent {
     public timeline;
     public task_manager;
     public entity_behavior;
-    public sprite:Sprite;
+    public sprite: Sprite;
+    public rand: number = Math.random();
 
     constructor(object?: RoomObject) {
         super();
@@ -40,21 +41,21 @@ export class RoomObject extends HasComponent {
         this.actions = [];
         this.tags = [];
         this.bark = "";
-        this.action=null;
+        this.action = null;
         this.timeline_index = 0;
-        this.timeline=null;
-     //  this.task_manager = new TaskManager();
-      //  this.entity_behavior = new EntityBehavior();
+        this.timeline = null;
+        //  this.task_manager = new TaskManager();
+        //  this.entity_behavior = new EntityBehavior();
 
         this._tmp = (Math.random() * 1000000000) | 0;
         if (object) {
-           // this.task_manager = object.task_manager||new TaskManager();
+            // this.task_manager = object.task_manager||new TaskManager();
             //this.entity_behavior = object.entity_behavior||new EntityBehavior();
             this.bark = object.bark || "";
-            this.action = object.action||null;
-            this.actions = object.actions||[];
+            this.action = object.action || null;
+            this.actions = object.actions || [];
             this.decal = object.decal || false;
-            this.mesh= object.mesh;
+            this.mesh = object.mesh;
             this._tmp = object._tmp;
             this.tags = object.tags || [];
             this.name = object.name;
@@ -67,26 +68,27 @@ export class RoomObject extends HasComponent {
         }
     }
 
-    setSprite(sprite){
+    setSprite(sprite) {
         this.sprite = sprite;
     }
 
-    getTags(){
+    getTags() {
         return this.tags;
     }
 
-    getSprite(){
+    getSprite() {
         return this.sprite;
     }
 
-    public getId(){
+    public getId() {
         return this._tmp;
     }
-    public setNextInteraction(interaction){
+
+    public setNextInteraction(interaction) {
         this.task_manager.setNextInteraction(interaction);
     }
 
-    public getBehavior(){
+    public getBehavior() {
         return this.entity_behavior;
     }
 
@@ -98,90 +100,92 @@ export class RoomObject extends HasComponent {
         return this.position;
     }
 
-  /* public render(state: any, updateCB?: any) {
-        let self = this;
-        let elem = document.createElement('div');
+    /* public render(state: any, updateCB?: any) {
+          let self = this;
+          let elem = document.createElement('div');
 
-        let name_controls = new FormField({
-            type: "text",
-            placeholder: "Object Name",
-            value: this.name,
-            state: state
-        }, function (n) {
-            self.name = n;
-            if (updateCB) {
-                updateCB()
-            }
-        });
+          let name_controls = new FormField({
+              type: "text",
+              placeholder: "Object Name",
+              value: this.name,
+              state: state
+          }, function (n) {
+              self.name = n;
+              if (updateCB) {
+                  updateCB()
+              }
+          });
 
-        let object_controls = new FormField({
-            type: "object",
-            placeholder: "Object",
-            value: this.game_object,
-            state: state
-        }, function (n) {
-            self.game_object = n;
-            if (updateCB) {
-                updateCB()
-            }
+          let object_controls = new FormField({
+              type: "object",
+              placeholder: "Object",
+              value: this.game_object,
+              state: state
+          }, function (n) {
+              self.game_object = n;
+              if (updateCB) {
+                  updateCB()
+              }
 
-            console.log('selected', n);
-        });
+              console.log('selected', n);
+          });
 
-        let position_controls = new FormField({
-            type: "position",
-            placeholder: "Position",
-            value: this.position, state: state
-        }, function (n) {
-            self.position = n;
-            if (updateCB) {
-                updateCB()
-            }
+          let position_controls = new FormField({
+              type: "position",
+              placeholder: "Position",
+              value: this.position, state: state
+          }, function (n) {
+              self.position = n;
+              if (updateCB) {
+                  updateCB()
+              }
 
-        });
+          });
 
-        let scale_controls = new FormField({
-            type: "position",
-            placeholder: "Scale",
-            value: this.scale,
-            min: 0.1,
-            max: 20,
-            step: 0.1, state: state
-        }, function (n) {
-            self.scale = n;
-            if (updateCB) {
-                updateCB()
-            }
+          let scale_controls = new FormField({
+              type: "position",
+              placeholder: "Scale",
+              value: this.scale,
+              min: 0.1,
+              max: 20,
+              step: 0.1, state: state
+          }, function (n) {
+              self.scale = n;
+              if (updateCB) {
+                  updateCB()
+              }
 
-        });
+          });
 
 
-        elem.appendChild(name_controls.getElement());
-        elem.appendChild(object_controls.getElement());
+          elem.appendChild(name_controls.getElement());
+          elem.appendChild(object_controls.getElement());
 
-        elem.appendChild(position_controls.getElement());
-        elem.appendChild(scale_controls.getElement());
-       // elem.appendChild(image_controls.getElement());
+          elem.appendChild(position_controls.getElement());
+          elem.appendChild(scale_controls.getElement());
+         // elem.appendChild(image_controls.getElement());
 
-        return elem;
-    }
-    */
+          return elem;
+      }
+      */
 
-    getBark(){
+    getBark() {
         return this.bark;
     }
 
-    getScale(){
+    getScale() {
         return this.scale;
     }
 
 
     getTimelineEvent() {
-        if (!this.timeline){return false;}
+        if (!this.timeline) {
+            return false;
+        }
         return this.timeline.getEvents()[this.timeline_index];
     }
 
-    getTaskManager(){
+    getTaskManager() {
         return this.task_manager;
     }
 
