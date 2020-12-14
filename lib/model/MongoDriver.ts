@@ -17,7 +17,7 @@ export class MongoDriver {
         this.name = "hello world";
 
         MongoClient.connect(mongo_uri, (err, client) => {
-            if (err){
+            if (err) {
                 console.warn(err);
                 return;
             }
@@ -30,38 +30,37 @@ export class MongoDriver {
     }
 
 
-
-    getDB(){
+    getDB() {
         return this.db;
     }
 
-    getCollection(collection){
+    async getCollection(collection) {
         this.verifyCollection(collection);
         return this.collections[collection];
     }
 
-    verifyCollection(collection) {
+    async verifyCollection(collection) {
         if (!this.collections[collection]) {
             this.collections[collection] = this.db.collection(collection);
         }
     }
 
-    findOrCreate(collection, search, data) {
+    async findOrCreate(collection, search, data) {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
             this.collections[collection].findOne(search).then((document) => {
                 if (document === null) {
                     this.insertOne(collection, data).then((inserted) => {
-                        resolve({did_create:true,data:data});
+                        resolve({did_create: true, data: data});
                     });
                 } else {
-                    resolve({did_create:false,data:document});
+                    resolve({did_create: false, data: document});
                 }
             });
         });
     }
 
-    insertOne(collection, data) {
+    async insertOne(collection, data) {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
 
@@ -74,22 +73,34 @@ export class MongoDriver {
         });
     }
 
-    updateOne(collection,search, data) {
+    async insertMany(collection, data) {
+        return new Promise((resolve, reject) => {
+            this.verifyCollection(collection);
+            this.collections[collection].insertMany(data).then((res) => {
+                resolve(res);
+            }).catch((err) => {
+                console.error(err);
+                reject(err);
+            });
+        });
+    }
+
+    async updateOne(collection, search, data) {
         this.verifyCollection(collection);
         return this.collections[collection].updateOne(search, data);
     }
 
-    deleteMany(collection,search) {
+    async deleteMany(collection, search) {
         this.verifyCollection(collection);
-        return new Promise((resolve, reject)=>{
-            this.collections[collection].deleteMany(search, function(ret){
+        return new Promise((resolve, reject) => {
+            this.collections[collection].deleteMany(search, function (ret) {
                 resolve(ret);
             });
         });
 
     }
 
-    update(collection,search, data) {
+    async update(collection, search, data) {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
             return this.collections[collection].update(search,
@@ -99,7 +110,17 @@ export class MongoDriver {
         });
     }
 
-    findOne(collection, search) {
+    async upsert(collection, search, data) {
+        return new Promise((resolve, reject) => {
+            this.verifyCollection(collection);
+            return this.collections[collection].update(search,
+                data, {upsert: true}, function (err, result) {
+                    resolve(result);
+                });
+        });
+    }
+
+    async findOne(collection, search) {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
             this.collections[collection].findOne(search).then((document) => {
@@ -112,12 +133,12 @@ export class MongoDriver {
         });
     }
 
-    find(collection, search) {
+    async find(collection, search) {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
             this.collections[collection].find(search).toArray(function (err, result) {
                 if (err) {
-                    console.error("ERRR",err);
+                    console.error("ERRR", err);
                     resolve([]);
                     return;
                 }
