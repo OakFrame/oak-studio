@@ -24,6 +24,7 @@ export class RoomObject extends HasComponent {
     public entity_behavior;
     public sprite: Sprite;
     public rand: number = Math.random();
+    public primary_color?:string;
 
     constructor(object?: RoomObject) {
         super();

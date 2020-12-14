@@ -33,11 +33,11 @@ export class Surface {
         this.context.font = ((options.size || 20) * this._scaling) + "px DM Sans";
         if (options.background) {
             let w = this.context.measureText(text).width;
-            let h = ((options.size || 20)) * this._scaling;
+            let h = (((options.size || 20)) * this._scaling);
             let padding = 10;
             this.context.fillStyle = options.background;
             this.getContext().beginPath();
-            this.context.rect(x - (w / 2) - padding, y - (h ) - padding, w+(padding*2), h+(padding*2));
+            this.context.rect(x - (w / 2) - padding, (y - (h) - padding) + (h * 0.1), w + (padding * 2), h + (padding * 2));
             this.context.fill();
         }
         this.context.fillStyle = options.color || '#000';

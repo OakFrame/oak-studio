@@ -158,7 +158,7 @@ export class Camera {
                 surface.drawText(0, -((actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc / 2) + 40), actor.bark, {
                     size: 40,
                     color: "#fff",
-                    background: "#000"
+                    background: actor.primary_color||"#000"
                 });
                 surface.getContext().textAlign = "left";
             }
@@ -271,10 +271,7 @@ export class Camera {
             four.color3 = color;
             this.drawFace(surface, four, parent, texture, scale, new_depth);
 
-
             return false;
-
-
         }
 
 
@@ -288,9 +285,7 @@ export class Camera {
             p1.sub(nv.copy(center).pointTo(p1).mulI(amt));
             p2.sub(nv.copy(center).pointTo(p2).mulI(amt));
             p3.sub(nv.copy(center).pointTo(p3).mulI(amt));
-
         }
-
 
         // console.log(tri);
 
@@ -322,8 +317,8 @@ export class Camera {
         surface.getContext().lineTo((0.5 + this._tmp.p2.x), (0.5 + this._tmp.p2.y));
         surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
 
-        // surface.getContext().closePath();
-        // surface.getContext().stroke();
+    //     surface.getContext().closePath();
+     //    surface.getContext().stroke();
 
         this._tmp._t[20] = 0;
         this._tmp._t[21] = 0;
