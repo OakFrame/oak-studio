@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "experimentalDecorators": true,
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "outDir" :"tmp",
+    "moduleResolution": "node"
+  },
+  "files": [
+    "Web.ts"
+  ],
+  "include": [
+    "../index.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
+}
