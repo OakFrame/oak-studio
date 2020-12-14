@@ -94,7 +94,6 @@ export class Camera {
          }*/
     }
 
-
     drawActor(surface: Surface, actor: RoomObject) {
 
         let _tick = Date.now() / 16;
@@ -108,7 +107,7 @@ export class Camera {
 
         this._tmp.from_camera_scale_x = (this._tmp.p2.dist(this._tmp.p1) / 24);
         this._tmp.from_camera_scale_y = this._tmp.from_camera_scale_x;
-        this._tmp.sr = (((Math.sin(((_tick / 6)) + actor.rand)) * (Math.pow(actor.velocity.mag(), 2) * 500) * 1.5));
+        this._tmp.sr = (((Math.sin(((_tick / 6)) + actor.rand)) * (Math.pow(actor.velocity.mag(), 2) * 4) * 1.5));
 
         this._tmp.sh = 1;//60 * (1 + (Math.sin((_tick / 2.5) + actor.rand) * 1)) * actor.velocity.mag() / 3;
 
@@ -136,18 +135,13 @@ export class Camera {
             surface.getContext().fillStyle = "#fff";
 
             // surface.drawText(0, 40, actor.timeline_index);
-            // surface.drawText(0, 20, actor.getName());
 
             if (actor.tags.indexOf('npc') !== -1) {
                 let active = [];
                 actor.getTaskManager().getCurrentTasks().forEach(function (t) {
                     active.push(t.getName());
                 });
-                /*let ob = {
-                    "active": active,
-                    "index":actor.getTaskManager().getCurrentTasks()[0], "queue": actor.getTaskManager().getQueue(),
-                "next": !!actor.getTaskManager().getNextAction()
-                };*/
+
                 if (actor.getTaskManager().getCurrentTasks().length) {
                     let ob = {
                         "name": actor.getTaskManager().getCurrentTasks()[0].getName(),
@@ -160,7 +154,13 @@ export class Camera {
             }
 
             if (actor.bark) {
-                surface.drawText(0, -40, actor.bark);
+                surface.getContext().textAlign = "center";
+                surface.drawText(0, -((actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc / 2) + 40), actor.bark, {
+                    size: 40,
+                    color: "#fff",
+                    background: "#000"
+                });
+                surface.getContext().textAlign = "left";
             }
 
             surface.getContext().restore();
@@ -174,7 +174,6 @@ export class Camera {
         this.projection.toScreen(surface, v2, this.from, this._tmp.p2);
         this.projection.toScreen(surface, v3, this.from, this._tmp.p3);
 
-
         var ax, ay, az, bx, by, bz, rx, ry, rz, m;
         ax = v2.x - v1.x;
         ay = v2.y - v1.y;
@@ -185,7 +184,6 @@ export class Camera {
         rx = ay * bz - by * az;
         ry = az * bx - bz * ax;
         rz = ax * by - bx * ay;
-        m = Math.sqrt(rx * rx + ry * ry + rz * rz);
 
         //triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 2);
         surface.getContext().fillStyle = color || "#000";
@@ -203,9 +201,9 @@ export class Camera {
 
         //this._tmp.drawntris++;
 
-        if (face3.getcenter().dist(this.from) < Math.pow(1.8,depth-1) && depth >= 1) {
+        if (face3.getcenter().dist(this.from) < Math.pow(1.8, depth - 1) && depth >= 1) {
 
-            let new_depth = depth-1;
+            let new_depth = depth - 1;
 
             let A = new Vec3().copy(face3.pos1);
             let B = new Vec3().copy(face3.pos2);
@@ -226,27 +224,51 @@ export class Camera {
             let color = face3.color1;
 
             let one = new Face3();
-            one.pos1.copy(C);one.pos2.copy(f);one.pos3.copy(e);
-            one.uv1.copy(uvC);one.uv2.copy(uvf);one.uv3.copy(uve);
-            one.color1 = color;one.color2 = color;one.color3 = color;
+            one.pos1.copy(C);
+            one.pos2.copy(f);
+            one.pos3.copy(e);
+            one.uv1.copy(uvC);
+            one.uv2.copy(uvf);
+            one.uv3.copy(uve);
+            one.color1 = color;
+            one.color2 = color;
+            one.color3 = color;
             this.drawFace(surface, one, parent, texture, scale, new_depth);
 
             let two = new Face3();
-            two.pos1.copy(e);two.pos2.copy(d);two.pos3.copy(B);
-            two.uv1.copy(uve);two.uv2.copy(uvd);two.uv3.copy(uvB);
-            two.color1 = color;two.color2 = color;two.color3 = color;
+            two.pos1.copy(e);
+            two.pos2.copy(d);
+            two.pos3.copy(B);
+            two.uv1.copy(uve);
+            two.uv2.copy(uvd);
+            two.uv3.copy(uvB);
+            two.color1 = color;
+            two.color2 = color;
+            two.color3 = color;
             this.drawFace(surface, two, parent, texture, scale, new_depth);
 
             let three = new Face3();
-            three.pos1.copy(f);three.pos2.copy(A);three.pos3.copy(d);
-            three.uv1.copy(uvf);three.uv2.copy(uvA);three.uv3.copy(uvd);
-            three.color1 = color;three.color2 = color;three.color3 = color;
+            three.pos1.copy(f);
+            three.pos2.copy(A);
+            three.pos3.copy(d);
+            three.uv1.copy(uvf);
+            three.uv2.copy(uvA);
+            three.uv3.copy(uvd);
+            three.color1 = color;
+            three.color2 = color;
+            three.color3 = color;
             this.drawFace(surface, three, parent, texture, scale, new_depth);
 
             let four = new Face3();
-            four.pos1.copy(f);four.pos2.copy(e);four.pos3.copy(d);
-            four.uv1.copy(uvf);four.uv2.copy(uve);four.uv3.copy(uvd);
-            four.color1 = color;four.color2 = color;four.color3 = color;
+            four.pos1.copy(f);
+            four.pos2.copy(e);
+            four.pos3.copy(d);
+            four.uv1.copy(uvf);
+            four.uv2.copy(uve);
+            four.uv3.copy(uvd);
+            four.color1 = color;
+            four.color2 = color;
+            four.color3 = color;
             this.drawFace(surface, four, parent, texture, scale, new_depth);
 
 
@@ -295,13 +317,13 @@ export class Camera {
         //console.log('DRAWING');
 
         surface.getContext().beginPath();
-     //   surface.getContext().strokeStyle = "#FFF";
+        //   surface.getContext().strokeStyle = "#FFF";
         surface.getContext().moveTo((0.5 + this._tmp.p1.x), (0.5 + this._tmp.p1.y));
         surface.getContext().lineTo((0.5 + this._tmp.p2.x), (0.5 + this._tmp.p2.y));
         surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
 
         // surface.getContext().closePath();
-       // surface.getContext().stroke();
+        // surface.getContext().stroke();
 
         this._tmp._t[20] = 0;
         this._tmp._t[21] = 0;
@@ -363,6 +385,11 @@ export class Camera {
         //surface.context.strokeStyle = "red";
         //surface.context.stroke();
     };
+
+
+    getZoom() {
+        return this.zoom;
+    }
 
 
 }

@@ -1,3 +1,9 @@
+export interface SurfaceTextOptions {
+    size?: number;
+    color?: string;
+    background?: string;
+}
+
 export class Surface {
     private element;
     private context;
@@ -7,29 +13,41 @@ export class Surface {
     private _set_size;
 
     constructor(canvas?: HTMLElement | HTMLCanvasElement) {
-        this.element = canvas||<HTMLCanvasElement>document.createElement('canvas');
+        this.element = canvas || <HTMLCanvasElement>document.createElement('canvas');
         if (!this.element.getContext || !this.element.getContext("2d")) {
             console.error('canvas is not supported.');
         }
         this._set_size = false;
         this.context = this.element.getContext('2d');
-        this._width = this.context.width||300;
-        this._height = this.context.height||150;
+        this._width = this.context.width || 300;
+        this._height = this.context.height || 150;
         this._scaling = 2;//(window.innerWidth < 600 ? 1 : window.devicePixelRatio) || 1;
         this.context.font = (20 * this._scaling) + "px DM Sans";
         return this;
     }
 
-    drawText(x, y, text) {
-        this.context.font = (20 * this._scaling) + "px DM Sans";
-        this.context.fillStyle = '#000';
+    drawText(x, y, text, options?: SurfaceTextOptions) {
+        if (!options) {
+            options = {};
+        }
+        this.context.font = ((options.size || 20) * this._scaling) + "px DM Sans";
+        if (options.background) {
+            let w = this.context.measureText(text).width;
+            let h = ((options.size || 20)) * this._scaling;
+            let padding = 10;
+            this.context.fillStyle = options.background;
+            this.getContext().beginPath();
+            this.context.rect(x - (w / 2) - padding, y - (h ) - padding, w+(padding*2), h+(padding*2));
+            this.context.fill();
+        }
+        this.context.fillStyle = options.color || '#000';
         this.context.fillText(text, x, y);
     }
 
     resize(_width, _height) {
-        if (_width == "100%"){
+        if (_width == "100%") {
             let node = this.getElement().parentNode;
-            _width = node.offsetWidth-(parseInt(node.style.paddingRight||"0",10) + parseInt(node.style.paddingLeft||"0",10) + parseInt(node.style.borderLeftWidth||"0",10))||1
+            _width = node.offsetWidth - (parseInt(node.style.paddingRight || "0", 10) + parseInt(node.style.paddingLeft || "0", 10) + parseInt(node.style.borderLeftWidth || "0", 10)) || 1
         }
         let width = _width * this._scaling;
         let height = _height * this._scaling;
@@ -43,8 +61,8 @@ export class Surface {
         this.context.width = width;
         this.context.height = height;
 
-        this.element.style.width = ((this._width/2)|0)+"px";
-        this.element.style.height = ((this._height/2)|0)+"px";
+        this.element.style.width = ((this._width / 2) | 0) + "px";
+        this.element.style.height = ((this._height / 2) | 0) + "px";
 
         //this.element.style.transform = "scale(" + (1 / this._scaling) + ")";
         //this.element.style.WebkitTransform = "scale(" + (1 / this._scaling) + ")";
@@ -59,8 +77,8 @@ export class Surface {
     maximize() {
         let node = this.getElement().parentNode;
         if (node) {
-            let w = node.offsetWidth-(parseInt(node.style.paddingRight||"0",10) + parseInt(node.style.paddingLeft||"0",10) + parseInt(node.style.borderLeftWidth||"0",10))||1;
-            let h = node.offsetHeight||this.getHeight()||1;
+            let w = node.offsetWidth - (parseInt(node.style.paddingRight || "0", 10) + parseInt(node.style.paddingLeft || "0", 10) + parseInt(node.style.borderLeftWidth || "0", 10)) || 1;
+            let h = node.offsetHeight || this.getHeight() || 1;
             if (this._width !== w * this._scaling || this._height !== h * this._scaling) {
                 this.resize(w, h);
             }
@@ -85,8 +103,8 @@ export class Surface {
     }
 
     fill(col) {
-        if (!this._set_size){
-           this.maximize();
+        if (!this._set_size) {
+            this.maximize();
         }
 
         this.context.beginPath();
@@ -122,11 +140,11 @@ export class Surface {
     }
 
     getPerceptualWidth() {
-        return this._width/this._scaling;
+        return this._width / this._scaling;
     }
 
     getPerceptualHeight() {
-        return this._height/this._scaling;
+        return this._height / this._scaling;
     }
 
 }
