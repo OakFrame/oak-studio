@@ -1,5 +1,6 @@
 import {Room} from "./model/interactive/Room";
 import {Vec3} from "./model/math/Vec3";
+import {Timeline} from "./model/interactive/Timeline";
 
 
 export class DataPacker {
@@ -13,9 +14,11 @@ export class Project {
     public rooms: Room[];
     public preview: String;
     public _helper_loading;
+    public timelines: Timeline[];
 
     constructor() {
         this.rooms = [];
+        this.timelines = [];
     }
 }
 

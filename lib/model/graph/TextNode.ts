@@ -3,7 +3,7 @@ import {GraphNode} from "../../interface/GraphNode";
 import {GraphNodeHTMLElement} from "../../interface/GraphNodeHTMLElement";
 
 /** @class TextNode **/
-export class TextNode implements GraphNode {
+export class TextNode extends GraphNode {
 	_graph: Graph;
 	_inputs: GraphNode[] = [];
 	_outputs: GraphNode[] = [];
@@ -13,7 +13,7 @@ export class TextNode implements GraphNode {
 	_element: GraphNodeHTMLElement = new GraphNodeHTMLElement(this, 'div', 'node');
 
 	constructor(graph: Graph) {
-		this._graph = graph;
+		super(graph);
 	}
 
 	attachOutput(node: GraphNode): any {
@@ -23,7 +23,7 @@ export class TextNode implements GraphNode {
 	_render(element: HTMLElement): any {
 		let self = this;
 		let id = (((Math.random()*120000)+1)|0)+"";
-		this._element.element.innerHTML = `<p>${this._name}<br /><input id="${id}" type="text" value="${this._value}"/></p>`;
+		this._element.element.innerHTML = `<div class="title">${this._name}<div class="help"></div></div><div class="parameter"><input id="${id}" type="text" value="${this._value}"/></div>`;
 		console.log(element);
 		console.log(this._name);
 		element.appendChild(this._element.element);
@@ -36,11 +36,19 @@ export class TextNode implements GraphNode {
 
 
 	_renderNodes(){
-		this._outputs.forEach(()=>{
-			let output_node = document.createElement("div");
-			output_node.className = "output_node";
-			this._element.element.appendChild(output_node);
-		});
+
+		let input_node = document.createElement("div");
+		input_node.className = "in";
+		// @ts-ignore
+		input_node.Node = this;
+		this._element.element.appendChild(input_node);
+
+		let output_node = document.createElement("div");
+		output_node.className = "output";
+		// @ts-ignore
+		output_node.Node = this;
+		this._element.element.appendChild(output_node);
+
 	}
 
 	_evaluate(input:any): void {

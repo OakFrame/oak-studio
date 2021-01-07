@@ -32,18 +32,13 @@ export class AssetLoader {
     }
 
     static loadFile(src, func) {
-        //AssetManager.total_items++;
-
         var xmlhttp = new XMLHttpRequest();
         // @ts-ignore
         xmlhttp._loaded = false;
         xmlhttp.onreadystatechange = function () {
-            //console.log(xmlhttp);
             // @ts-ignore
             if (!xmlhttp._loaded && xmlhttp.readyState === 4 && (xmlhttp.status === 200 || xmlhttp.responseText)) {
                 func(xmlhttp.responseText);
-                //AssetManager.loaded_items++;
-                //console.log('loaded!');
                 // @ts-ignore
                 xmlhttp._loaded = true;
             }

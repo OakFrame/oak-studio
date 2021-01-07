@@ -1,11 +1,23 @@
+import {Sprite} from "../rendering/Sprite";
+
 export class Timeline {
     events: TimelineEvent[];
     index: number;
+    constructor() {
+        this.index = 0;
+        this.events = [];
+    }
 }
 
-interface TimelineOptions {
+interface TimelineEventOptions {
     timeout?:number;
     wait_for_completion?:boolean;
+}
+
+interface DialogTimelineOptions extends TimelineEventOptions{
+    sprite?:Sprite,
+    text:string,
+    options?:string[]
 }
 
 export class TimelineEvent {
@@ -23,21 +35,21 @@ export class TimelineEvent {
 }
 
 export class WaitTimelineEvent extends TimelineEvent {
-    constructor(props?:TimelineOptions) {
+    constructor(props?:TimelineEventOptions) {
         super(props);
     }
 
 }
 
 export class PathTimelineEvent extends TimelineEvent {
-    constructor(props?:TimelineOptions) {
+    constructor(props?:TimelineEventOptions) {
         super(props);
 
     }
 
 }
 export class DialogTimelineEvent extends TimelineEvent {
-    constructor(props?:TimelineOptions) {
+    constructor(props?:DialogTimelineOptions) {
         super(props);
 
     }

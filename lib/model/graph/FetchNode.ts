@@ -4,17 +4,17 @@ import {GraphNodeHTMLElement} from "../../interface/GraphNodeHTMLElement";
 import {SVGConnectionGenerator} from "./SVGConnectionGenerator";
 
 /** @class FetchNode **/
-export class FetchNode implements GraphNode {
+export class FetchNode extends GraphNode {
     _graph: Graph;
     _inputs: GraphNode[] = [];
     _outputs: GraphNode[] = [];
     _value: string = "";
-    _name: string = "Text";
+    _name: string = "Fetch";
     _display: any;
-    _element: GraphNodeHTMLElement = new GraphNodeHTMLElement(this, 'div', 'node');
+    _element: GraphNodeHTMLElement = new GraphNodeHTMLElement(this, 'div', 'node string');
 
     constructor(graph: Graph) {
-        this._graph = graph;
+        super(graph);
     }
 
     attachOutput(node: GraphNode): any {
@@ -24,7 +24,7 @@ export class FetchNode implements GraphNode {
     _render(element: HTMLElement): any {
         let self = this;
         let id = (((Math.random() * 120000) + 1) | 0) + "";
-        this._element.element.innerHTML = `<p>${this._name}<br /><input id="${id}" type="text" value="${this._value}" placeholder="//maag.tv"/></p>`;
+        this._element.element.innerHTML = `<div class="title">${this._name}<div class="help"></div></div><div class="parameter"><input id="${id}" type="text" value="${this._value}" placeholder="//maag.tv"/></div>`;
         console.log(element);
         console.log(this._name);
         element.appendChild(this._element.element);
@@ -36,14 +36,26 @@ export class FetchNode implements GraphNode {
     }
 
     _renderNodes(){
-        this._outputs.forEach((graph_node:GraphNode)=>{
-            let output_node = document.createElement("div");
-            output_node.className = "connection_node";
-            this._element.element.appendChild(output_node);
 
-            let svg_connector = SVGConnectionGenerator(output_node, graph_node._element);
-            output_node.appendChild(svg_connector);
-        });
+        let input_node = document.createElement("div");
+        input_node.className = "in";
+        // @ts-ignore
+        input_node.Node = this;
+        this._element.element.appendChild(input_node);
+
+        let output_node = document.createElement("div");
+        output_node.className = "output";
+        // @ts-ignore
+        output_node.Node = this;
+        this._element.element.appendChild(output_node);
+
+
+      //  for (let i = 0 ; i<this._outputs.length; i++) {
+        //    let output_node = document.createElement("div");
+         //   output_node.className = "output";
+          //  this._element.element.appendChild(output_node);
+       // }
+
     }
 
     _evaluate(input: any): void {
@@ -51,7 +63,7 @@ export class FetchNode implements GraphNode {
         let self = this;
 
         fetch(this._value)
-            .then(response => response.json())
+          //  .then(response => response.body())
             .then(data => {
                 console.log("JSON RESPONSE",data);
                 for (let i = 0; i < self._outputs.length; i++) {

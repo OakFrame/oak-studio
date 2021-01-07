@@ -1,12 +1,12 @@
-import {GraphNode} from "./GraphNode";
+import {GraphNode, GraphNodeInterface} from "./GraphNode";
 
 //** @class GraphNodeHTMLElement extends an HTMLElement to add data binding functionality
 export class GraphNodeHTMLElement {
 
-	private readonly _parent: GraphNode;
+	private readonly _parent: GraphNodeInterface;
 	readonly _element: HTMLElement;
 
-	constructor(parent: GraphNode, tagName: string, className: string) {
+	constructor(parent: GraphNodeInterface, tagName: string, className: string) {
 		this._parent = parent;
 		this._element = document.createElement(tagName);
 		this._element.className = className;

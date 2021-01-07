@@ -1,9 +1,10 @@
 import {Vec3} from "../math/Vec3";
 import {Sprite} from "../rendering/Sprite";
-import {HasComponent} from "./Component";
+import {Component, HasComponent} from "./Component";
 import {Mesh} from "../rendering/Mesh";
+import {GameEventEmitter} from "./GameEvent";
 
-export class RoomObject extends HasComponent {
+export class RoomObject {
     private _tmp: number;
     public position: Vec3;
     public scale;
@@ -24,10 +25,12 @@ export class RoomObject extends HasComponent {
     public entity_behavior;
     public sprite: Sprite;
     public rand: number = Math.random();
-    public primary_color?:string;
+    public primary_color?: string;
+    public components: Component[];
+    public eventEmitter: GameEventEmitter;
 
     constructor(object?: RoomObject) {
-        super();
+
         this.name = 'Default Object';
         this.position = new Vec3();
         this.scale = new Vec3();
@@ -45,6 +48,8 @@ export class RoomObject extends HasComponent {
         this.action = null;
         this.timeline_index = 0;
         this.timeline = null;
+        this.components = [];
+        this.eventEmitter = new GameEventEmitter();
         //  this.task_manager = new TaskManager();
         //  this.entity_behavior = new EntityBehavior();
 
@@ -61,7 +66,7 @@ export class RoomObject extends HasComponent {
             this.tags = object.tags || [];
             this.name = object.name;
             this.timeline = object.timeline || null;
-            this.components = object.components || null;
+            this.components = object.components || [];
             object.position ? this.position.copy(object.position) : 0;
             object.scale ? this.scale.copy(object.scale) : 0;
             object.game_object ? (this.game_object = parseInt("" + object.game_object)) : 0;
@@ -178,7 +183,6 @@ export class RoomObject extends HasComponent {
         return this.scale;
     }
 
-
     getTimelineEvent() {
         if (!this.timeline) {
             return false;
@@ -188,6 +192,29 @@ export class RoomObject extends HasComponent {
 
     getTaskManager() {
         return this.task_manager;
+    }
+
+    addComponent(component: Component) {
+        this.components.push(component);
+    }
+
+    getComponents(): Component[] {
+        return this.components;
+    }
+
+    runComponents(): void {
+
+        this.components.forEach((component) => {
+            component.update(this);
+        });
+    }
+
+    on(key, fn) {
+        return this.eventEmitter.on(key, fn);
+    }
+
+    publish(key, data) {
+        return this.eventEmitter.publish(key, data);
     }
 
 

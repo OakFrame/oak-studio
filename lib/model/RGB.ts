@@ -57,7 +57,7 @@ export class RGBA {
         return this;
     };
 
-    hexToColor = (hex, opacity) => {
+    fromHex = (hex, opacity) => {
         hex = hex.replace('#', '');
 
         this.r = parseInt(hex.substring(0, 2), 16);
