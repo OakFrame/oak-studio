@@ -1,4 +1,5 @@
 import {EventModel} from "../EventModel";
+import {v4 as uuidv4} from "uuid";
 
 export class Sprite implements EventModel {
     public src: Array<String>;
@@ -8,16 +9,28 @@ export class Sprite implements EventModel {
 
     public ready;
     private listeners;
+    public uuid;
 
-    constructor(sprite: (Array<string> | string)) {
+    constructor(sprite?: (Array<string> | string)) {
         this.src = [];
         this.images = [];
+        this.uuid = uuidv4();
         if (sprite) {
             //this.src = ((sprite.src) ? (Array.isArray(sprite.src) ? sprite.src : [sprite.src]) : []);
             this.src = (Array.isArray(sprite) ? sprite : [sprite]);
         }
         this.listeners = [];
         this.ready = false;
+    }
+
+    deserialize(sprite){
+        if (sprite.uuid){
+            this.uuid = sprite.uuid;
+        }
+        if (sprite.src){
+            this.src = sprite.src;
+        }
+        return this;
     }
 
     getImage(): HTMLImageElement {

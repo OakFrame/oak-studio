@@ -1,6 +1,7 @@
 import {Room} from "./model/interactive/Room";
 import {Vec3} from "./model/math/Vec3";
 import {Timeline} from "./model/interactive/Timeline";
+import {TextField} from "./model/graph/TextField";
 
 
 export class DataPacker {
@@ -17,8 +18,27 @@ export class Project {
     public timelines: Timeline[];
 
     constructor() {
+        this.name="Untitled Project";
         this.rooms = [];
         this.timelines = [];
+    }
+
+    getElement() {
+        let form = document.createElement('div');
+        let name = new TextField(this.name);
+        name.subscribe('update', (v) => {
+            this.name = v;
+        });
+
+        let desc = new TextField(this.description);
+        desc.subscribe('update', (v) => {
+            this.description = v;
+        });
+
+        form.appendChild(name.getElement());
+        form.appendChild(desc.getElement());
+
+        return form;
     }
 }
 

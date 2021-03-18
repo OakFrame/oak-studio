@@ -1,5 +1,6 @@
 import {RoomObject} from "./RoomObject";
 import {Vec3} from "../math/Vec3";
+import { Camera } from "./Camera";
 
 export class Room {
     private name: string;
@@ -13,8 +14,8 @@ export class Room {
         this.objects = [];
         this.position = new Vec3();
         this.size = new Vec3();
-        this.size.x = 24;
-        this.size.y = 16;
+        this.size.x = 16;
+        this.size.y = 8;
 
         if (room) {
             this.name = room.name;
@@ -28,6 +29,10 @@ export class Room {
 
     public getName() {
         return this.name;
+    }
+
+    public getSize() {
+       return this.size;
     }
 
     public setName(name) {
@@ -56,16 +61,29 @@ export class Room {
         return i;
     }
 
-    depthSort(camera) {
+    depthSort(camera?:Camera) {
 
-        let _v1 = new Vec3();
-        _v1.copy(camera.from);
-        for (var index = 0; index < this.objects.length; index++) {
-            //_v1.x = this.objects[index].position.x;
-            this.objects[index].depth = _v1.dist(this.objects[index].position);
-            if (this.objects[index].decal) {
-                this.objects[index].depth += 1000000;
-                this.objects[index].depth += (this.objects[index].scale.mag());
+
+        if (camera) {
+            let _v1 = new Vec3();
+            _v1.copy(camera.from);
+            _v1.y = 9999;
+            for (var index = 0; index < this.objects.length; index++) {
+                _v1.x = this.objects[index].position.x;
+                this.objects[index].depth = _v1.dist(this.objects[index].position);
+                if (this.objects[index].decal) {
+                    this.objects[index].depth += 1000000;
+                    this.objects[index].depth += (this.objects[index].scale.mag());
+                }
+            }
+        }else{
+            for (var index = 0; index < this.objects.length; index++) {
+                //_v1.x = this.objects[index].position.x;
+                this.objects[index].depth = -this.objects[index].position.y;
+                if (this.objects[index].decal) {
+                    this.objects[index].depth -= 1000000;
+                    this.objects[index].depth += (this.objects[index].scale.mag());
+                }
             }
         }
         var loop = true;

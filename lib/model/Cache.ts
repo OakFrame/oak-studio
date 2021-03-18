@@ -1,44 +1,100 @@
 import {Project} from "../Project";
 import {Sprite} from "./rendering/Sprite";
+import {slugify} from "./Utils";
+import {Account} from "./Account";
+import {v4 as uuidv4} from "uuid";
 
 export class CacheModel {
 
-    private projects;
-    private resources;
-    private packs;
-    private sprites;
+    private cache;
 
     constructor(cm?) {
-        this.projects = cm ? cm.projects : [];
-        this.packs = cm ? cm.packs : [];
-        this.resources = cm ? cm.resources : [];
-        this.sprites = cm ? cm.sprites : [];
+        //this.projects = cm ? cm.projects : [];
+        //this.packs = cm ? cm.packs : [];
+        //this.sprites = cm ? cm.sprites : {};
+
+        this.cache = cm ? cm.cache : {
+            sprites: {},
+            packs: {},
+            projects: {}
+        };
+
+        if (window.localStorage.getItem('oakframe-cache')) {
+            console.log("LOADING CACHE FROM LOCAL");
+            this.deserialize(JSON.parse(window.localStorage.getItem('oakframe-cache')))
+        } else {
+            console.log("NO LOCAL CACHE FOUND");
+        }
         // PRELOAD CACHE IF NECESSARY
     }
 
+    deserialize = (props?) => {
+        if (props) {
+            this.cache.projects = props.projects ? props.projects : {};
+            this.cache.sprites = {};
+            //props.sprites ? props.sprites : {};
+            for (const prop in props.sprites) {
+                //  let sprite = props.sprites[prop];
+                let res = new Resource(props.sprites[prop]);
+                this.cache.sprites[prop] = res;
+            }
+        }
+    };
+
+    serialize = () => {
+        return JSON.stringify(this.getSerializedResources());
+    }
+
+    mutate(key?, value?) {
+        window.localStorage.setItem('oakframe-cache', this.serialize());
+    }
+
     registerSprite(src) {
-        this.sprites[src] = new Sprite(src);
+        let res = new Resource();
+        res.data = new Sprite(src);
+        this.cache.sprites[src] = res;
+        //this.cache.sprites[src] = res.data;
+        this.mutate();
+        return res;
+        // console.log('REGISTERED', this.sprites);
     }
 
     getSprite(src) {
-        return this.sprites[src];
+        let cached = this.cache.sprites[src];
+        if (!cached){
+            let registered = this.registerSprite(src);
+            return registered.data;
+        }
+
+        return cached.data||cached.thumbnail;
     }
 
     addPack(pack) {
-        this.packs.push(pack);
+        this.cache.packs.push(pack);
         console.log('adding pack', pack.name);
     }
 
     addProject(project: Project) {
-        this.projects.push(project);
+        this.cache.projects.push(project);
     }
 
     getProjects() {
-        return this.projects;
+        return this.cache.projects;
+    }
+
+    getProject(id) {
+        let p;
+       for (const prop in this.cache.projects){
+           let projectResource = this.cache.projects[prop];
+          if (id === slugify(projectResource.data.name)){
+              p = projectResource.data;
+          }
+       }
+        return p;
     }
 
     addResource(resource: Resource) {
-        this.resources.push(resource);
+        this.cache.push(resource);
     }
 
     getResource(id) {
@@ -47,21 +103,63 @@ export class CacheModel {
 
     getSerializedResources() {
         return {
-            packs: this.packs,
-            resources: this.resources
+            projects: this.cache.projects,
+            packs: this.cache.packs,
+            sprites: this.cache.sprites
         }
     }
 
 }
 
+export enum CacheResourceStatus {
+    TEMP = 0,
+    CLOUD = 1,
+    THUMB = 2,
+    FULL = 3
+}
+
 export class Resource {
 
     _id;
+    uuid;
     type: String;
-    value;
-    preview_uri;
+    data;
+    thumbnail: any;
+    status: CacheResourceStatus
 
     constructor(props?) {
+        this.uuid = uuidv4();
+        if (props) {
+            if (props.type) {
+                this.type = props.type;
+            }
+            if (props._id) {
+                this._id = props._id;
+            }
+            if (props.uuid) {
+                this.uuid = props.uuid;
+            }
+            if (props.data) {
+                this.data = props.data;
+            }
+            if (props.thumbnail) {
+                this.thumbnail = props.thumbnail;
+            }
+            if (props.status) {
+                this.status = props.status;
+            }
+        }
+    }
+
+    serialize() {
+        return {
+            _id: this._id,
+            uuid: this.uuid,
+            type: this.type,
+            data: this.data,
+            thumbnail: this.thumbnail,
+            status: this.status,
+        }
     }
 
 

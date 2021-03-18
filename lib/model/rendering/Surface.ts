@@ -1,7 +1,18 @@
+import {Vec2} from "../math/Vec2";
+import {Vec3} from "../math/Vec3";
+import {Sprite} from "./Sprite";
+
 export interface SurfaceTextOptions {
     size?: number;
     color?: string;
     background?: string;
+}
+
+export interface SurfaceImageOptions {
+    position: Vec2 | Vec3;
+    scale?: Vec2 | Vec3;
+    origin?: Vec2 | Vec3;
+    rotation?: number;
 }
 
 export class Surface {
@@ -145,6 +156,38 @@ export class Surface {
 
     getPerceptualHeight() {
         return this._height / this._scaling;
+    }
+
+    drawImage(sprite, x, y) {
+        this.context.drawImage(sprite.getImage(), x, y);
+    }
+
+    drawSprite(sprite:Sprite, options?: SurfaceImageOptions) {
+        options = {
+            position: options.position || (new Vec2()),
+            origin: options.origin || (new Vec2()),
+            scale: options.scale || ((new Vec2()).set(1,1)),
+            rotation: options.rotation || 0
+        }
+
+        let from_camera_scale_x = 1;
+
+        let w = options.scale.x*sprite.getImage().width;
+        let h = options.scale.y*sprite.getImage().height;
+
+        let offx = 0;//w*options.origin.x;
+        let offy = 0;// h*options.origin.y;
+
+        this.context.drawImage(sprite.getImage(), options.position.x-offx, options.position.y-offy, w, h);
+
+        let lower_x = offx + (0.5 - (sprite.getImage().width * options.scale.x * from_camera_scale_x / 2));
+        let lower_y = offy + (-(0.5 + (sprite.getImage().height * options.scale.x * from_camera_scale_x / 2)));
+        let upper_x = lower_x + (sprite.getImage().width * from_camera_scale_x * options.scale.x);
+        let upper_y = lower_y + (sprite.getImage().height * from_camera_scale_x * options.scale.x); // should be options.scale.y?
+
+        this.context.beginPath();
+        this.context.rect(lower_x, lower_y, upper_x - lower_x, upper_y - lower_y);
+        this.context.stroke();
     }
 
 }

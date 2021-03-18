@@ -255,7 +255,7 @@ export class Face3 {
  */
 export class Mesh {
 
-    public _children;
+    public _children:Face3[];
     private _bounds;
     private _tmpv;
     private _tmpr;

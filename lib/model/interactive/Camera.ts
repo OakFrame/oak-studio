@@ -197,11 +197,26 @@ export class Camera {
         surface.getContext().stroke();
     };
 
-    drawFace(surface: Surface, face3: Face3, parent, texture, scale, depth = 9) {
+    drawLine2D(surface,x1,y1,x2,y2){
+            this.projection.toScreen(surface, (new Vec3().set(x1,y1,0)), this.from, this._tmp.p1);
+            this.projection.toScreen(surface, (new Vec3().set(x2,y2,0)), this.from, this._tmp.p2);
+
+        surface.getContext().beginPath();
+        surface.getContext().moveTo(this._tmp.p1.x, this._tmp.p1.y);
+        surface.getContext().lineTo(this._tmp.p2.x, this._tmp.p2.y);
+       // surface.getContext().fill();
+
+        surface.getContext().strokeStyle = "black" || '#f00';
+        surface.getContext().strokeWidth = "10";
+        surface.getContext().stroke();
+        surface.getContext().strokeWidth = 1;
+    }
+
+    drawFace(surface: Surface, face3: Face3, parent, texture, scale, depth = 3) {
 
         //this._tmp.drawntris++;
 
-        if (face3.getcenter().dist(this.from) < Math.pow(1.8, depth - 1) && depth >= 1) {
+        if (/*face3.getcenter().dist(this.from) < Math.pow(2.8, depth - 1) && */depth >= 1) {
 
             let new_depth = depth - 1;
 
@@ -318,7 +333,7 @@ export class Camera {
         surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
 
     //     surface.getContext().closePath();
-     //    surface.getContext().stroke();
+         surface.getContext().stroke();
 
         this._tmp._t[20] = 0;
         this._tmp._t[21] = 0;
