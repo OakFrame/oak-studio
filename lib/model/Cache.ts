@@ -3,25 +3,50 @@ import {Sprite} from "./rendering/Sprite";
 import {slugify} from "./Utils";
 import {Account} from "./Account";
 import {v4 as uuidv4} from "uuid";
+import {PathImage} from "./paint/PathImage";
+import {TextComment} from "./graph/TextComment";
+import {GameEventEmitter} from "./interactive/GameEvent";
+import {ObjectSync} from "./ObjectSync";
+import {SchemaProvider} from "../interface/Provider";
 
-export class CacheModel {
+export class CacheModel extends GameEventEmitter {
 
-    private cache;
+    private dataProvider;
+    private cache: ObjectSync;
+    private projects: Resource[] = [];
+    public maxByteSize: number = 128;
+    private memoryCache: [] = [];
 
-    constructor(cm?) {
-        //this.projects = cm ? cm.projects : [];
-        //this.packs = cm ? cm.packs : [];
-        //this.sprites = cm ? cm.sprites : {};
+    getDataProvider(){
+        return this.dataProvider;
+    }
 
-        this.cache = cm ? cm.cache : {
-            sprites: {},
-            packs: {},
-            projects: {}
-        };
+    getObjectSync(){
+        return this.cache;
+    }
 
-        if (window.localStorage.getItem('oakframe-cache')) {
+    constructor(dataProvider: SchemaProvider) {
+
+        super();
+        this.cache = new ObjectSync(dataProvider);
+        // this.cache.registerSchema("user", User);
+        this.cache.registerSchema("image", PathImage);
+        this.cache.registerSchema("sprite", Sprite);
+        this.cache.registerSchema("comment", TextComment);
+        /*  this.cache = {
+              sprites: {},
+              images: [],
+              packs: {},
+              projects: []
+          };*/
+        this.dataProvider = dataProvider;
+        dataProvider.on("save", () => {
+            this.mutate();
+        })
+
+        if (window.localStorage.getItem('kp-cache')) {
             console.log("LOADING CACHE FROM LOCAL");
-            this.deserialize(JSON.parse(window.localStorage.getItem('oakframe-cache')))
+            this.deserialize(JSON.parse(window.localStorage.getItem('kp-cache')));
         } else {
             console.log("NO LOCAL CACHE FOUND");
         }
@@ -30,67 +55,142 @@ export class CacheModel {
 
     deserialize = (props?) => {
         if (props) {
-            this.cache.projects = props.projects ? props.projects : {};
-            this.cache.sprites = {};
+            console.log("DESERIALIZE FROM", props);
+            //this.cache.projects = [];//props.projects ? props.projects : {};
+            //this.cache.sprites = {};
+            //this.cache.images = [];
             //props.sprites ? props.sprites : {};
             for (const prop in props.sprites) {
-                //  let sprite = props.sprites[prop];
                 let res = new Resource(props.sprites[prop]);
-                this.cache.sprites[prop] = res;
+                this.cache.addResource("sprite", res);
+            }
+            for (const prop in props.comments) {
+                let res = new Resource(props.comments[prop]);
+                this.cache.addResource("comment", res);
+            }
+            if (props.images) {
+                for (const prop in props.images) {
+                    let res = new Resource(props.images[prop]);
+                    res.data = new PathImage(props.images[prop].data);
+                    this.cache.addResource("image", res);
+                }
             }
         }
+        console.log("CURRENT CAHCHEMODEL,", this.getSerializedResources())
     };
 
     serialize = () => {
         return JSON.stringify(this.getSerializedResources());
     }
 
-    mutate(key?, value?) {
-        window.localStorage.setItem('oakframe-cache', this.serialize());
+    serializeFiltered = () => {
+        return JSON.stringify(this.getSerializedResourcesFiltered());
     }
 
-    registerSprite(src) {
+    mutate(key?, value?) {
+      //  console.log('MUTATING CACHE', this.serialize());
+        window.localStorage.setItem('kp-cache', this.serializeFiltered());
+        this.publish('mutate', this.serialize());
+    }
+
+    async registerSprite(src) {
         let res = new Resource();
         res.data = new Sprite(src);
-        this.cache.sprites[src] = res;
-        //this.cache.sprites[src] = res.data;
-        this.mutate();
+        await this.cache.addResource('sprite', res);
+        //this.mutate();
         return res;
-        // console.log('REGISTERED', this.sprites);
     }
 
-    getSprite(src) {
-        let cached = this.cache.sprites[src];
-        if (!cached){
-            let registered = this.registerSprite(src);
-            return registered.data;
-        }
-
-        return cached.data||cached.thumbnail;
+    async registerImage(src) {
+        let res = new Resource();
+        res.data = src;
+        await this.cache.addResource('image', res);
+        //this.mutate();
+        return res;
     }
+
+    async registerComment(src) {
+        let res = new Resource();
+        res.data = src;
+        await this.cache.addResource('comment', res);
+        //this.mutate();
+        return res;
+    }
+
+    /* getSpriteBySource(src){
+         this.getResourceByUUID(schema, res.uuid).then(()=>{
+
+         });
+     }*/
+
+    /*
 
     addPack(pack) {
         this.cache.packs.push(pack);
         console.log('adding pack', pack.name);
     }
-
-    addProject(project: Project) {
-        this.cache.projects.push(project);
+*/
+    async registerProject(project: Project) {
+        let res = new Resource();
+        res.data = project;
+        await this.cache.addResource('project', res);
+      //  this.mutate();
+        // this.projects.push(res);
     }
 
     getProjects() {
-        return this.cache.projects;
+        return this.cache.getResources('project');
+    }
+
+    getImages() {
+        return this.cache.getResources("image");
+    }
+
+    getComments() {
+        return this.cache.getResources("comment");
+    }
+
+    search(schema?,filter?){
+        return this.cache.search(schema, filter);
+    }
+
+
+    getSprite(id): Sprite {
+        let str_id = JSON.stringify(id);
+        if (this.memoryCache[str_id]) {
+            return this.memoryCache[str_id];
+        }
+        let images = this.getImages();
+        //console.log('looking for item', id);
+        if (!Array.isArray(id)) {
+            for (const image of images) {//:Resource<PathImage>
+                if (image._id && image._id === id && image.data) {
+                    console.log('found', id);
+
+                    let spr = new Sprite((<PathImage>image.data).getImage());
+                    this.memoryCache[str_id] = spr;
+                    return spr;
+                }
+            }
+        }
+        let spr = new Sprite(id)
+        this.memoryCache[str_id] = spr;
+        return spr;
     }
 
     getProject(id) {
         let p;
-       for (const prop in this.cache.projects){
-           let projectResource = this.cache.projects[prop];
-          if (id === slugify(projectResource.data.name)){
-              p = projectResource.data;
-          }
-       }
+        for (const prop in this.projects) {
+            const projectResource = this.projects[prop];
+            if (id === (projectResource.uuid)) {
+                p = projectResource.data;
+            }
+        }
         return p;
+    }
+
+    /*addImage(imageResource: Resource) {
+        this.cache.images.push(imageResource);
     }
 
     addResource(resource: Resource) {
@@ -99,14 +199,71 @@ export class CacheModel {
 
     getResource(id) {
         return id;
-    }
+    }*/
 
     getSerializedResources() {
         return {
-            projects: this.cache.projects,
-            packs: this.cache.packs,
-            sprites: this.cache.sprites
+            projects: this.cache.getResources('project'),
+            packs: [],
+            sprites: this.cache.getResources('sprite'),
+            images: this.cache.getResources('image'),
+            comments: this.cache.getResources('comment')
         }
+    }
+
+    getSerializedResourcesFiltered() {
+        return {
+            projects: this.cache.getResources('project').filter((p)=>{return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)}),
+            packs: [],
+            sprites: this.cache.getResources('sprite').filter((p)=>{return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)}),
+            images: this.cache.getResources('image').filter((p)=>{return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)}),
+            comments: this.cache.getResources('comment').filter((p)=>{return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)})
+        }
+    }
+
+    byteLength(str) {
+        // returns the byte length of an utf8 string
+        var s = str.length;
+        for (var i = str.length - 1; i >= 0; i--) {
+            var code = str.charCodeAt(i);
+            if (code > 0x7f && code <= 0x7ff) s++;
+            else if (code > 0x7ff && code <= 0xffff) s += 2;
+            if (code >= 0xDC00 && code <= 0xDFFF) i--; //trail surrogate
+        }
+        return s;
+    }
+
+
+    async getByteSize() {
+        if (localStorage && !localStorage.getItem('kp-cachesize')) {
+            var i = 0;
+            const starting_size = (this.byteLength(JSON.stringify(this.getSerializedResources())) / 1024);
+            try {
+                // Test up to 10 MB
+                for (i = starting_size; i <= starting_size + (1024 * 10); i += 1024) {
+                    localStorage.setItem('kp-sizetest', new Array((i * 1024) + 1).join('a'));
+                    this.maxByteSize = i * 1024;
+                    await new Promise((r) => {
+                        window.setTimeout(() => {
+                            r(true);
+                        }, 150)
+                    });
+                }
+
+            } catch (e) {
+                // localStorage.setItem('kp-cachesize', (i*1024).toString());
+                //localStorage.removeItem('test');
+            }
+            localStorage.setItem('kp-cachesize', ((i) * 1024).toString());
+            localStorage.removeItem('kp-sizetest');
+            return i * 1024;
+        }
+
+        if (localStorage && localStorage.getItem('kp-cachesize')) {
+            return this.maxByteSize = parseInt(localStorage.getItem('kp-cachesize'));
+        }
+
+        return 1024 * 1024;
     }
 
 }
@@ -120,24 +277,38 @@ export enum CacheResourceStatus {
 
 export class Resource {
 
-    _id;
-    uuid;
-    type: String;
+    _owner: string;
+    _permissions: string[];
+    _id?: string;
+    _last_modified: number;
+    uuid: string;
+    type: string;
     data;
     thumbnail: any;
-    status: CacheResourceStatus
+    status: CacheResourceStatus;
+
 
     constructor(props?) {
         this.uuid = uuidv4();
+        this._last_modified = Date.now();
         if (props) {
+            if (props._owner) {
+                this._owner = props._owner;
+            }
+            if (props._permissions) {
+                this._permissions = props._permissions;
+            }
+            if (props._last_modified) {
+                this._last_modified = props._last_modified;
+            }
+            if (props.uuid) {
+                this.uuid = props.uuid;
+            }
             if (props.type) {
                 this.type = props.type;
             }
             if (props._id) {
                 this._id = props._id;
-            }
-            if (props.uuid) {
-                this.uuid = props.uuid;
             }
             if (props.data) {
                 this.data = props.data;
@@ -151,14 +322,21 @@ export class Resource {
         }
     }
 
+    updateLastModified() {
+        this._last_modified = Date.now();
+    }
+
     serialize() {
         return {
             _id: this._id,
+            _owner: this._owner,
+            _permissions: this._permissions,
             uuid: this.uuid,
             type: this.type,
             data: this.data,
             thumbnail: this.thumbnail,
             status: this.status,
+            _last_modified: this._last_modified,
         }
     }
 
@@ -196,7 +374,7 @@ export class DataRequest {
 
             var percent_complete = (e.loaded / e.total) * 100;
             percent_complete = Math.floor(percent_complete);
-            console.log("PERCENT COMPLETE:::", percent_complete);
+            console.log("PERCENT COMPLETE", percent_complete);
             // progressText.innerHTML = percent_complete + "%";
         };
 
@@ -210,6 +388,7 @@ export class DataRequest {
             // link.click();
         };
     }
+
 }
 
 export function generateFakePack() {

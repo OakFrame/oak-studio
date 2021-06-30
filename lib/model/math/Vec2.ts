@@ -117,8 +117,8 @@ export class Vec2 {
 
     /** @type {function():Vec2} */
     random() {
-        this.x = Math.random();
-        this.y = Math.random();
+        this.x = Math.random()-Math.random();
+        this.y = Math.random()-Math.random();
         return this;
     }
 
@@ -180,4 +180,13 @@ export class Vec2 {
         return JSON.stringify(this);
     }
 
+}
+
+
+export function lerp(v0, v1, t) {
+    return v0 * (1 - t) + v1 * t
+}
+
+export function lerpVec2(real:number, v1: Vec2, v2: Vec2){
+    return ((new Vec2()).set(lerp(v1.x,v2.x,real),lerp(v1.y,v2.y,real)));
 }

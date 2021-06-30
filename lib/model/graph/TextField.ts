@@ -7,9 +7,9 @@ export class TextField extends Field {
     _displayArea = document.createElement('div');
     _inputArea = document.createElement('input');
 
-    constructor(value?) {
-        super("Tag", value || []);
-
+    constructor(value?,type?) {
+        super(type || "Tag", value || []);
+        this._type = type;
         this._inputArea.className="form-field";
 
         this._inputArea.onchange = () => {

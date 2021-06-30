@@ -10,6 +10,7 @@ import {Face3} from "../rendering/Mesh";
 
 export class Camera {
 
+    public focus: Vec3;
     public from: Vec3;
     public to: Vec3;
     public up: Vec3;
@@ -19,6 +20,7 @@ export class Camera {
     public aspect: number;
     public projection: Projection;
     private animation;
+    focus: any;
     private _tmp;
 
     constructor() {
@@ -26,6 +28,7 @@ export class Camera {
         this.to = new Vec3();
         this.up = new Vec3().set(0, 0, 1);
         this.tmpv = new Vec3();
+        this.focus = new Vec3();
         this.fov = 45;
         this.zoom = 1;
         this.aspect = 1;
@@ -155,10 +158,18 @@ export class Camera {
 
             if (actor.bark) {
                 surface.getContext().textAlign = "center";
+
+                for (let i=1;i<=3*surface.getScaling();i++){
+                surface.drawText(i, (-((actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc / 2) + 40))+i, actor.bark, {
+                    size: 40,
+                    color: "#fffdf5",
+                   // background: actor.primary_color||"#000"
+                });}
+
                 surface.drawText(0, -((actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc / 2) + 40), actor.bark, {
                     size: 40,
-                    color: "#fff",
-                    background: actor.primary_color||"#000"
+                    color: actor.primary_color//"#fff",
+                   // background: actor.primary_color||"#000"
                 });
                 surface.getContext().textAlign = "left";
             }
@@ -193,8 +204,8 @@ export class Camera {
         surface.getContext().lineTo(this._tmp.p3.x, this._tmp.p3.y);
         surface.getContext().fill();
 
-        surface.getContext().strokeStyle = color || '#f00';
-        surface.getContext().stroke();
+      //  surface.getContext().strokeStyle = color || '#f00';
+       // surface.getContext().stroke();
     };
 
     drawLine2D(surface,x1,y1,x2,y2){
@@ -333,7 +344,7 @@ export class Camera {
         surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
 
     //     surface.getContext().closePath();
-         surface.getContext().stroke();
+        // surface.getContext().stroke();
 
         this._tmp._t[20] = 0;
         this._tmp._t[21] = 0;

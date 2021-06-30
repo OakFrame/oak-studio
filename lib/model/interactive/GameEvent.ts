@@ -19,12 +19,10 @@ export class GameEventEmitter {
         }
         let u = uuidv4();
         this._subscribers[identifier].push({uuid: u, fn: callback});
-        //TODO return UUID here
         return u;
     }
 
     publish(identifier, data?): any {
-        console.log("publishing", identifier);
         if (this._subscribers[identifier]) {
             this._subscribers[identifier].forEach(function (subscriberOb) {
                 subscriberOb.fn(data);

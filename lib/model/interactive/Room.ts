@@ -1,6 +1,7 @@
 import {RoomObject} from "./RoomObject";
 import {Vec3} from "../math/Vec3";
 import { Camera } from "./Camera";
+import { TextField } from "../graph/TextField";
 
 export class Room {
     private name: string;
@@ -109,6 +110,18 @@ export class Room {
 
     update(){
 
+    }
+
+    getElement() {
+        let form = document.createElement('div');
+        let name = new TextField(this.name,"Room Name");
+        name.subscribe('update', (v) => {
+            this.name = v;
+        });
+
+        form.appendChild(name.getElement());
+
+        return form;
     }
 
 }

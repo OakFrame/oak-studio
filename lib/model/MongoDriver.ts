@@ -11,6 +11,7 @@ export class MongoDriver {
     private name;
 
     constructor(mongo_uri, dbName) {
+        console.log("connecting to", mongo_uri, dbName);
 
         this.connected = false;
         this.collections = [];
@@ -60,7 +61,7 @@ export class MongoDriver {
         });
     }
 
-    async insertOne(collection, data) {
+    async insertOne(collection, data):Promise<any> {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
 
@@ -133,7 +134,7 @@ export class MongoDriver {
         });
     }
 
-    async find(collection, search) {
+    async find(collection, search):Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
             this.collections[collection].find(search).toArray(function (err, result) {
@@ -143,7 +144,6 @@ export class MongoDriver {
                     return;
                 }
                 resolve(result);
-
             });
         });
     }

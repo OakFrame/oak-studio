@@ -15,7 +15,7 @@ export class Module {
 	//	if (JSON.stringify(this._state_history) !== JSON.stringify())
 	};
 
-	public focus = ():any => {
+	public focus = (app?:ApplicationRouter):any => {
 		let self = this;
 		this.loop = window.setInterval(function () {
 			self.update();

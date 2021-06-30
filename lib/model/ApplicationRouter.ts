@@ -4,6 +4,7 @@ import {SubscribeInterface} from "../interface/SubscribeInterface";
 import {ModuleRouter} from "./ModuleRouter";
 // @ts-ignore
 import {v4 as uuidv4} from "uuid";
+import {isApplicationWrapped} from "../../utils/wrapper";
 
 export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
 
@@ -11,6 +12,7 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
     private stack: Array<Layer>;
     private error_stack: Array<Layer>;
     private _subscribers: any[];
+    private _route:string;
 
     constructor() {
         this._subscribers = [];
@@ -27,20 +29,30 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
                 if ((target.getAttribute('href') || "").slice(0, 5) === "/api/") {
                     window.location = target.hasAttribute('href')
                 } else {
-                    app.goToPage(target.getAttribute('href'), event);
+                    console.log("application router target href",target.getAttribute('href'));
+                    let relative_link=target.getAttribute('href');
+                    //if (isApplicationWrapped()){
+                     //   relative_link = relative_link.slice(1,relative_link.length-1)
+                    //}
+                    app.goToPage(relative_link, event);
                 }
             }
         }, false);
 
-        window.addEventListener('popstate', function (e) {
-            app.route();
-        });
+
+        if (!window.navigator['standalone'] && !isApplicationWrapped()) {
+            window.addEventListener('popstate', function (e) {
+                app.route();
+            });
+        }
 
     }
 
     public goToPage(route: string, event?) {
         let rel_route = route.replace(`//${window.location.hostname}`, "");
-        if (!window.navigator['standalone']) {
+
+
+        if (!window.navigator['standalone'] && !isApplicationWrapped()) {
             /* iOS hides Safari address bar */
             window.history.pushState({data: "okay"}, "unknown", route);
         }
@@ -69,6 +81,8 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         let self = this;
 
         let request_url = url || window.location.pathname || window.location.href;
+
+        this._route = request_url;
 
         let chain: Array<Layer> = [];
         this.stack.forEach(function (layer: Layer) {
@@ -126,7 +140,7 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         }).then(function () {
             self.publish('route', false);
             self._modules.forEach(function (module) {
-                module.focus();
+                module.focus(self);
             });
         });
 
@@ -148,7 +162,6 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
                     let id = elem.getAttribute('data-bind');
                     module._binds.push({
                         identifier: id, uuid: app.subscribe(id, function (d) {
-                            console.log("UPDATE", d);
 
                             let _s_dom = document.createElement('div');
                             _s_dom.innerHTML = renderer(view, d);
@@ -178,18 +191,17 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
     }
 
     subscribe(identifier: string, callback: any): string {
-        console.log("SUBSCRIBING TO ", identifier);
         if (!this._subscribers[identifier]) {
             this._subscribers[identifier] = [];
         }
         let u = uuidv4();
         this._subscribers[identifier].push({uuid: u, fn: callback});
         //TODO return UUID here
+        console.log('SUBSCRIBERS',this._subscribers);
         return u;
     }
 
     publish(identifier, data?): any {
-        console.log("publishing", identifier);
         if (this._subscribers[identifier]) {
             this._subscribers[identifier].forEach(function (subscriberOb) {
                 subscriberOb.fn(data);
@@ -212,7 +224,7 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
     }
 
     getURLPath(){
-        return window.location.pathname || window.location.href;
+        return this._route || window.location.pathname || window.location.href;
     }
 
 }

@@ -11,11 +11,12 @@ export class AssetLoader {
         this.loaded = 0;
     }
 
-    loadSprite(src, preload = true) {
+    loadSprite(src, preload = true):Sprite {
         this.queued++;
         let s = new Sprite(src);
         this.spriteCache[src] = s;
         s.on('ready', () => {
+            console.log('asset loaded ',src);
             this.loaded++;
             if (this.loaded >= this.queued) {
                 this.publish("loaded", true);

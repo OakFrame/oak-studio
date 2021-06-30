@@ -14,7 +14,11 @@ export class SurfaceGL {
     _scaling;
     gl;
     _render_loop;
+    _draw_model;
 
+setDrawModel(dm){
+    this._draw_model = dm;
+}
 
     constructor(canvas?, sprite?:Sprite) {
 
@@ -142,99 +146,124 @@ export class SurfaceGL {
         let box = new GLCubeBufferUV();
         box.translate(0,1,0);
 
-            drawModel.appendBuffer(box)
+            drawModel.appendBuffer(box);
 
-        var bufferedVertices = drawModel.vertices;
-        var bufferedIndices = drawModel.indices;
+        var bufferedVertices = [];
+        var bufferedIndices = [];
 
-        /**
-         * Camera shader setup
-         */
+        var vertexPositionAttrib;
 
-// We enable our vertex attributes for our camera's shader.
-        var vertexPositionAttrib = gl.getAttribLocation(lightShaderProgram, 'aVertexPosition')
+
+        var shadowFramebuffer = gl.createFramebuffer()
+        var shadowDepthTexture = gl.createTexture()
+        var renderBuffer = gl.createRenderbuffer()
 
         var glPositionBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, glPositionBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bufferedVertices), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(vertexPositionAttrib, 3, // Number of elements per attribute
-            gl.FLOAT, // Type of elements
-            gl.FALSE,
-            5 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-            0 // Offset from the beginning of a single vertex to this attribute
-        )
-
-
-
-        gl.enableVertexAttribArray(vertexPositionAttrib);
-
         var glIndexBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, glIndexBuffer)
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(bufferedIndices), gl.STATIC_DRAW)
+
+        var lightProjectionMatrix = mat4.ortho([], -20, 20, -20, 20, -20.0, 80)
+        var lightViewMatrix = mat4.lookAt([], [0, 4, 0], [3, 0, 5], [0, 1, 0])
 
 
-        /**
-         * Light shader setup
-         */
+        var shadowPMatrix;
+        var shadowMVMatrix;
+        var uPMatrix;
+        var uMVMatrix;
+        var uColor;
+        var uLightMatrix;
+        var uLightProjection;
+        var samplerUniform;
 
-        gl.useProgram(lightShaderProgram)
+
+
+        function setupBufferedGeometry(drawModel) {
+
+            bufferedVertices = drawModel.vertices;
+            bufferedIndices = drawModel.indices;
+
+            /**
+             * Camera shader setup
+             */
+
+// We enable our vertex attributes for our camera's shader.
+            vertexPositionAttrib = gl.getAttribLocation(lightShaderProgram, 'aVertexPosition')
+            gl.bindBuffer(gl.ARRAY_BUFFER, glPositionBuffer)
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bufferedVertices), gl.STATIC_DRAW)
+            gl.vertexAttribPointer(vertexPositionAttrib, 3, // Number of elements per attribute
+                gl.FLOAT, // Type of elements
+                gl.FALSE,
+                5 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+                0 // Offset from the beginning of a single vertex to this attribute
+            )
+
+
+            gl.enableVertexAttribArray(vertexPositionAttrib);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, glIndexBuffer)
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(bufferedIndices), gl.STATIC_DRAW)
+
+
+            /**
+             * Light shader setup
+             */
+
+            gl.useProgram(lightShaderProgram)
 
 // This section is the meat of things. We create an off screen frame buffer that we'll render
 // our scene onto from our light's viewpoint. We output that to a color texture `shadowDepthTexture`.
 // Then later our camera shader will use `shadowDepthTexture` to determine whether or not fragments
 // are in the shadow.
-        var shadowFramebuffer = gl.createFramebuffer()
-        gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFramebuffer)
+//            var shadowFramebuffer = gl.createFramebuffer()
+            gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFramebuffer)
 
-        var shadowDepthTexture = gl.createTexture()
-        gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, shadowDepthTextureSize, shadowDepthTextureSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+            //var shadowDepthTexture = gl.createTexture()
+            gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, shadowDepthTextureSize, shadowDepthTextureSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
 
-        var renderBuffer = gl.createRenderbuffer()
-        gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer)
-        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, shadowDepthTextureSize, shadowDepthTextureSize)
+           // var renderBuffer = gl.createRenderbuffer()
+            gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer)
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, shadowDepthTextureSize, shadowDepthTextureSize)
 
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, shadowDepthTexture, 0)
-        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer)
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, shadowDepthTexture, 0)
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer)
 
-        gl.bindTexture(gl.TEXTURE_2D, null)
-        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+            gl.bindTexture(gl.TEXTURE_2D, null)
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null)
 
 // We create an orthographic projection and view matrix from which our light
 // will vie the scene
-        var lightProjectionMatrix = mat4.ortho([], -20, 20, -20, 20, -20.0, 80)
-        var lightViewMatrix = mat4.lookAt([], [0, 4, 0], [3, 0, 5], [0, 1, 0])
 
-        var shadowPMatrix = gl.getUniformLocation(lightShaderProgram, 'uPMatrix')
-        var shadowMVMatrix = gl.getUniformLocation(lightShaderProgram, 'uMVMatrix')
+            shadowPMatrix = gl.getUniformLocation(lightShaderProgram, 'uPMatrix')
+            shadowMVMatrix = gl.getUniformLocation(lightShaderProgram, 'uMVMatrix')
 
-        gl.uniformMatrix4fv(shadowPMatrix, false, lightProjectionMatrix)
-        gl.uniformMatrix4fv(shadowMVMatrix, false, lightViewMatrix)
+            gl.uniformMatrix4fv(shadowPMatrix, false, lightProjectionMatrix)
+            gl.uniformMatrix4fv(shadowMVMatrix, false, lightViewMatrix)
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
-        /**
-         * Scene uniforms
-         */
-        gl.useProgram(cameraShaderProgram)
+            /**
+             * Scene uniforms
+             */
+            gl.useProgram(cameraShaderProgram)
 
-        var samplerUniform = gl.getUniformLocation(cameraShaderProgram, 'depthColorTexture')
+            samplerUniform = gl.getUniformLocation(cameraShaderProgram, 'depthColorTexture')
 
-        gl.activeTexture(gl.TEXTURE0)
-        gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
-        gl.uniform1i(samplerUniform, 0)
+            gl.activeTexture(gl.TEXTURE0)
+            gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
+            gl.uniform1i(samplerUniform, 0)
 
-        var uMVMatrix = gl.getUniformLocation(cameraShaderProgram, 'uMVMatrix')
-        var uPMatrix = gl.getUniformLocation(cameraShaderProgram, 'uPMatrix')
-        var uLightMatrix = gl.getUniformLocation(cameraShaderProgram, 'lightMViewMatrix')
-        var uLightProjection = gl.getUniformLocation(cameraShaderProgram, 'lightProjectionMatrix')
-        var uColor = gl.getUniformLocation(cameraShaderProgram, 'uColor')
+            uMVMatrix = gl.getUniformLocation(cameraShaderProgram, 'uMVMatrix')
+            uPMatrix = gl.getUniformLocation(cameraShaderProgram, 'uPMatrix')
+            uLightMatrix = gl.getUniformLocation(cameraShaderProgram, 'lightMViewMatrix')
+            uLightProjection = gl.getUniformLocation(cameraShaderProgram, 'lightProjectionMatrix')
+            uColor = gl.getUniformLocation(cameraShaderProgram, 'uColor')
 
-        gl.uniformMatrix4fv(uLightMatrix, false, lightViewMatrix)
-        gl.uniformMatrix4fv(uLightProjection, false, lightProjectionMatrix)
-        gl.uniformMatrix4fv(uPMatrix, false, mat4.perspective([], glMatrix.toRadian(45), surface._width / surface._height, 0.01, 900.0))
+            gl.uniformMatrix4fv(uLightMatrix, false, lightViewMatrix)
+            gl.uniformMatrix4fv(uLightProjection, false, lightProjectionMatrix)
+            gl.uniformMatrix4fv(uPMatrix, false, mat4.perspective([], glMatrix.toRadian(45), surface._width / surface._height, 0.01, 900.0))
+
+        }
 
 // We rotate the dragon about the y axis every frame
         var dragonRotateY = 0
@@ -270,6 +299,8 @@ export class SurfaceGL {
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         }
 
+
+
         this._render_loop = function () {
 
             xVelocity *= 0.8;
@@ -281,6 +312,7 @@ export class SurfaceGL {
             xRotation = Math.min(xRotation, Math.PI / 2.5);
             xRotation = Math.max(xRotation, 0.1);
 
+            setupBufferedGeometry(surface._draw_model||drawModel);
             drawShadowMap();
             gl.useProgram(cameraShaderProgram)
             gl.viewport(0, 0, surface._width, surface._height)

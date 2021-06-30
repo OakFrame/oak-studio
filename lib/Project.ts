@@ -2,7 +2,7 @@ import {Room} from "./model/interactive/Room";
 import {Vec3} from "./model/math/Vec3";
 import {Timeline} from "./model/interactive/Timeline";
 import {TextField} from "./model/graph/TextField";
-
+import {ListField} from "./model/graph/ListField";
 
 export class DataPacker {
 
@@ -25,18 +25,26 @@ export class Project {
 
     getElement() {
         let form = document.createElement('div');
-        let name = new TextField(this.name);
+        let name = new TextField(this.name,"Project Name");
         name.subscribe('update', (v) => {
             this.name = v;
         });
 
-        let desc = new TextField(this.description);
+        let desc = new TextField(this.description,"Description");
         desc.subscribe('update', (v) => {
             this.description = v;
         });
 
+        let rooms = new ListField(this.rooms.map((r)=>{return r.getName();}),"Room");
+        rooms.subscribe('update', (v) => {
+           // this.name = v;
+            console.log('LIST FIELD', v);
+        });
+
+
         form.appendChild(name.getElement());
         form.appendChild(desc.getElement());
+        form.appendChild(rooms.getElement());
 
         return form;
     }

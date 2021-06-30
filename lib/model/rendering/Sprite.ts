@@ -33,17 +33,25 @@ export class Sprite implements EventModel {
         return this;
     }
 
-    getImage(): HTMLImageElement {
-        this.image_index = (Date.now() / 250) | 0;
+    getImageSrc(){
+        this.image_index = Math.floor(Date.now() / 250);
         this.image_index = this.image_index % this.src.length;
+        return this.src[this.image_index];
+    }
+
+    getImage(): HTMLImageElement {
+        this.image_index = Math.floor(Date.now() / 250);
+        this.image_index = (this.image_index % this.src.length);
 
         let img = this.images[this.image_index];
         if (!img) {
             let new_img: any = new Image();
+            console.log(new_img,this.src, this.images, this.image_index);
             new_img.src = this.src[this.image_index];
             new_img.isReady = false;
             new_img.onload = () => {
                 new_img.isReady = true;
+                this.publish('loaded',true);
             };
 
             this.images.push(new_img);

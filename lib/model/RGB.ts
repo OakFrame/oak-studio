@@ -56,6 +56,9 @@ export class RGBA {
         this.a = rgba.a;
         return this;
     };
+    clone = () =>{
+        return (new RGBA()).copy(this);
+    }
 
     fromHex = (hex, opacity) => {
         hex = hex.replace('#', '');

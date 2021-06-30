@@ -1,6 +1,6 @@
 export class GLBuffer {
-    vertices: Array<number>;
-    indices: Array<number>;
+    vertices: Array<number>=[];
+    indices: Array<number>=[];
 
     scale(scale){
         this.vertices = this.vertices.map((v, idx) => {
@@ -27,13 +27,18 @@ export class GLBuffer {
     appendBuffer(buffer:GLBuffer){
         let self = this;
         let indlen = (this.vertices.length/5);
-        this.vertices=this.vertices.concat(buffer.vertices);
+        this.vertices = [].concat(this.vertices.concat(buffer.vertices));
 
         buffer.indices.forEach(function(ind){
             self.indices.push(ind+indlen);
         });
 
-        console.log(this.vertices, this.indices);
+        //console.log(this.vertices, this.indices);
+        return this;
+    }
+
+    clone(){
+        return new GLBuffer();
     }
 }
 
