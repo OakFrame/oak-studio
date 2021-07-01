@@ -1,7 +1,10 @@
-Oak-Studio
+Oak Studio
 ======
-![coverage](https://img.shields.io/badge/Coverage-70%25-e0dc5e) \
-Serverless, Microservices and Client Based Application Platform based on (deprecated) Oakframe-Application-Service
+Serverless, Microservices and Client Based Application Platform based on Express
+
+Try our online demos & documentation: https://oakframe.org/documentation/
+
+Installing
 ------
 Ensure your paths are set correctly
 /etc/paths `~/.npm-global/bin` \
@@ -26,11 +29,12 @@ The build process involves typescript compilation, google closure compilation, a
 
 Mocha Chai Test Suite
 ------
+`npm run test` \
 `./scripts/test.sh` \
 or something like this if that doesn't work\
 `node /usr/local/lib/node_modules/mocha/bin/_mocha -r ts-node/register --ui bdd */**/*.spec.ts`
 
-There are some demos available, including
+There are some demos available (deprecated)
 ------
 Web Server `./demo/http/HTTPServer.ts` \
 Socket Server `./demo/http/SocketServer.ts`
