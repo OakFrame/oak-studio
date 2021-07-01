@@ -2,11 +2,11 @@ export function replaceAll(str: any, search: any, replace: any) {
     return str.replace(new RegExp('' + search + '', 'g'), replace);
 }
 
-export function combine(objects:Array<any>){
+export function combine(objects: Array<any>) {
     let v = {};
-        objects.forEach(function (a) {
-            Object.assign(v,a);
-        });
+    objects.forEach(function (a) {
+        Object.assign(v, a);
+    });
     return v;
 }
 
@@ -167,3 +167,60 @@ export const mimeTypes = {
     'gif': 'image/gif',
     'manifest': 'text/cache-manifest'
 };
+
+export function timeago(dateString, now?) {
+    var rightNow = now || new Date().getTime();
+    var then = new Date(dateString).getTime();
+
+    //  if ($.browser.msie) {
+    // IE can't parse these crazy Ruby dates
+    //then = Date.parse(dateString.replace(/( \+)/, ' UTC$1'));
+    //}
+
+    let history = [];
+
+    var diff = rightNow - then;
+
+    var second = 1000,
+        minute = second * 60,
+        hour = minute * 60,
+        day = hour * 24,
+        week = day * 7;
+
+    if (isNaN(diff) || diff < 0) {
+        return "?"; // return blank string if unknown
+    }
+
+    if (diff < second * 2) {
+        // within 2 seconds
+        return 'right now'//"<div class='stats_info'>right now</div>";
+    }
+
+
+    history.push(Math.floor(diff / second) + ' second' + (Math.floor(diff / second) !== 1 ? 's' : '') + ' ago');//+ "<div class='stats_info'> seconds ago</div>";
+    if (diff < minute) {
+        return history[0];
+    }
+
+    history.unshift(Math.floor(diff / minute) + ' minute' + (Math.floor(diff / minute) !== 1 ? 's' : '') + ' ago');//  + "<div class='stats_info'> minutes ago</div>"
+
+    if (diff < hour) {
+        return history[0];
+        //return Math.floor(diff / minute) + ":" + (((Math.floor(diff / second) % 60) < 10) ? "0" : "") + (Math.floor(diff / second) % 60) + ' minutes'// + "<div class='stats_info'> minutes uptime</div>";
+    }
+
+    history.unshift(Math.floor(diff / hour) + ' hour' + (Math.floor(diff / hour) !== 1 ? 's' : '') + ' ago');
+
+    if (diff < day) {
+        return history[0];
+        //return Math.floor(diff / hour) + ' hour' + (Math.floor(diff / hour) !== 1 ? 's' : '') + '';
+        //return Math.floor(diff / hour) + ":" + (((Math.floor(diff / minute) % 60) < 10) ? "0" : "") + (Math.floor(diff / minute) % 60) + ":" + (((Math.floor(diff / second) % 60) < 10) ? "0" : "") + (Math.floor(diff / second) % 60) + ' hours'// + "<div class='stats_info'>hours uptime</div>";
+    }
+
+    if (diff < day * 365) {
+        //return Math.floor(diff / day) + ' day' + (Math.floor(diff / day) !== 1 ? 's' : '') + '';
+        return Math.floor(diff / day) + "<div class='stats_info'>days uptime</div>";
+    } else {
+        return "over a year";
+    }
+}
