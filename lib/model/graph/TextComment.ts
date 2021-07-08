@@ -4,8 +4,7 @@ export class TextComment implements EventModel {
 
     body:string;
     parent:string;
-    owner:string;
-    date:number;
+    _date:number;
 
     constructor(props?) {
         if (props){
@@ -23,10 +22,8 @@ export class TextComment implements EventModel {
         }
         if (sprite.parent){
             this.parent = sprite.parent;
-        }if (sprite.owner){
-            this.owner = sprite.owner;
         }if (sprite.date){
-            this.date = sprite.date;
+            this._date = sprite._date;
         }
         return this;
     }

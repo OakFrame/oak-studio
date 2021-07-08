@@ -163,12 +163,13 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
                     module._binds.push({
                         identifier: id, uuid: app.subscribe(id, function (d) {
 
-                            let _s_dom = document.createElement('div');
-                            _s_dom.innerHTML = renderer(view, d);
+                           /* let _s_dom = document.createElement('div');
+                            console.log('RENDER B ',data, d);
+                            _s_dom.innerHTML = renderer(view, data);
 
                             let _ea = document.querySelectorAll(`[data-bind]`);
-                            let _es = _s_dom.querySelectorAll(`[data-bind]`);
-                            _ea[i].innerHTML = _es[i].innerHTML;
+                            let _es = _s_dom.querySelectorAll(`[data-bind]`);*/
+                            //_ea[i].innerHTML = _es[i].innerHTML;
                             /*for (let x = 0; x < _ea.length; x++) {
                                 if (_ea[x].getAttribute('data-bind') === id) {
                                     console.log('FOUND MATCHING ELEMENT', id);
@@ -197,7 +198,6 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         let u = uuidv4();
         this._subscribers[identifier].push({uuid: u, fn: callback});
         //TODO return UUID here
-        console.log('SUBSCRIBERS',this._subscribers);
         return u;
     }
 
@@ -219,6 +219,8 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
             });
             if (idx != -1) {
                 this._subscribers.splice(idx, 1);
+            }else{
+                console.error('Failed to unsubscribe', uuid);
             }
         }
     }

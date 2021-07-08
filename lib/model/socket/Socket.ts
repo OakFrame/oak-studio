@@ -10,18 +10,38 @@ var getCookie = function (name) {
 export class Socket {
     private _socket: WebSocket;
     private _subscribe: Subscribe;
-    private _queue: any[] = [];
-    public connected: boolean = false;
+    private _queue: any[] = []; // TODO SAVE BETWEEN LOCAL SESSIONS
+    public connected: boolean;
+    private loop;
+    private endpoint;
 
     constructor() {
         this._subscribe = new Subscribe();
+        this.connected = false;
+        this.loop = window.setInterval(this.healthcheck(), 3250);
+    }
+
+    healthcheck() {
+        return () => {
+           // console.log('healthcheck', this.connected);
+            if (!this.connected) {
+                console.info('Not connected to server, attemping');
+                // TODO Check if we even are on wifi or cellular before continuing
+                if (!this.endpoint) {
+                    return;
+                }
+
+                this.connect(this.endpoint);
+
+            }
+        }
     }
 
     send(data) {
         if (this.connected) {
             try {
                 this._socket.send(JSON.stringify(data));
-            }catch (e){
+            } catch (e) {
                 this.connected = false;
                 this.publish('disconnect', e);
             }
@@ -33,7 +53,10 @@ export class Socket {
 
     connect(endpoint: string): any {
         let _socket = this;
-
+        if (this._socket) {
+            this._socket.close();
+        }
+        this.endpoint = endpoint;
         this._socket = new WebSocket(endpoint);
 
         this._socket.onopen = (e) => {
@@ -52,7 +75,7 @@ export class Socket {
                 this.send((data));
             });
             this._queue = [];
-            this.publish('connect',{});
+            this.publish('connect', {});
         };
         this._socket.onmessage = function (e) {
             let json = JSON.parse(e.data);
@@ -64,11 +87,12 @@ export class Socket {
             }
             _socket.publish(JSON.parse(e.data), this);
         };
-        this._socket.onerror = (e) => {
-            this.connected = false;
+        this._socket.onclose = this._socket.onerror = (e) => {
             console.log('ERR', e);
-            _socket.publish('error', e);
-            _socket.publish('disconnect', e);
+            if (this.connected) {
+                _socket.publish('disconnect', e);
+            }
+            this.connected = false;
         }
     }
 

@@ -42,7 +42,7 @@ export class MongoDriver {
 
     async verifyCollection(collection) {
         if (!this.collections[collection]) {
-            this.collections[collection] = this.db.collection(collection);
+            this.collections[collection] = await this.db.collection(collection);
         }
     }
 
@@ -61,7 +61,7 @@ export class MongoDriver {
         });
     }
 
-    async insertOne(collection, data):Promise<any> {
+    async insertOne(collection, data): Promise<any> {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
 
@@ -134,10 +134,21 @@ export class MongoDriver {
         });
     }
 
-    async find(collection, search):Promise<any[]> {
+    async sample(collection, search, count) {
+        await this.verifyCollection(collection);
+        let d = [];
+
+        for (let i = 0; i < count; i++) {
+            d.push(await this.findOne(collection, {$query: search, $orderby: {rnd: 1}}));
+        }
+
+        return d;
+    }
+
+    async find(collection, search, count = 25): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
-            this.collections[collection].find(search).toArray(function (err, result) {
+            this.collections[collection].find(search).sort({ _id: -1 }).limit(count).toArray(function (err, result) {
                 if (err) {
                     console.error("ERRR", err);
                     resolve([]);

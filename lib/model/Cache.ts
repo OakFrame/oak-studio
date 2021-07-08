@@ -17,11 +17,11 @@ export class CacheModel extends GameEventEmitter {
     public maxByteSize: number = 128;
     private memoryCache: [] = [];
 
-    getDataProvider(){
+    getDataProvider() {
         return this.dataProvider;
     }
 
-    getObjectSync(){
+    getObjectSync() {
         return this.cache;
     }
 
@@ -88,7 +88,7 @@ export class CacheModel extends GameEventEmitter {
     }
 
     mutate(key?, value?) {
-      //  console.log('MUTATING CACHE', this.serialize());
+        //  console.log('MUTATING CACHE', this.serialize());
         window.localStorage.setItem('kp-cache', this.serializeFiltered());
         this.publish('mutate', this.serialize());
     }
@@ -101,9 +101,10 @@ export class CacheModel extends GameEventEmitter {
         return res;
     }
 
-    async registerImage(src) {
+    async registerImage(src, status:CacheResourceStatus = CacheResourceStatus.TEMP) {
         let res = new Resource();
         res.data = src;
+        res.status = status;
         await this.cache.addResource('image', res);
         //this.mutate();
         return res;
@@ -134,7 +135,7 @@ export class CacheModel extends GameEventEmitter {
         let res = new Resource();
         res.data = project;
         await this.cache.addResource('project', res);
-      //  this.mutate();
+        //  this.mutate();
         // this.projects.push(res);
     }
 
@@ -143,14 +144,14 @@ export class CacheModel extends GameEventEmitter {
     }
 
     getImages() {
-        return this.cache.getResources("image");
+        return (this.cache.getResources("image")).sort((a,b)=>{ return b._last_modified - a._last_modified;});
     }
 
     getComments() {
-        return this.cache.getResources("comment");
+        return (this.cache.getResources("comment")).sort((a,b)=>{ return b._last_modified - a._last_modified;});
     }
 
-    search(schema?,filter?){
+    search(schema?, filter?) {
         return this.cache.search(schema, filter);
     }
 
@@ -213,11 +214,19 @@ export class CacheModel extends GameEventEmitter {
 
     getSerializedResourcesFiltered() {
         return {
-            projects: this.cache.getResources('project').filter((p)=>{return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)}),
+            projects: this.cache.getResources('project').filter((p) => {
+                return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)
+            }),
             packs: [],
-            sprites: this.cache.getResources('sprite').filter((p)=>{return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)}),
-            images: this.cache.getResources('image').filter((p)=>{return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)}),
-            comments: this.cache.getResources('comment').filter((p)=>{return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)})
+            sprites: this.cache.getResources('sprite').filter((p) => {
+                return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)
+            }),
+            images: this.cache.getResources('image').filter((p) => {
+                return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)
+            }),
+            comments: this.cache.getResources('comment').filter((p) => {
+                return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)
+            })
         }
     }
 
@@ -284,7 +293,7 @@ export class Resource {
     uuid: string;
     type: string;
     data;
-    thumbnail: any;
+    _thumbnail: any;
     status: CacheResourceStatus;
 
 
@@ -313,8 +322,8 @@ export class Resource {
             if (props.data) {
                 this.data = props.data;
             }
-            if (props.thumbnail) {
-                this.thumbnail = props.thumbnail;
+            if (props._thumbnail) {
+                this._thumbnail = props._thumbnail;
             }
             if (props.status) {
                 this.status = props.status;
@@ -334,7 +343,7 @@ export class Resource {
             uuid: this.uuid,
             type: this.type,
             data: this.data,
-            thumbnail: this.thumbnail,
+            _thumbnail: this._thumbnail,
             status: this.status,
             _last_modified: this._last_modified,
         }

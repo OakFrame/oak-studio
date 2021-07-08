@@ -193,7 +193,7 @@ export function timeago(dateString, now?) {
 
     if (diff < second * 2) {
         // within 2 seconds
-        return 'right now'//"<div class='stats_info'>right now</div>";
+        return 'right now';
     }
 
 
@@ -218,9 +218,9 @@ export function timeago(dateString, now?) {
     }
 
     if (diff < day * 365) {
-        //return Math.floor(diff / day) + ' day' + (Math.floor(diff / day) !== 1 ? 's' : '') + '';
-        return Math.floor(diff / day) + "<div class='stats_info'>days uptime</div>";
+        return Math.floor(diff / day) + ' day' + (Math.floor(diff / day) !== 1 ? 's' : '') + ' ago';
+        //return Math.floor(diff / day) + "<div class='stats_info'>days uptime</div>";
     } else {
-        return "over a year";
+        return "over a year ago";
     }
 }

@@ -26,7 +26,6 @@ export class SliderField extends Field {
         this._inputArea.type = "range";
 
         this._inputArea.onchange = this._inputArea.onmousemove = (w) => {
-            console.log("UPDATED SLIDER", w,this._inputArea.value)
             this._value = parseFloat(this._inputArea.value);
             this.publish('update', this._value);
         }

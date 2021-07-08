@@ -15,7 +15,7 @@ export class ObjectSync {
 
         this._provider.on("register", async (schema) => {
            await this.rectifyDifference(schema.name, schema.register);
-            console.log(3, 'REGISTER', schema);
+          //  console.log(3, 'REGISTER', schema);
         })
 
         this._cached_uuids = [];
@@ -57,7 +57,7 @@ export class ObjectSync {
             }
 
             //newres.type=schema;
-            console.log(2, 'ADDING RESROUCE', schema, newres);
+            //console.log(2, 'ADDING RESROUCE', schema, newres);
             this.addResource(schema, newres);
 
             return;
