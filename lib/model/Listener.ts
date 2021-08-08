@@ -4,7 +4,7 @@ export class Listener {
     recognition;
     public _connected = false;
     public root = window;
-    public _isListening = false;
+    public _isListening = true;
     private setLanguage;
     private _has_initialized = false;
     private controller;
@@ -13,17 +13,21 @@ export class Listener {
         return this._isListening;
     }
 
-    update (){
+    update() {
         let display;
 
-        if (document.getElementById('display')){
+        if (document.getElementById('display')) {
             display = document.getElementById('display');
-
-            display.innerHTML = '<i class="fas fa-microphone'+(!this._isListening?"-slash":'')+' fa-fw fa-2x"></i>';
+            let ih = '<i class="fas fa-microphone' + (!this._isListening ? "-slash" : '') + ' fa-fw"></i>';
+            if (display.innerHTML !== ih) {
+                display.innerHTML = ih;
+            }
         }
     }
 
     public start(controller?) {
+
+        console.log("starting voice");
 
         const self = this;
         const synth = window['speechSynthesis'];
@@ -65,13 +69,21 @@ export class Listener {
         };
 
         let container = document.getElementById("voicebox"), transcript, potential;
+        console.log(container);
         if (!self._has_initialized) {
-            transcript = document.createElement("textarea");
+            console.log("has not initialized");
+            transcript = document.createElement("div");
             transcript.style.width = "100%";
+            transcript.style.maxHeight = "50vh";
+            transcript.style.fontSize = "115%";
+            transcript.style.lineHeight = "180%";
+            transcript.style.overflowY = "scroll";
             transcript.id = "transcript";
-
-            if (controller){
-                controller.transcript.forEach(function(v){
+            transcript.contentEditable = "true";
+            console.log(controller);
+            if (controller) {
+                console.log(controller.transcript);
+                controller.transcript.forEach(function (v) {
                     let d = document.createElement('span');
                     d.innerHTML = v;
                     transcript.appendChild(d);
@@ -79,12 +91,21 @@ export class Listener {
             }
 
             potential = document.createElement("input");
+            potential.type = "text";
             potential.readOnly = true;
+            potential.disabled = true;
             potential.id = "potential";
-            container.appendChild(transcript);
+            potential.placeholder = "say something...";
+            potential.style.width = "100%";
+
+            let p = document.createElement('p');
+
+            p.appendChild(transcript);
+            container.appendChild(p);
             container.appendChild(potential);
             self._has_initialized = true;
         } else {
+            console.log("has initialized");
             transcript = document.getElementById("transcript");
             potential = document.getElementById("potential");
         }
@@ -108,14 +129,14 @@ export class Listener {
                         let sentence = document.createElement("span");
                         sentence.className = "sentence";
                         sentence.innerHTML = final_transcript + ". &nbsp; ";
-                       // transcript.appendChild(sentence);
+                        // transcript.appendChild(sentence);
                         potential.value = "";
 
-                        if (controller){
-                            controller.transcript.push(final_transcript + ". &nbsp; ");
+                        if (controller) {
+                            controller.transcript.push(final_transcript + ". ");
                         }
 
-                        transcript.innerHTML += final_transcript + ". &nbsp; "
+                        transcript.innerHTML += final_transcript + ". "
                         transcript.scrollTop = transcript.scrollHeight;
                         if (document.activeElement.getAttribute('type') == "text") {
                         }
@@ -124,6 +145,7 @@ export class Listener {
                 } else {
                     interim_transcript += event['results'][i][0]['transcript'];
                     potential.value = interim_transcript;
+                    console.log(interim_transcript)
                 }
             }
 
@@ -172,5 +194,6 @@ export class Listener {
             }
         };
         recognition.start();
+        console.log("called start");
     }
 }

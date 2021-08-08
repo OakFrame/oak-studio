@@ -30,6 +30,7 @@ export class CacheModel extends GameEventEmitter {
         super();
         this.cache = new ObjectSync(dataProvider);
         // this.cache.registerSchema("user", User);
+        this.cache.registerSchema("project", Project);
         this.cache.registerSchema("image", PathImage);
         this.cache.registerSchema("sprite", Sprite);
         this.cache.registerSchema("comment", TextComment);
@@ -51,6 +52,10 @@ export class CacheModel extends GameEventEmitter {
             console.log("NO LOCAL CACHE FOUND");
         }
         // PRELOAD CACHE IF NECESSARY
+    }
+
+    addProject = (b) => {
+        this.projects.push(b);
     }
 
     deserialize = (props?) => {
@@ -101,7 +106,7 @@ export class CacheModel extends GameEventEmitter {
         return res;
     }
 
-    async registerImage(src, status:CacheResourceStatus = CacheResourceStatus.TEMP) {
+    async registerImage(src, status: CacheResourceStatus = CacheResourceStatus.TEMP) {
         let res = new Resource();
         res.data = src;
         res.status = status;
@@ -144,11 +149,15 @@ export class CacheModel extends GameEventEmitter {
     }
 
     getImages() {
-        return (this.cache.getResources("image")).sort((a,b)=>{ return b._last_modified - a._last_modified;});
+        return (this.cache.getResources("image")).sort((a, b) => {
+            return b._last_modified - a._last_modified;
+        });
     }
 
     getComments() {
-        return (this.cache.getResources("comment")).sort((a,b)=>{ return b._last_modified - a._last_modified;});
+        return (this.cache.getResources("comment")).sort((a, b) => {
+            return b._last_modified - a._last_modified;
+        });
     }
 
     search(schema?, filter?) {
@@ -201,6 +210,10 @@ export class CacheModel extends GameEventEmitter {
     getResource(id) {
         return id;
     }*/
+
+    addResource(type:string,resource: Resource) {
+        this.cache.addResource(type, resource);
+    }
 
     getSerializedResources() {
         return {

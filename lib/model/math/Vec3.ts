@@ -9,7 +9,7 @@ export class Vec3 {
     constructor() {
         this.x = 0 | 0;
         this.y = 0 | 0;
-        this.z = 0 | 0;
+        this.z = 0 | 0
         return this;
     }
 
@@ -34,7 +34,6 @@ export class Vec3 {
         this.x += vec3.x;
         this.y += vec3.y;
         this.z += vec3.z;
-        //this.z += vec3.;
         return this;
     }
 
@@ -89,7 +88,6 @@ export class Vec3 {
     /** @type {function(number):Vec3} */
     rotX(deg) {
         // deg *= (Math.PI / 180);
-        //let b = new Vec3().set((this.x * Math.cos(a) - this.y * Math.sin(a)), (this.x * Math.sin(a) + this.y * Math.cos(a)), this.z);
         Vec3_TempV.y = (this.y * Math.cos(deg) - this.z * Math.sin(deg));
         Vec3_TempV.z = (this.y * Math.sin(deg) + this.z * Math.cos(deg));
         this.y = Vec3_TempV.y;
@@ -100,7 +98,6 @@ export class Vec3 {
     /** @type {function(number):Vec3} */
     rotY(deg) {
         //deg *= (Math.PI / 180);
-        //let b = new Vec3().set((this.x * Math.cos(a) - this.y * Math.sin(a)), (this.x * Math.sin(a) + this.y * Math.cos(a)), this.z);
         Vec3_TempV.x = (this.x * Math.cos(deg) - this.z * Math.sin(deg));
         Vec3_TempV.z = (this.x * Math.sin(deg) + this.z * Math.cos(deg));
         this.x = Vec3_TempV.x;
