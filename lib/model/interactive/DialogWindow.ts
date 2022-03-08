@@ -37,6 +37,9 @@ export class DialogWindow {
                     let btn = document.createElement("button");
                     btn.innerText = prop;
                     limits.appendChild(btn);
+                    btn.onclick=()=>{
+                        this.publish('option', prop);
+                    }
             }
 
 

@@ -30,8 +30,9 @@ export class BasicInput {
     public pointerEventTwist;
     public pointerEventPressure;
     public pointerEventTangentialPressure;
+    public touches;
 
-    constructor( input_target ) {
+    constructor(input_target) {
         window['BasicInput'] = this;
         this.TouchMoveAllowed = false;
         this.pointerEventOrientation = new Vec2();
@@ -56,6 +57,7 @@ export class BasicInput {
         this.ABSTILT = new Vec3();
         this.positionCurrent = 0;
         this.isScrolling = 0;
+        this.touches = [];
         this.defaultOrientation = 'portrait';
         this.Key = [];
         /** @type {Array<boolean>} */
@@ -72,9 +74,8 @@ export class BasicInput {
         input_target.addEventListener("mousedown", this.handleMouseEvent, false);
         input_target.addEventListener("mouseup", this.handleMouseEventUp, false);
 
-        //window.addEventListener("contextmenu", this.stopEvent);
         input_target.addEventListener("touchstart", this.onTouchDown, false);
-        input_target.addEventListener("touchmove", BasicInput.onTouchMove, false);
+        input_target.addEventListener("touchmove", this.onTouchMove, false);
         input_target.addEventListener("touchend", this.onTouchUp, false);
 
         input_target.addEventListener("pointerdown", this.onPointerEventDown, false);
@@ -92,11 +93,26 @@ export class BasicInput {
 
     }
 
-    handleScroll(event){
-        window['BasicInput'].isScrolling = Date.now()+15;
+    step(){
+        window['BasicInput'].pos_last.x = window['BasicInput'].pos.x;
+        window['BasicInput'].pos_last.y = window['BasicInput'].pos.y;
+        for (let u = 0; u < 255; u += 1) {
+            //window['BasicInput'].Key[u] = false;
+            //window['BasicInput'].button[u] = false;
+            window['BasicInput'].buttonPressed[u] = false;
+            window['BasicInput'].KeyPressed[u] = false;
+            window['BasicInput'].buttonReleased[u] = false;
+            window['BasicInput'].KeyReleased[u] = false;
+        }
+        //window['BasicInput'].didLongTouchRelease = false;
+        //window['BasicInput'].didLongTouch = false;
     }
 
-    getIsScrolling(){
+    handleScroll(event) {
+        window['BasicInput'].isScrolling = Date.now() + 15;
+    }
+
+    getIsScrolling() {
         return window['BasicInput'].isScrolling > Date.now();
     }
 
@@ -113,11 +129,22 @@ export class BasicInput {
         // let mousePos = window['BasicInput'].getMousePos(event.srcElement, event);
         window['BasicInput'].pos.x = event.clientX;//mousePos.x;
         window['BasicInput'].pos.y = event.clientY;//mousePos.y;
+
+
+        if (window['BasicInput'].button[1]) {
+            if (window['BasicInput'].pos.dist(window['BasicInput'].start_last) > 20) {
+                window['BasicInput'].isSwiping = true;
+            }
+
+            if (Date.now() - window['BasicInput'].TouchTimer >= 30) {
+                window['BasicInput'].didLongTouch = true;
+            }
+        }
         //console.log(window['BasicInput'].pos.toArray());
 
     }
 
-    getPos(){
+    getPos() {
         return window['BasicInput'].pos;
     }
 
@@ -142,31 +169,34 @@ export class BasicInput {
         window['BasicInput'].KeyReleased[event.keyCode] = true;
     }
 
-    onPointerEvent(event:PointerEvent){
-        if (event.clientX || event.clientY){
+    onPointerEvent(event: PointerEvent) {
+        if (event.clientX || event.clientY) {
             window['BasicInput'].start_last.x = event.clientX;
             window['BasicInput'].start_last.y = event.clientY;
             window['BasicInput'].pos.x = event.clientX;
             window['BasicInput'].pos.y = event.clientY;
         }
-        if (event.tiltX || event.tiltY){
-            window['BasicInput'].pointerEventOrientation.set(event.tiltX||0,event.tiltY||0).normalize();}
-        if (event.twist){
-            window['BasicInput'].pointerEventTwist = event.twist || 0;}
-        if (event.pressure){
-            window['BasicInput'].pointerEventPressure = event.pressure || 0;}
-        if (event.tangentialPressure) {
-            window['BasicInput'].pointerEventTangentialPressure = event.tangentialPressure || 0;
+        if (event.tiltX || event.tiltY) {
+            window['BasicInput'].pointerEventOrientation.set(event.tiltX || 0, event.tiltY || 0).normalize();
         }
+        //  if (event.twist) {
+        //      window['BasicInput'].pointerEventTwist = event.twist || 0;
+        // }
+        if (event.pressure) {
+            window['BasicInput'].pointerEventPressure = event.pressure || 0;
+        }
+        //   if (event.tangentialPressure) {
+        //       window['BasicInput'].pointerEventTangentialPressure = event.tangentialPressure || 0;
+        //  }
     }
 
-    onPointerEventUp(event:PointerEvent){
+    onPointerEventUp(event: PointerEvent) {
         window['BasicInput'].buttonPressed[5] = false;
         window['BasicInput'].button[5] = false;
         window['BasicInput'].onPointerEvent(event);
     }
 
-    onPointerEventDown(event:PointerEvent){
+    onPointerEventDown(event: PointerEvent) {
         window['BasicInput'].buttonPressed[5] = true;
         window['BasicInput'].button[5] = true;
         window['BasicInput'].onPointerEvent(event);
@@ -174,54 +204,81 @@ export class BasicInput {
 
 
     onTouchDown(event) {
-        console.log('touchDown');
+        console.log('touchDown', event.targetTouches);
         window['BasicInput'].start_last.x = event.changedTouches[0].pageX;
         window['BasicInput'].start_last.y = event.changedTouches[0].pageY;
         window['BasicInput'].pos.x = event.changedTouches[0].pageX;
         window['BasicInput'].pos.y = event.changedTouches[0].pageY;
         window['BasicInput'].buttonPressed[5] = true;
         window['BasicInput'].button[5] = true;
-        window['BasicInput'].TouchTimer = 0;
+        window['BasicInput'].isSwiping = false;
+        window['BasicInput'].longTouchTimerDown();
+    }
+
+    longTouchTimerDown(){
+        window['BasicInput'].TouchTimer = Date.now();
         window['BasicInput'].isTouching = true;
         window['BasicInput'].didLongTouch = false;
-        window['BasicInput'].isSwiping = false;
+        window['BasicInput'].didLongTouchRelease = false;
+    }
+
+    longTouchTimerUp(){
+        if (Date.now() - window['BasicInput'].TouchTimer < 10) {
+            window['BasicInput'].touch_state = 1;
+            // console.log('touch quick tap');
+        } else if (Date.now() - window['BasicInput'].TouchTimer < 30) {
+            window['BasicInput'].touch_state = 2;
+            //console.log('touch tap');
+        } else if (Date.now() - window['BasicInput'].TouchTimer >= 200){
+            window['BasicInput'].didLongTouchRelease = true;
+        }
     }
 
     onTouchUp(event) {
-        if (window['BasicInput'].TouchTimer < 10) {
-            window['BasicInput'].touch_state = 1;
-            // console.log('touch quick tap');
-        } else if (window['BasicInput'].TouchTimer < 30) {
-            window['BasicInput'].touch_state = 2;
-            //console.log('touch tap');
-        } else {
-            //window['BasicInput'].didLongTouchRelease = true;
-        }
+        window['BasicInput'].longTouchTimerUp();
         window['BasicInput'].pos.x = event.changedTouches[0].pageX;
         window['BasicInput'].pos.y = event.changedTouches[0].pageY;
-        window['BasicInput'].isSwiping = false;
 
         window['BasicInput'].isTouching = false;
-        //window['BasicInput'].buttonReleased[5] = false;
+        window['BasicInput'].buttonReleased[5] = true;
         window['BasicInput'].button[5] = false;
+        window['BasicInput'].touches = [];
         //console.error('UP')
     }
 
-    public static onTouchMove(event) {
+    onTouchMove(event) {
         window['BasicInput'].button[5] = true;
-        window['BasicInput'].pos.x = event.changedTouches[0].pageX;
-        window['BasicInput'].pos.y = event.changedTouches[0].pageY;
+        // window['BasicInput'].pos.x = event.changedTouches[0].pageX;
+        //window['BasicInput'].pos.y = event.changedTouches[0].pageY;
+        window['BasicInput'].pos.set(event.changedTouches[0].pageX, event.changedTouches[0].pageY);
 
         if (window['BasicInput'].pos.dist(window['BasicInput'].start_last) > 20) {
             window['BasicInput'].isSwiping = true;
         }
 
-        console.log("touching");
-        if (event.pressure){
-            window['BasicInput'].pointerEventPressure = event.pressure || 0;}
+        if (Date.now() - window['BasicInput'].TouchTimer >= 30) {
+            window['BasicInput'].didLongTouch = true;
+        }
+
+        if (event.pressure) {
+            window['BasicInput'].pointerEventPressure = event.pressure || 0;
+        }
+
         if (event.tangentialPressure) {
             window['BasicInput'].pointerEventTangentialPressure = event.tangentialPressure || 0;
         }
+        window['BasicInput'].touches = [];
+
+        for (let i = 0; i < event.targetTouches.length; i++) {
+            window['BasicInput'].touches.push({x: event.targetTouches[i].pageX, y: event.targetTouches[i].pageY});
+
+        }
+
+        /* if (event.targetTouches.length === 2) {
+             window['BasicInput'].touches.push({x:event.targetTouches[0].pageX,y:event.targetTouches[0].pageY});
+             window['BasicInput'].touches.push({x:event.targetTouches[1].pageX,y:event.targetTouches[1].pageY});
+             console.log("multitouch", event.targetTouches, event.touches, event.changedTouches);
+         }*/
 
 
         window['BasicInput'].isTouching = true;
@@ -232,6 +289,7 @@ export class BasicInput {
 
     handleMouseEvent(event) {
         //console.log('mouseEvent', event);
+
         let evt = event || window.event;
         let mb = 1;
         if (evt.which) {
@@ -249,16 +307,25 @@ export class BasicInput {
                 mb = 4;
             }
         }
-        //window['BasicInput'].buttonPressed[mb] = true;
-        window['BasicInput'].button[mb] = true;
         window['BasicInput'].setPos(event);
+
+        if (!window['BasicInput'].button[mb]){
+            window['BasicInput'].start_last = window['BasicInput'].getPos().clone();
+            window['BasicInput'].longTouchTimerDown();
+        }
+
+        // window['BasicInput'].buttonPressed[mb] = true;
+
+        window['BasicInput'].button[mb] = true;
+
         // this.button[mb] = true;
         // this.setPos(event);
-        console.log(mb);
+        //console.log(mb);
         return mb;
     }
 
     handleMouseEventUp(event) {
+        window['BasicInput'].longTouchTimerUp();
         let evt = event || window.event;
         let mb = 1;
         if (evt.which) {
@@ -278,6 +345,7 @@ export class BasicInput {
         }
         window['BasicInput'].buttonReleased[mb] = true;
         window['BasicInput'].button[mb] = false;
+        console.log('released', mb);
         //this.buttonReleased[mb] = true;
         //this.button[mb] = false;
         //this.setPos(event);
@@ -421,11 +489,8 @@ export class BasicInput {
                 ABSTILT.x = 20
             }
 
-            //console.log(ABSTILT.x, ABSTILT.y);
-
             x -= arrayGetAverage(TILTD.x);
             y -= arrayGetAverage(TILTD.y);
-
 
             //y/=max;
             let tilt_dir = -((Math.atan2(x, (y) + 0.0000001) / Math.PI) * 180) + 180;

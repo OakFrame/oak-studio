@@ -164,7 +164,7 @@ export class Vec3 {
 
     /** @type {function():Vec3} */
     normalize() {
-        Vec3_TempI = this.mag();
+        Vec3_TempI = this.mag()+0.0000000000001;
         this.x /= Vec3_TempI;
         this.y /= Vec3_TempI;
         this.z /= Vec3_TempI;

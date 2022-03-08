@@ -14,6 +14,7 @@ export class GraphNode implements GraphNodeInterface{
     _graph: Graph;
     _element: GraphNodeHTMLElement;
     _subscribe:Subscribe = new Subscribe();
+    _value: any;
 
     constructor(graph) {
         this._graph = graph;
@@ -29,8 +30,6 @@ export class GraphNode implements GraphNodeInterface{
     _renderNodes(): void{
 
     };
-
-    _value: any;
 
     attachOutput(node: GraphNode): any{
 

@@ -77,6 +77,9 @@ export class RoomObject {
     setSprite(sprite) {
         this.sprite = sprite;
     }
+    getBounds(){
+        return [];
+    }
 
     getTags() {
         return this.tags;

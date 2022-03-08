@@ -6,9 +6,9 @@ export class RGB {
     g = 0;
     b = 0;
     set = (r, g, b) => {
-        this.r = r|0;
-        this.g = g|0;
-        this.b = b|0;
+        this.r = r | 0;
+        this.g = g | 0;
+        this.b = b | 0;
         return this;
     }
     copy = (rgb) => {
@@ -22,6 +22,9 @@ export class RGB {
     toHex = () => {
         return "#" + ((1 << 24) + (this.r << 16) + (this.g << 8) + this.b).toString(16).slice(1);
     };
+    toArray = () => {
+        return [this.r, this.g, this.b]
+    }
 
     fromHex = (hex) => {
         hex = hex.replace('#', '');
@@ -56,7 +59,7 @@ export class RGBA {
         this.a = rgba.a;
         return this;
     };
-    clone = () =>{
+    clone = () => {
         return (new RGBA()).copy(this);
     }
 
@@ -69,5 +72,14 @@ export class RGBA {
         this.a = (((opacity || 1) * 255) | 0);
         return this;
     };
+    mix = (rgba) => {
+        let mixed = new RGBA();
+        mixed.a = 1 - (1 - rgba.a) * (1 - this.a);
+        mixed.set(Math.round((rgba.r * rgba.a / mixed.a) + (this.r * this.a * (1 - rgba.a) / mixed.a)),
+            Math.round((rgba.g * rgba.a / mixed.a) + (this.g * this.a * (1 - rgba.a) / mixed.a)),
+            Math.round((rgba.b * rgba.a / mixed.a) + (this.b * this.a * (1 - rgba.a) / mixed.a)),
+            mixed.a);
+        return mixed;
+    }
 }
 

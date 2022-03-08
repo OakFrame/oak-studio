@@ -1,6 +1,3 @@
-/**
- * @constructor
- */
 import {Vec3} from "../math/Vec3";
 import {Projection} from "../math/Projection";
 import {Vec2} from "../math/Vec2";
@@ -20,7 +17,6 @@ export class Camera {
     public aspect: number;
     public projection: Projection;
     private animation;
-    focus: any;
     private _tmp;
 
     constructor() {

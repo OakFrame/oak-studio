@@ -18,11 +18,20 @@ export class Socket {
     constructor() {
         this._subscribe = new Subscribe();
         this.connected = false;
-        this.loop = window.setInterval(this.healthcheck(), 3250);
+        //@ts-ignore
+        if (window){
+        this.loop = window.setInterval(this.healthcheck(), 3250);}else {
+            this.loop = setInterval(this.healthcheck(), 3250);
+        }
+    }
+
+    isConnected(){
+        return this.connected;
     }
 
     healthcheck() {
         return () => {
+            if (!this.endpoint){return}
            // console.log('healthcheck', this.connected);
             if (!this.connected) {
                 console.info('Not connected to server, attemping');
@@ -33,7 +42,12 @@ export class Socket {
 
                 this.connect(this.endpoint);
 
+            }else{
+                this._socket.send(JSON.stringify({
+                    ping: true
+                }));
             }
+
         }
     }
 
@@ -72,7 +86,9 @@ export class Socket {
             this._queue.forEach((data) => {
                 console.log('SENDING FROM QUEUE', data);
 
-                this.send((data));
+                window.setTimeout(()=>{
+                    this.send((data));
+                },20);
             });
             this._queue = [];
             this.publish('connect', {});
@@ -97,10 +113,13 @@ export class Socket {
     }
 
     subscribe(slug: string, fn): any {
-        this._subscribe.subscribe(slug, fn);
+       return this._subscribe.subscribe(slug, fn);
+    }
+    unsubscribe(slug: string, uuid): any {
+       return this._subscribe.unsubscribe(slug,uuid);
     }
 
     publish(packet, data) {
-        this._subscribe.publish(packet, data);
+       return this._subscribe.publish(packet, data);
     }
 }

@@ -2,7 +2,7 @@ import {EventModel} from "../EventModel";
 import {v4 as uuidv4} from "uuid";
 
 export class Sprite implements EventModel {
-    public src: Array<String>;
+    public src: Array<string>;
     public images: Array<HTMLImageElement>;
     private image_index;
     private image_speed;
@@ -33,7 +33,7 @@ export class Sprite implements EventModel {
         return this;
     }
 
-    getImageSrc(){
+    getImageSrc():string{
         this.image_index = Math.floor(Date.now() / 250);
         this.image_index = this.image_index % this.src.length;
         return this.src[this.image_index];

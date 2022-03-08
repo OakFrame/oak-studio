@@ -41,7 +41,7 @@ export class Surface {
         if (!options) {
             options = {};
         }
-        this.context.font = ((options.size || 20) * this._scaling) + "px DM Sans";
+        this.context.font = ((options.size || 20) * this._scaling) + "px Krona One";
         if (options.background) {
             let w = this.context.measureText(text).width;
             let h = (((options.size || 20)) * this._scaling);
@@ -94,6 +94,7 @@ export class Surface {
                 this.resize(w, h);
             }
         }
+        this._set_size = true;
     }
 
     setSize(w, h) {

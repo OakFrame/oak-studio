@@ -1,7 +1,16 @@
 import {Vec2} from "./math/Vec2";
+import {Vec3} from "./math/Vec3";
+import {ErosionDrop} from "./shipp/ErosionDrop";
 
 function lerp(v0, v1, t) {
     return v0 * (1 - t) + v1 * t
+}
+
+export function getDistance(x1, y1, x2, y2) {
+    let y = x2 - x1;
+    let x = y2 - y1;
+
+    return Math.sqrt(x * x + y * y);
 }
 
 export class SHIPP {
@@ -12,10 +21,35 @@ export class SHIPP {
 
     constructor(width, height) {
         this.map = [];
-        this.width = width;
-        this.height = height;
+        this.width = Math.floor(width);
+        this.height = Math.floor(height);
         for (let i = 0; i < width * height; i++) {
             this.map[i] = 0;
+        }
+    }
+
+    erode(c: number) {
+
+        let drop = new ErosionDrop();
+        for (let i = 0; i < c; i++) {
+
+            for (let x = 0; x < this.getWidth(); x++) {
+                for (let y = 0; y < this.getHeight(); y++) {
+                    //drop.position.set(x, y);
+                    drop.position.set(Math.random()*this.getWidth(), Math.random()*this.getHeight());
+                    for (let z = 0; z < 500; z++) {
+                        drop.simulate(this);
+                        if (z > 100 && drop.velocity.mag()<0.001){
+
+                           // console.log("BREAKING EARLY", drop);
+                            break;
+                        }
+                    }
+                   // this.setPosition(drop.position.x, drop.position.y,0);
+                    drop.end(this);
+                }
+            }
+
         }
     }
 
@@ -35,6 +69,56 @@ export class SHIPP {
             m.push(this.map.slice(this.width * i, this.width * (i + 1)));
         }
         return m;
+    }
+
+    blur(amt) {
+        if (amt == 0) {
+            return;
+        }
+        let m = new SHIPP(this.getWidth(), this.getHeight());
+
+        for (let x = 0; x <= this.getWidth(); x++) {
+            for (let y = 0; y <= this.getHeight(); y++) {
+
+                let v = 0;//this.getPosition(x, y);
+                // let ov = this.getPosition(x, y);
+                //m.setPosition(x+ix,y+iy, this.getPosition(ix,iy) )
+                let samples = 0;
+                let pool = [];
+                let total_influence = 0;
+
+                for (let ix = -amt; ix <= amt; ix++) {
+                    for (let iy = -amt; iy <= amt; iy++) {
+                        // let influence_x = //Math.abs(((Math.abs(ix)) - (amt)) / amt);
+                        // let influence_y = //Math.abs(((Math.abs(iy)) - (amt)) / amt);
+                        let inf = (amt * 1.45) - getDistance(0, 0, Math.abs(ix), Math.abs(iy));//influence_y * influence_x;
+                        if (inf <= amt * 1.45) {
+                            total_influence += inf;
+                            pool.push({
+                                inf: inf,
+                                value: this.getPosition(x + ix, y + iy)
+                            })
+                        }
+                        //v += this.getPosition(x + ix, y + iy)
+                        //samples++;
+                    }
+                }
+
+                let acc = 0;
+
+                pool.forEach((sample) => {
+                    acc += sample.value * (sample.inf / total_influence)
+                })
+
+                m.setPosition(x, y, acc)
+
+            }
+        }
+
+        // m.normalize();
+
+        this.setMap(m.getMap().concat());
+        return this;
     }
 
     run(fn) {
@@ -71,7 +155,7 @@ export class SHIPP {
     setPosition(x, y, value) {
         x = (x + (this.width * 1000000)) % this.width;
         y = (y + (this.height * 1000000)) % this.height;
-        this.map[(x|0) + ((y|0) * this.width)] = value;
+        this.map[(x | 0) + ((y | 0) * this.width)] = value;
         return this;
     }
 
@@ -93,14 +177,14 @@ export class SHIPP {
 
     growClusters(tag, size, lin, fn?) {
         let f = fn || function (value, x, y) {
-            return true;
+            return tag;
         };
         let temp = new SHIPP(this.width, this.height);
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.regionContains(tag, x - size, y - size, x + size, y + size)) {
-                    if (Math.random() < lin && f(this.getPosition(x, y), x, y)) {
-                        temp.setPosition(x, y, tag);
+                    if (Math.random() < lin) {
+                        temp.setPosition(x, y, (this.getPosition(x, y) === tag) ? (tag) : f(this.getPosition(x, y), x, y));
                     }
                 }
             }
@@ -128,7 +212,35 @@ export class SHIPP {
     renderHTML(options?) {
         if (!options) {
             options = {
-                attr: ""
+                attr: "",
+                transform: (value) => {
+                    if (typeof value === 'number') {
+                        let v = Math.floor(value * 255);
+                        return [v, v, v];
+                    }
+                    let rgb = [0, 0, 0];
+                    switch ((value + "").toLowerCase()) {
+                        case 'f':
+                            rgb = [254, 214, 255];
+                            break;
+                        case 'r':
+                            rgb = [160, 160, 160];
+                            break;
+                        case 't':
+                            rgb = [109, 175, 99];
+                            break;
+                        case 'd':
+                            rgb = [247, 240, 203];
+                            break;
+                        case 'w':
+                            rgb = [190, 236, 253];
+                            break;
+                        default:
+                            rgb = [139, 230, 125];
+                            break;
+                    }
+                    return rgb;
+                }
             }
         }
         let table = "";
@@ -142,30 +254,11 @@ export class SHIPP {
                     rgb = [255 - (col * 255) | 0, 255 - (col * 255) | 0, 255 - (col * 255) | 0];
                 }
 
-                switch ((col + "").toLowerCase()) {
-                    case 'f':
-                        rgb = [254, 214, 255];
-                        break;
-                    case 'r':
-                        rgb = [160, 160, 160];
-                        break;
-                    case 't':
-                        rgb = [109, 175, 99];
-                        break;
-                    case 'd':
-                        rgb = [247, 240, 203];
-                        break;
-                    case 'w':
-                        rgb = [217, 246, 255];
-                        break;
-                    default:
-                        rgb = [209, 235, 169];
-                        break;
-                }
+                rgb = options.transform(col);
                 table += `<td style='background-color:rgb(${rgb.join(",")})'>`;//style='background-color:rgb(${rgb.join(",")})'
 
 
-                table += col;
+                //table += col;
                 // table += isNaN(col)?col:"&nbsp;";
 
                 table += "</td>";
@@ -198,7 +291,7 @@ export class SHIPP {
         //this.setPosition(x2,y2,0.75);
     }
 
-    placeCluster(x, y, width, height, value) {
+    placeCluster(x, y, width, height, value, real = 1) {
         let dox = x;// Math.floor((this.width * Math.random()) - width); //Math.floor(Math.random() * (( - (width * 2)) + width));
         let doy = y;// + Math.floor((this.height * Math.random()) - height);
 
@@ -206,13 +299,14 @@ export class SHIPP {
 
             for (let oiy = doy; oiy < doy + height; oiy += 1) {
 
-                //  if (Math.random() * 100 <= 10) {
+                if (real >= Math.random()) {
 
-                let x = (oix + this.width) % this.width;
-                let y = (oiy + this.height) % this.height;
+                    let x = (oix + this.width) % this.width;
+                    let y = (oiy + this.height) % this.height;
 
-                this.setPosition(x, y, value);
-                console.log(x, y);
+                    this.setPosition(x, y, value);
+                    console.log(x, y);
+                }
                 //  y
 
             }
@@ -222,12 +316,16 @@ export class SHIPP {
 
     normalize() {
         let m = -1000000000;
+        let u = 99999999999;
         this.map.forEach(function (v) {
             m = Math.max(m, v);
+            u = Math.min(u, v);
         });
+        u = Math.abs(u);
 
         for (let i = 0; i < this.map.length; i++) {
-            this.map[i] /= m;
+
+            this.map[i] = Math.max(0, (this.map[i] - u) / (m - u));
         }
     }
 
@@ -313,21 +411,58 @@ export class SHIPP {
         for (let x = 0; x < w; x++) {
             for (let y = 0; y < h; y++) {
 
-                let cellaw = ((x+1) / w) * a.getWidth();
-                let cellah = ((y+1) / h) * a.getHeight();
+                let cellaw = ((x + 0) / w) * a.getWidth();
+                let cellah = ((y + 0) / h) * a.getHeight();
                 let va1 = a.getPosition(cellaw, cellah);
                 //let va2 = a.getPosition(cellaw + 1, cellah);
                 //let pctw = (x % a.getWidth()) / a.getWidth();
                 //let va = lerp(va1, va2, pctw);
 
-                let cellbw = ((x+1) / w) * b.getWidth();
-                let cellbh = ((y+1) / h) * b.getHeight();
+                let cellbw = ((x + 0) / w) * b.getWidth();
+                let cellbh = ((y + 0) / h) * b.getHeight();
                 let vb1 = b.getPosition(cellbw, cellbh);
-               // let vb2 = b.getPosition(cellbw, cellbh + 1);
-               // let pcth = (y % a.getHeight()) / a.getHeight();
-               // let vb = lerp(vb1, vb2, pcth);
+                // let vb2 = b.getPosition(cellbw, cellbh + 1);
+                // let pcth = (y % a.getHeight()) / a.getHeight();
+                // let vb = lerp(vb1, vb2, pcth);
 
                 f.setPosition(x, y, va1 * vb1);
+
+            }
+        }
+
+        this.width = w;
+        this.height = h;
+        this.map = f.getMap();
+
+
+    }
+
+    addWide(b) {
+        let a = this;
+
+        let w = a.getWidth();
+        let h = a.getHeight();
+
+        let f = new SHIPP(this.getWidth(), this.getHeight());
+
+        for (let x = 0; x < w; x++) {
+            for (let y = 0; y < h; y++) {
+
+                let cellaw = ((x + 0) / w) * a.getWidth();
+                let cellah = ((y + 0) / h) * a.getHeight();
+                let va1 = a.getPosition(cellaw, cellah);
+                //let va2 = a.getPosition(cellaw + 1, cellah);
+                //let pctw = (x % a.getWidth()) / a.getWidth();
+                //let va = lerp(va1, va2, pctw);
+
+                let cellbw = ((x + 0) / w) * b.getWidth();
+                let cellbh = ((y + 0) / h) * b.getHeight();
+                let vb1 = b.getPosition(cellbw, cellbh);
+                // let vb2 = b.getPosition(cellbw, cellbh + 1);
+                // let pcth = (y % a.getHeight()) / a.getHeight();
+                // let vb = lerp(vb1, vb2, pcth);
+
+                f.setPosition(x, y, va1 + vb1);
 
             }
         }

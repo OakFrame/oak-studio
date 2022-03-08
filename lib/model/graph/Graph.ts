@@ -5,12 +5,13 @@ import {GraphNode, GraphNodeInterface} from "../../interface/GraphNode";
 import {Subscribe} from "../subscribe/Subscribe";
 
 export class Graph implements GraphEvent {
-
+    public name: string;
     private _nodes: GraphNodeInterface[];
     private fromNode = null;
     private _subscribe = new Subscribe();
 
     constructor() {
+        this.name = "Unnamed Graph";
         this._nodes = [];
     }
 

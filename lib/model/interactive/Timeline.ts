@@ -88,6 +88,7 @@ interface CameraTimelineOptions extends TimelineEventOptions {
     to?: Vec3;
     focus?: string;
     reset?: boolean;
+    zoom:?:number;
 }
 
 interface PathTimelineOptions extends TimelineEventOptions {
@@ -142,6 +143,7 @@ export class CameraTimelineEvent extends TimelineEvent {
     to: Vec3;
     focus: string;
     reset: boolean;
+    zoom:number;
 
     constructor(props?: CameraTimelineOptions) {
         super(props);
@@ -149,13 +151,14 @@ export class CameraTimelineEvent extends TimelineEvent {
         this.to = props.to;
         this.focus = props.focus;
         this.reset = props.reset;
+        this.zoom = props.zoom;
     }
 
     start(emitter, room?) {
 
 
         if (this.focus) {
-            emitter.publish('camera.focus', this.focus);
+            emitter.publish('camera.focus', {focus:this.focus, zoom:this.zoom});
         }
         if (this.from) {
             emitter.publish('camera.set.from', this.from);
@@ -311,7 +314,7 @@ export class PathTimelineEvent extends TimelineEvent {
         }
 
         if (focus && path_pos) {
-            console.log(focus.position.dist(path_pos));
+            //console.log(focus.position.dist(path_pos));
             if (focus.position.dist(path_pos) < 5.25) {
                 this.finished = true;
             }
@@ -363,6 +366,10 @@ export class TextTimelineEvent extends TimelineEvent {
         }
 
         insertAfter(p, hero);
+        window.setTimeout(()=>{
+            p.className+=" transition";
+
+        }, 10)
     }
 
     done() {
@@ -403,9 +410,9 @@ export class BodyTextTimelineEvent extends TimelineEvent {
 
         content.appendChild(p);
 
-        synthVoice(this.text, () => {
+      //  synthVoice(this.text, () => {
             //this.finished = true;
-        }, "narrator")
+       // }, "narrator")
     }
 
     done() {

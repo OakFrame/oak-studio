@@ -9,7 +9,7 @@ export class SelectField extends Field {
     _type: string;
     _value: any;
 
-    _displayArea = document.createElement('div');
+    _displayArea = document.createElement('span');
     _inputArea = document.createElement('select');
 
     constructor(options:SelectFieldOptionInterface[], value?) {
@@ -38,7 +38,7 @@ export class SelectField extends Field {
             this._inputArea.appendChild(option_element);
         });
 
-        this._displayArea.appendChild(label);
+       // this._displayArea.appendChild(label);
         this._displayArea.appendChild(this._inputArea);
 
     }

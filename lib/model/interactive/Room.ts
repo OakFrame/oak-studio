@@ -61,6 +61,37 @@ export class Room {
         });
         return i;
     }
+    objectAtPosition(x, y, dist= 1, tags){
+        let ob = null;
+        for (var index = 0; index < this.objects.length; index++) {
+            //_v1.x = this.objects[index].position.x;
+            //this.objects[index].depth = _v1.dist(this.objects[index].position);
+
+            let check_v = new Vec3();
+            check_v.set(x,y,0);
+
+            if (this.objects[index].getTags().indexOf('solid') !== -1 && check_v.dist(this.objects[index].getPosition()) < dist){
+                return this.objects[index];
+
+            }
+            /*if (
+                this.objects[index].getPosition().x - this.objects[index].getScale().x < x &&
+                this.objects[index].getScale().x + this.objects[index].getPosition().x > x &&
+                this.objects[index].getPosition().y - this.objects[index].getScale().y < y &&
+                this.objects[index].getScale().y + this.objects[index].getPosition().y > y
+            ){
+               return this.objects[index];
+            }*/
+        }
+
+        if (ob){
+          //  this.surface.getContext().beginPath();
+           // this.surface.getContext().rect(lower_x, lower_y, upper_x - lower_x, upper_y - lower_y);
+            //this.surface.getContext().stroke();
+        }
+        return ob;
+    }
+
 
     depthSort(camera?:Camera) {
 
