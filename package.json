@@ -42,7 +42,6 @@
     "@types/source-map": "^0.5.7",
     "asciichart": "^1.5.25",
     "canvas": "^2.9.0",
-    "ccxt": "^1.42.76",
     "cli-progress": "^3.8.2",
     "cookie-parser": "^1.4.5",
     "cookies": "^0.8.0",
