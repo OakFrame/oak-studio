@@ -15,9 +15,6 @@ These steps will install ts-node ,typescript, mocha and chai globally `-g`. \
 `npm install mocha chai ts-node --save-dev` \
 `npm install @types/node @types/chai @types/mocha --save-dev` \
 `npm install webpack webpack-cli -g` \
-`pip install awscli` \
-`aws configure` \
-Now, you will need to log in to AWS > IAM > Users and generate/create Security Credentials Access Key and input them into the prompt.
 
 Building
 ------
@@ -38,3 +35,6 @@ There are some demos available (deprecated)
 ------
 Web Server `./demo/http/HTTPServer.ts` \
 Socket Server `./demo/http/SocketServer.ts`
+
+MIT License \
+With love, from OakFrame
