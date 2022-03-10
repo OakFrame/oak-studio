@@ -2,6 +2,55 @@ export function replaceAll(str: any, search: any, replace: any) {
     return str.replace(new RegExp('' + search + '', 'g'), replace);
 }
 
+export function byteLength(str) {
+    // returns the byte length of an utf8 string
+    var s = str.length;
+    for (var i = str.length - 1; i >= 0; i--) {
+        var code = str.charCodeAt(i);
+        if (code > 0x7f && code <= 0x7ff) s++;
+        else if (code > 0x7ff && code <= 0xffff) s += 2;
+        if (code >= 0xDC00 && code <= 0xDFFF) i--; //trail surrogate
+    }
+    return s;
+}
+
+export function findInArray(arr:any[], prop:string, value?){
+    let found = undefined;
+    arr.forEach((e)=>{
+        if (e[prop] !== undefined){
+            if (value !== undefined){
+                if (value === e[prop]){
+                    found = e;
+                    return e;
+                }
+            }else{
+                found = e;
+                return e;
+            }
+        }
+    })
+    return found;
+}
+
+export function findIndexInArray(arr:any[], prop:string, value?){
+    let found = -1;
+    for (let i =0; i<arr.length;i++){
+        let e = arr[i];
+        if (e[prop] !== undefined){
+            if (value !== undefined){
+                if (value === e[prop]){
+                    found = i;
+                    return i;
+                }
+            }else{
+                found = i;
+                return i;
+            }
+        }
+    }
+    return found;
+}
+
 export function combine(objects: Array<any>) {
     let v = {};
     objects.forEach(function (a) {
@@ -223,4 +272,21 @@ export function timeago(dateString, now?) {
     } else {
         return "over a year ago";
     }
+}
+export function shuffleArray(array) {
+    let currentIndex = array.length,  randomIndex;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
 }
