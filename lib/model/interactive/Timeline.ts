@@ -1,5 +1,5 @@
 import {Vec3} from "../math/Vec3";
-import {DialogWindow} from "../interactive/DialogWindow";
+import {DialogWindow} from "./DialogWindow";
 import {Sprite} from "../rendering/Sprite";
 import {Room} from "oak-studio/lib/model/interactive/Room";
 import {GameEventEmitter} from "oak-studio/lib/model/interactive/GameEvent";
@@ -88,7 +88,7 @@ interface CameraTimelineOptions extends TimelineEventOptions {
     to?: Vec3;
     focus?: string;
     reset?: boolean;
-    zoom:?:number;
+    zoom?: number;
 }
 
 interface PathTimelineOptions extends TimelineEventOptions {
