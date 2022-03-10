@@ -1,6 +1,6 @@
 {
   "name": "oak-studio",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "`npm install -g ts-node` `npm install -g typescript`",
   "main": "index.js",
   "scripts": {
@@ -11,8 +11,8 @@
   "bin": {
     "oak": "./cli.ts"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Gordon Goodrum",
+  "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.2.10",
     "@types/expect": "^24.3.0",
