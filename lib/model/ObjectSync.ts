@@ -2,20 +2,20 @@ import {Resource} from "./Cache";
 import {Provider, SchemaProvider} from "../interface/Provider";
 
 export class ObjectSync {
-    _registered: Resource[][];
-    _resources: Resource[][];
+    _registered: any;
+    _resources: any;
     _provider: SchemaProvider;
-    _cached_uuids: Resource[];
-    _cached_ids: Resource[];
+    _cached_uuids: Resource<any>[];
+    _cached_ids: Resource<any>[];
 
     constructor(provider: SchemaProvider) {
-        this._registered = [];
-        this._resources = [];
+        this._registered = {};
+        this._resources = {};
         this._provider = provider;
 
         this._provider.on("register", async (schema) => {
            await this.rectifyDifference(schema.name, schema.register);
-          //  console.log(3, 'REGISTER', schema);
+            console.log(3, 'REGISTER', schema);
         })
 
         this._cached_uuids = [];
@@ -31,10 +31,14 @@ export class ObjectSync {
     }
 
     getResources(schema_name) {
-        return this._resources[schema_name] || [];
+        if (!this._resources[schema_name]){
+            console.log('NO RESOURCES FOUND', this._resources);
+            this._resources[schema_name] = [];
+        }
+        return this._resources[schema_name];
     }
 
-    async rectifyDifference(schema: string, res: Resource) {
+    async rectifyDifference(schema: string, res: Resource<any>) {
 
         let existing;
 
@@ -54,11 +58,13 @@ export class ObjectSync {
             let newres = new Resource(res);
             if (this._registered[schema]){
                 newres.data = new this._registered[schema](res.data)
+            }else{
+                newres.data = res.data;
             }
 
             //newres.type=schema;
-            //console.log(2, 'ADDING RESROUCE', schema, newres);
-            this.addResource(schema, newres);
+            console.log(2, 'ADDING RESROUCE', schema, newres);
+            await this.addResource(schema, newres);
 
             return;
         }
@@ -85,10 +91,11 @@ export class ObjectSync {
         this._registered[name] = schema;
     }
 
-    async addResource(schema: string, res: Resource) {
+    async addResource(schema: string, res: Resource<any>) {
         if (!this._resources[schema]) {
             this._resources[schema] = [];
         }
+        console.log('RESOURCE SCHEMA', this._resources, res);
         this._resources[schema].push(res);
         if (res.uuid) {
             this._cached_uuids[res.uuid] = res;
@@ -96,7 +103,7 @@ export class ObjectSync {
         if (res._id) {
             this._cached_ids[res._id] = res;
         } else {
-            this._provider.register(schema, res);
+          await this._provider.register(schema, res);
         }
         return res;
     }
