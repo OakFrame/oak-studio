@@ -2,6 +2,7 @@ import {Vec3} from "../math/Vec3";
 import {Vec2} from "../math/Vec2";
 import {RGB} from "../RGB";
 import {AssetLoader} from "../AssetLoader";
+import {Camera} from "../interactive/Camera";
 
 var Tri3_Temp = {
     a: 0, i: 0, t: 0, e: 0, u: 0, v: 0, f: 0, g: 0, s: 0, c: 0, h: 0, M: 0
@@ -43,9 +44,9 @@ export class Face3 {
     public uv2;
     public pos3;
     public uv3;
-    public color1;
-    public color2;
-    public color3;
+    public color1:RGB;
+    public color2:RGB;
+    public color3:RGB;
     public center;
     public normal;
     public _cullvec;
@@ -232,7 +233,7 @@ export class Face3 {
     /**
      * @type {function(number):Face3}
      */
-    scale(vec) {
+    scale(vec: Vec3) {
         this.pos1.mul(vec);
         this.pos2.mul(vec);
         this.pos3.mul(vec);
@@ -241,21 +242,17 @@ export class Face3 {
 
     size() {
 
-        var r:any = {},
-            n:any = {},
-            t:any = {};
+        var r: any = {},
+            n: any = {},
+            t: any = {};
         return r.x = this.pos2.x - this.pos1.x, r.y = this.pos2.y - this.pos1.y, r.z = this.pos2.z - this.pos1.z, n.x = this.pos3.x - this.pos1.x, n.y = this.pos3.y - this.pos1.y, n.z = this.pos3.z - this.pos1.z, t.x = r.y * n.z - r.z * n.y, t.y = r.z * n.x - r.x * n.z, t.z = r.x * n.y - r.y * n.x, .5 * Math.sqrt(t.x * t.x + t.y * t.y + t.z * t.z);
 
     };
 }
 
-
-/**
- * @constructor
- */
 export class Mesh {
 
-    public _children:Face3[];
+    public _children: Face3[];
     private _bounds;
     private _tmpv;
     private _tmpr;
@@ -283,7 +280,7 @@ export class Mesh {
         return this;
     }
 
-    clone(){
+    clone() {
         let m = new Mesh();
         this._children.forEach(function (face) {
             m._children.push(face.clone().recalc());
@@ -314,8 +311,8 @@ export class Mesh {
         return this;
     };
 
-    scale(scale) {
-        this._children.forEach(function (tri:Face3) {
+    scale(scale: Vec3) {
+        this._children.forEach(function (tri: Face3) {
 
             tri.scale(scale);
 
@@ -333,7 +330,7 @@ export class Mesh {
     };
 
 
-    drawUV(surface, camera, parent, texture, scale, depth?) {
+    drawUV(surface, camera: Camera, parent, texture, scale, depth?) {
         this._children.forEach(function (tri) {
             //  tri.center=tri.getcenter().rotY(parent.rotation.y).add(parent.position)
             //if (tri._cullvec.copy(tri._dotvec.copy(tri.normal).mul(parent.scale).normalize().rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z)).dot(tri._dotvec.copy(tri.center).mul(parent.scale).rotZ(parent.rotation.z).add(parent.position).pointTo(camera.from).invert()) > 0) {
@@ -464,137 +461,156 @@ export class Mesh {
     };
 
 
-        parsePLY(file) {
-            var model = this;
-            var ply = AssetLoader.loadFile(file, function (a) {
-                var properties = {
-                        vertices: 0,
-                        indeces: 0
-                    },
-                    elements = {
-                        vertices: [],
-                        indeces: []
-                    },
-                    arr = [],
-                    define_pos = 0, //0-headers,vertices,indeces
-                    read_pos = 0;
+    parsePLY(a) {
+        var model = this;
 
 
-                arr = a.split('\n');
-
-                //console.log(arr);
-console.log('LOADING LINES');
-
-                for (var i = 0; i < arr.length; i++) {
-                    var line_arr = arr[i].split(' ');
-                    if (define_pos === 0) { // READING HEADER
-
-                        if (line_arr[0] === 'element') {
-                            if (line_arr[1] === 'vertex') {
-                                properties.vertices = parseInt(line_arr[2], 10);
-                            } else if (line_arr[1] === 'face') {
-                                properties.indeces = parseInt(line_arr[2], 10);
-                            }
-                        } else if (line_arr[0] === 'end_header') {
-                            define_pos = 1;
-                        }
-                    } else if (define_pos === 1) { // READING VERTICES
-                        if (line_arr[0]) {
-
-                            elements.vertices.push(parseFloat(line_arr[0])); //x
-                            elements.vertices.push(parseFloat(line_arr[1])); //y
-                            elements.vertices.push(parseFloat(line_arr[2])); //z
-                            elements.vertices.push(parseFloat(line_arr[3])); //u
-                            elements.vertices.push(parseFloat(line_arr[4])); //v
-                            elements.vertices.push(parseInt(line_arr[5], 10)); //r
-                            elements.vertices.push(parseInt(line_arr[6], 10)); //g
-                            elements.vertices.push(parseInt(line_arr[7], 10)); //b
-
-                            model._bounds[0] = Math.min(model._bounds[0], parseFloat(line_arr[0]));
-                            model._bounds[1] = Math.min(model._bounds[1], parseFloat(line_arr[1]));
-                            model._bounds[2] = Math.min(model._bounds[2], parseFloat(line_arr[2]));
-
-                            model._bounds[3] = Math.max(model._bounds[3], parseFloat(line_arr[0]));
-                            model._bounds[4] = Math.max(model._bounds[4], parseFloat(line_arr[1]));
-                            model._bounds[5] = Math.max(model._bounds[5], parseFloat(line_arr[2]));
+        var plyProperties = {
+                verticesCount: 0,
+                indecesCount: 0,
+                comments: [],
+                format: "",
+                formatVersion: "",
+                properties: [],//PlyPropertyType[]
+            },
+            elements = {
+                vertices: [],
+                indeces: []
+            },
+            arr = [],
+            checkLineIndices = 0, //0-headers,verticesCount,indecesCount
+            read_pos = 0;
 
 
-                        }
-                        properties.vertices--;
-                        if (properties.vertices === 0) {
-                            define_pos = 2;
-                        }
-                    } else if (define_pos === 2) {
-                        if (line_arr[0]) {
-                            elements.indeces.push(parseInt(line_arr[0], 10)); //facedefinition
-                            elements.indeces.push(parseInt(line_arr[1], 10)); //v1
-                            elements.indeces.push(parseInt(line_arr[2], 10)); //v2
-                            elements.indeces.push(parseInt(line_arr[3], 10)); //v3
-                        }
-                        properties.indeces--;
-                        if (properties.indeces === 0) {
-                            define_pos = 3;
-                        }
+        arr = a.split('\n');
+
+        //console.log(arr);
+
+        for (var i = 0; i < arr.length; i++) {
+            var line_arr = arr[i].split(' ');
+            if (checkLineIndices === 0) { // READING HEADER
+
+                if (line_arr[0] === 'element') {
+                    if (line_arr[1] === 'vertex') {
+                        plyProperties.verticesCount = parseInt(line_arr[2], 10);
+                    } else if (line_arr[1] === 'face') {
+                        plyProperties.indecesCount = parseInt(line_arr[2], 10);
                     }
+                } else if (line_arr[0] === 'comment') {
+                    plyProperties.comments.push(line_arr.slice(1));
+                } else if (line_arr[0] === 'format') {
+                    plyProperties.format = line_arr[1];
+                    plyProperties.formatVersion = line_arr[2];
+                } else if (line_arr[0] === 'property') {
+
+
+                    let prop: PlyPropertyType = {
+                        name: line_arr[2],
+                        type: line_arr[1]
+                    }
+
+                   // if (prop.type == "list") {
+
+                   // } else {
+                        plyProperties.properties.push(prop);
+                    //}
+
+                } else if (line_arr[0] === 'ply') {
+                    // properties.comments.push(line_arr.slice(1));
+                } else if (line_arr[0] === 'end_header') {
+                    checkLineIndices = 1;
                 }
+            } else if (checkLineIndices === 1) { // READING VERTICES
+                if (line_arr[0]) {
 
-              //  model.name = file;
+                    elements.vertices.push(parseFloat(line_arr[0])); //x
+                    elements.vertices.push(parseFloat(line_arr[1])); //y
+                    elements.vertices.push(parseFloat(line_arr[2])); //z
+                    elements.vertices.push(parseFloat(line_arr[3])); //u
+                    elements.vertices.push(parseFloat(line_arr[4])); //v
+                    elements.vertices.push(parseInt(line_arr[5], 10)); //r
+                    elements.vertices.push(parseInt(line_arr[6], 10)); //g
+                    elements.vertices.push(parseInt(line_arr[7], 10)); //b
 
+                    model._bounds[0] = Math.min(model._bounds[0], parseFloat(line_arr[0]));
+                    model._bounds[1] = Math.min(model._bounds[1], parseFloat(line_arr[1]));
+                    model._bounds[2] = Math.min(model._bounds[2], parseFloat(line_arr[2]));
 
-                for (var y = 0; y < elements.indeces.length; y += 4) {
-                    var c = 1;
-
-                    model._children.push(new Face3().set(
-                        elements.vertices[(elements.indeces[y + 1] * 8) + 0], //x1
-                        elements.vertices[(elements.indeces[y + 1] * 8) + 1], //y1
-                        elements.vertices[(elements.indeces[y + 1] * 8) + 2], //z1
-                        elements.vertices[(elements.indeces[y + 1] * 8) + 3], //u1
-                        1 - elements.vertices[(elements.indeces[y + 1] * 8) + 4], //v1
-
-                        elements.vertices[(elements.indeces[y + 2] * 8) + 0], //x2
-                        elements.vertices[(elements.indeces[y + 2] * 8) + 1], //y2
-                        elements.vertices[(elements.indeces[y + 2] * 8) + 2], //z2
-                        elements.vertices[(elements.indeces[y + 2] * 8) + 3], //u2
-                        1 - elements.vertices[(elements.indeces[y + 2] * 8) + 4], //v2
-
-                        elements.vertices[(elements.indeces[y + 3] * 8) + 0], //x3
-                        elements.vertices[(elements.indeces[y + 3] * 8) + 1], //y3
-                        elements.vertices[(elements.indeces[y + 3] * 8) + 2], //z3
-                        elements.vertices[(elements.indeces[y + 3] * 8) + 3], //u3
-                        1 - elements.vertices[(elements.indeces[y + 3] * 8) + 4], //v3
-
-                        Math.floor(elements.vertices[(elements.indeces[y + 1] * 8) + 5]), //r1
-                        Math.floor(elements.vertices[(elements.indeces[y + 1] * 8) + 6]), //g1
-                        Math.floor(elements.vertices[(elements.indeces[y + 1] * 8) + 7]), //b1
-
-                        Math.floor(elements.vertices[(elements.indeces[y + 2] * 8) + 5]), //r2
-                        Math.floor(elements.vertices[(elements.indeces[y + 2] * 8) + 6]), //g2
-                        Math.floor(elements.vertices[(elements.indeces[y + 2] * 8) + 7]), //b2
-
-                        Math.floor(elements.vertices[(elements.indeces[y + 3] * 8) + 5]), //r3
-                        Math.floor(elements.vertices[(elements.indeces[y + 3] * 8) + 6]), //g3
-                        Math.floor(elements.vertices[(elements.indeces[y + 3] * 8) + 7]) //b3
-
-                    ));
+                    model._bounds[3] = Math.max(model._bounds[3], parseFloat(line_arr[0]));
+                    model._bounds[4] = Math.max(model._bounds[4], parseFloat(line_arr[1]));
+                    model._bounds[5] = Math.max(model._bounds[5], parseFloat(line_arr[2]));
 
                 }
+                plyProperties.verticesCount--;
+                if (plyProperties.verticesCount === 0) {
+                    checkLineIndices = 2;
+                }
+            } else if (checkLineIndices === 2) {
+                if (line_arr[0]) {
+                    elements.indeces.push(parseInt(line_arr[0], 10)); //facedefinition
+                    elements.indeces.push(parseInt(line_arr[1], 10)); //v1
+                    elements.indeces.push(parseInt(line_arr[2], 10)); //v2
+                    elements.indeces.push(parseInt(line_arr[3], 10)); //v3
+                }
+                plyProperties.indecesCount--;
+                if (plyProperties.indecesCount === 0) {
+                    checkLineIndices = 3;
+                }
+            }
+        }
+
+        //  model.name = file;
 
 
+        for (var y = 0; y < elements.indeces.length; y += 4) {
+            var c = 1;
 
+            model._children.push(new Face3().set(
+                elements.vertices[(elements.indeces[y + 1] * 8) + 0], //x1
+                elements.vertices[(elements.indeces[y + 1] * 8) + 1], //y1
+                elements.vertices[(elements.indeces[y + 1] * 8) + 2], //z1
+                elements.vertices[(elements.indeces[y + 1] * 8) + 3], //u1
+                1 - elements.vertices[(elements.indeces[y + 1] * 8) + 4], //v1
 
+                elements.vertices[(elements.indeces[y + 2] * 8) + 0], //x2
+                elements.vertices[(elements.indeces[y + 2] * 8) + 1], //y2
+                elements.vertices[(elements.indeces[y + 2] * 8) + 2], //z2
+                elements.vertices[(elements.indeces[y + 2] * 8) + 3], //u2
+                1 - elements.vertices[(elements.indeces[y + 2] * 8) + 4], //v2
 
+                elements.vertices[(elements.indeces[y + 3] * 8) + 0], //x3
+                elements.vertices[(elements.indeces[y + 3] * 8) + 1], //y3
+                elements.vertices[(elements.indeces[y + 3] * 8) + 2], //z3
+                elements.vertices[(elements.indeces[y + 3] * 8) + 3], //u3
+                1 - elements.vertices[(elements.indeces[y + 3] * 8) + 4], //v3
 
+                Math.floor(elements.vertices[(elements.indeces[y + 1] * 8) + 5]), //r1
+                Math.floor(elements.vertices[(elements.indeces[y + 1] * 8) + 6]), //g1
+                Math.floor(elements.vertices[(elements.indeces[y + 1] * 8) + 7]), //b1
 
+                Math.floor(elements.vertices[(elements.indeces[y + 2] * 8) + 5]), //r2
+                Math.floor(elements.vertices[(elements.indeces[y + 2] * 8) + 6]), //g2
+                Math.floor(elements.vertices[(elements.indeces[y + 2] * 8) + 7]), //b2
 
+                Math.floor(elements.vertices[(elements.indeces[y + 3] * 8) + 5]), //r3
+                Math.floor(elements.vertices[(elements.indeces[y + 3] * 8) + 6]), //g3
+                Math.floor(elements.vertices[(elements.indeces[y + 3] * 8) + 7]) //b3
 
-                //console.log(model);
-                //model._mesh_id = ModelManager._children.length;
-                //ModelManager._children.push(model);
+            ));
 
-            });
+        }
 
+        //console.log(model);
+        //model._mesh_id = ModelManager._children.length;
+        //ModelManager._children.push(model);
+        console.log(plyProperties, elements);
 
-            return this;
-        };
+        return this;
+    };
 
+}
+
+export class PlyPropertyType {
+    type: string;
+    name: string;
 }

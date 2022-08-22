@@ -155,17 +155,18 @@ export class Camera {
             if (actor.bark) {
                 surface.getContext().textAlign = "center";
 
-                for (let i=1;i<=3*surface.getScaling();i++){
-                surface.drawText(i, (-((actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc / 2) + 40))+i, actor.bark, {
-                    size: 40,
-                    color: "#fffdf5",
-                   // background: actor.primary_color||"#000"
-                });}
+                for (let i = 1; i <= 3 * surface.getScaling(); i++) {
+                    surface.drawText(i, (-((actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc / 2) + 40)) + i, actor.bark, {
+                        size: 40,
+                        color: "#fffdf5",
+                        // background: actor.primary_color||"#000"
+                    });
+                }
 
                 surface.drawText(0, -((actor.getSprite().getImage().height * this._tmp.from_camera_scale_y * this._tmp.sc / 2) + 40), actor.bark, {
                     size: 40,
                     color: actor.primary_color//"#fff",
-                   // background: actor.primary_color||"#000"
+                    // background: actor.primary_color||"#000"
                 });
                 surface.getContext().textAlign = "left";
             }
@@ -177,20 +178,10 @@ export class Camera {
     };
 
     drawFace3(surface: Surface, v1, v2, v3, color) {
+
         this.projection.toScreen(surface, v1, this.from, this._tmp.p1);
         this.projection.toScreen(surface, v2, this.from, this._tmp.p2);
         this.projection.toScreen(surface, v3, this.from, this._tmp.p3);
-
-        var ax, ay, az, bx, by, bz, rx, ry, rz, m;
-        ax = v2.x - v1.x;
-        ay = v2.y - v1.y;
-        az = v2.z - v1.z;
-        bx = v3.x - v1.x;
-        by = v3.y - v1.y;
-        bz = v3.z - v1.z;
-        rx = ay * bz - by * az;
-        ry = az * bx - bz * ax;
-        rz = ax * by - bx * ay;
 
         //triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 2);
         surface.getContext().fillStyle = color || "#000";
@@ -200,18 +191,15 @@ export class Camera {
         surface.getContext().lineTo(this._tmp.p3.x, this._tmp.p3.y);
         surface.getContext().fill();
 
-      //  surface.getContext().strokeStyle = color || '#f00';
-       // surface.getContext().stroke();
     };
 
-    drawLine2D(surface,x1,y1,x2,y2){
-            this.projection.toScreen(surface, (new Vec3().set(x1,y1,0)), this.from, this._tmp.p1);
-            this.projection.toScreen(surface, (new Vec3().set(x2,y2,0)), this.from, this._tmp.p2);
+    drawLine2D(surface, x1, y1, x2, y2) {
+        this.projection.toScreen(surface, (new Vec3().set(x1, y1, 0)), this.from, this._tmp.p1);
+        this.projection.toScreen(surface, (new Vec3().set(x2, y2, 0)), this.from, this._tmp.p2);
 
         surface.getContext().beginPath();
         surface.getContext().moveTo(this._tmp.p1.x, this._tmp.p1.y);
         surface.getContext().lineTo(this._tmp.p2.x, this._tmp.p2.y);
-       // surface.getContext().fill();
 
         surface.getContext().strokeStyle = "black" || '#f00';
         surface.getContext().strokeWidth = "10";
@@ -220,8 +208,6 @@ export class Camera {
     }
 
     drawFace(surface: Surface, face3: Face3, parent, texture, scale, depth = 3) {
-
-        //this._tmp.drawntris++;
 
         if (/*face3.getcenter().dist(this.from) < Math.pow(2.8, depth - 1) && */depth >= 1) {
 
@@ -309,37 +295,26 @@ export class Camera {
             p3.sub(nv.copy(center).pointTo(p3).mulI(amt));
         }
 
-        // console.log(tri);
-
         this.projection.toScreen(surface, this._tmp.v1.copy(parent.position).divI(1).add(this._tmp.v4.copy(face3.pos1).mulI(scale)), this.from, this._tmp.p1);
         this.projection.toScreen(surface, this._tmp.v2.copy(parent.position).divI(1).add(this._tmp.v4.copy(face3.pos2).mulI(scale)), this.from, this._tmp.p2);
         this.projection.toScreen(surface, this._tmp.v3.copy(parent.position).divI(1).add(this._tmp.v4.copy(face3.pos3).mulI(scale)), this.from, this._tmp.p3);
 
-        // camera.projection.toScreen(this, tri.pos1, camera.from, this._tmp.p1);
-        // camera.projection.toScreen(this, tri.pos2, camera.from, this._tmp.p2);
-        // camera.projection.toScreen(this, tri.pos3, camera.from, this._tmp.p3);
-
-        //console.log(this._tmp.p1,this._tmp.p2,this._tmp.p3);
-
         triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 0.45);
 
 
-        /*if ((this._tmp.p3.x === -99 && this._tmp.p3.y === -99) || (this._tmp.p2.x === -99 && this._tmp.p2.y === -99) || (this._tmp.p1.x === -99 && this._tmp.p1.y === -99)) {
+        if ((this._tmp.p3.x === -99 && this._tmp.p3.y === -99) || (this._tmp.p2.x === -99 && this._tmp.p2.y === -99) || (this._tmp.p1.x === -99 && this._tmp.p1.y === -99)) {
             return false;
-        } else if ((this._tmp.p1.x < 0 && this._tmp.p2.x < 0 && this._tmp.p3.x < 0) || (this._tmp.p1.x > this._width && this._tmp.p2.x > this._width && this._tmp.p3.x > this._width) || (this._tmp.p1.y < 0 && this._tmp.p2.y < 0 && this._tmp.p3.y < 0) || (this._tmp.p1.y > this._height && this._tmp.p2.y > this._height && this._tmp.p3.y > this._height)) {
+        } else if ((this._tmp.p1.x < 0 && this._tmp.p2.x < 0 && this._tmp.p3.x < 0) || (this._tmp.p1.x > surface.getWidth() && this._tmp.p2.x > surface.getWidth() && this._tmp.p3.x > surface.getWidth()) || (this._tmp.p1.y < 0 && this._tmp.p2.y < 0 && this._tmp.p3.y < 0) || (this._tmp.p1.y > surface.getHeight() && this._tmp.p2.y > surface.getHeight() && this._tmp.p3.y > surface.getHeight())) {
 
             return false;
-        } else {*/
-
-        //console.log('DRAWING');
+        } else {
 
         surface.getContext().beginPath();
-        //   surface.getContext().strokeStyle = "#FFF";
         surface.getContext().moveTo((0.5 + this._tmp.p1.x), (0.5 + this._tmp.p1.y));
         surface.getContext().lineTo((0.5 + this._tmp.p2.x), (0.5 + this._tmp.p2.y));
         surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
 
-    //     surface.getContext().closePath();
+        //     surface.getContext().closePath();
         // surface.getContext().stroke();
 
         this._tmp._t[20] = 0;
@@ -398,15 +373,13 @@ export class Camera {
         surface.getContext().drawImage(texture, 0, 0);
         surface.getContext().restore();
 
-        //}
-        //surface.context.strokeStyle = "red";
-        //surface.context.stroke();
+        }
+
     };
 
 
     getZoom() {
         return this.zoom;
     }
-
 
 }
