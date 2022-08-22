@@ -101,7 +101,7 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         });
         this._modules = [];
 
-        return new Promise(function (resolve, reject) {
+        return new Promise<void>(function (resolve, reject) {
             function process() {
                 if (chain.length > 0) {
                     let layer: Layer = chain.shift();

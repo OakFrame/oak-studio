@@ -13,9 +13,10 @@ export class CacheModel extends GameEventEmitter {
 
     private dataProvider;
     private cache: ObjectSync;
-    private projects: Resource[] = [];
+    private projects: Resource<any>[] = [];
     public maxByteSize: number = 128;
-    private memoryCache: [] = [];
+    public memoryCache = [];
+    private resourceTypes : string[] = [];
 
     getDataProvider() {
         return this.dataProvider;
@@ -29,17 +30,7 @@ export class CacheModel extends GameEventEmitter {
 
         super();
         this.cache = new ObjectSync(dataProvider);
-        // this.cache.registerSchema("user", User);
-        this.cache.registerSchema("project", Project);
-        this.cache.registerSchema("image", PathImage);
-        this.cache.registerSchema("sprite", Sprite);
-        this.cache.registerSchema("comment", TextComment);
-        /*  this.cache = {
-              sprites: {},
-              images: [],
-              packs: {},
-              projects: []
-          };*/
+
         this.dataProvider = dataProvider;
         dataProvider.on("save", () => {
             this.mutate();
@@ -65,7 +56,7 @@ export class CacheModel extends GameEventEmitter {
             //this.cache.sprites = {};
             //this.cache.images = [];
             //props.sprites ? props.sprites : {};
-            for (const prop in props.sprites) {
+            /*for (const prop in props.sprites) {
                 let res = new Resource(props.sprites[prop]);
                 this.cache.addResource("sprite", res);
             }
@@ -79,7 +70,7 @@ export class CacheModel extends GameEventEmitter {
                     res.data = new PathImage(props.images[prop].data);
                     this.cache.addResource("image", res);
                 }
-            }
+            }*/
         }
         console.log("CURRENT CAHCHEMODEL,", this.getSerializedResources())
     };
@@ -93,7 +84,7 @@ export class CacheModel extends GameEventEmitter {
     }
 
     mutate(key?, value?) {
-        //  console.log('MUTATING CACHE', this.serialize());
+          console.log('MUTATING CACHE', this.serialize());
         window.localStorage.setItem('kp-cache', this.serializeFiltered());
         this.publish('mutate', this.serialize());
     }
@@ -115,13 +106,6 @@ export class CacheModel extends GameEventEmitter {
         return res;
     }
 
-    async registerComment(src) {
-        let res = new Resource();
-        res.data = src;
-        await this.cache.addResource('comment', res);
-        //this.mutate();
-        return res;
-    }
 
     /* getSpriteBySource(src){
          this.getResourceByUUID(schema, res.uuid).then(()=>{
@@ -142,13 +126,24 @@ export class CacheModel extends GameEventEmitter {
         await this.cache.addResource('project', res);
         //  this.mutate();
         // this.projects.push(res);
+        return res;
+    }
+
+    getResources(res){
+        return this.cache.getResources(res);
+    }
+
+    getResource(res) {
+        return (this.cache.getResources(res)).sort((a, b) => {
+            return b._last_modified - a._last_modified;
+        });
     }
 
     getProjects() {
         return this.cache.getResources('project');
     }
 
-    getImages() {
+/*    getImages() {
         return (this.cache.getResources("image")).sort((a, b) => {
             return b._last_modified - a._last_modified;
         });
@@ -158,20 +153,32 @@ export class CacheModel extends GameEventEmitter {
         return (this.cache.getResources("comment")).sort((a, b) => {
             return b._last_modified - a._last_modified;
         });
-    }
+    }*/
 
     search(schema?, filter?) {
+        this.registerSchema(schema);
         return this.cache.search(schema, filter);
     }
 
+    find(schema?, uuid?) {
+        this.registerSchema(schema);
+        return this.cache.getResourceByUUID(schema, uuid);
+    }
 
-    getSprite(id): Sprite {
+    registerSchema(schema:string){
+        if (this.resourceTypes.indexOf(schema) == -1){
+            this.resourceTypes.push(schema);
+        }
+    }
+
+
+     getSprite(id): Sprite {
         let str_id = JSON.stringify(id);
         if (this.memoryCache[str_id]) {
             return this.memoryCache[str_id];
         }
-        let images = this.getImages();
-        //console.log('looking for item', id);
+        let images = this.getResource("image");
+        console.info('looking for sprite', id, images, typeof images);
         if (!Array.isArray(id)) {
             for (const image of images) {//:Resource<PathImage>
                 if (image._id && image._id === id && image.data) {
@@ -193,7 +200,7 @@ export class CacheModel extends GameEventEmitter {
         for (const prop in this.projects) {
             const projectResource = this.projects[prop];
             if (id === (projectResource.uuid)) {
-                p = projectResource.data;
+                p = projectResource;
             }
         }
         return p;
@@ -211,22 +218,36 @@ export class CacheModel extends GameEventEmitter {
         return id;
     }*/
 
-    addResource(type:string,resource: Resource) {
-        this.cache.addResource(type, resource);
+    async addResource(schema:string,resource: Resource<any>) {
+        this.registerSchema(schema);
+        await this.cache.addResource(schema, resource);
     }
 
     getSerializedResources() {
+
         return {
             projects: this.cache.getResources('project'),
             packs: [],
             sprites: this.cache.getResources('sprite'),
             images: this.cache.getResources('image'),
-            comments: this.cache.getResources('comment')
+            comments: this.cache.getResources('comment'),
+            maps: this.cache.getResources('map')
         }
     }
 
     getSerializedResourcesFiltered() {
-        return {
+
+        let ob = {};
+        this.resourceTypes.forEach((type)=>{
+            ob['type']= this.cache.getResources(type).filter((p) => {
+                return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)
+            })
+        });
+
+        return ob;
+
+
+        /*return {
             projects: this.cache.getResources('project').filter((p) => {
                 return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)
             }),
@@ -240,7 +261,7 @@ export class CacheModel extends GameEventEmitter {
             comments: this.cache.getResources('comment').filter((p) => {
                 return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)
             })
-        }
+        }*/
     }
 
     byteLength(str) {
@@ -297,7 +318,7 @@ export enum CacheResourceStatus {
     FULL = 3
 }
 
-export class Resource {
+export class Resource<T> {
 
     _owner: string;
     _permissions: string[];
@@ -310,7 +331,7 @@ export class Resource {
     status: CacheResourceStatus;
 
 
-    constructor(props?) {
+    constructor(props?, dataObject?) {
         this.uuid = uuidv4();
         this._last_modified = Date.now();
         if (props) {
@@ -333,7 +354,11 @@ export class Resource {
                 this._id = props._id;
             }
             if (props.data) {
-                this.data = props.data;
+                if (dataObject){
+                    this.data = new dataObject(props.data);
+                }else {
+                    this.data = props.data;
+                }
             }
             if (props._thumbnail) {
                 this._thumbnail = props._thumbnail;
@@ -346,6 +371,14 @@ export class Resource {
 
     updateLastModified() {
         this._last_modified = Date.now();
+    }
+
+    setOwner(uuid:string){
+        this._owner = uuid;
+    }
+
+    getDataObject(){
+        return this.data;
     }
 
     serialize() {

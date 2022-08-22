@@ -3,10 +3,12 @@ import {User} from "../schema/User";
 
 export class Account implements AccountHandler {
     user:User;
+    characters:any;
     constructor(props?) {
        // let user_model = new User();
         if (props){
             this.user = new User(props);
+           //
         }
     }
 

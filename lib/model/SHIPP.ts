@@ -1,5 +1,4 @@
 import {Vec2} from "./math/Vec2";
-import {Vec3} from "./math/Vec3";
 import {ErosionDrop} from "./shipp/ErosionDrop";
 
 function lerp(v0, v1, t) {
@@ -13,19 +12,32 @@ export function getDistance(x1, y1, x2, y2) {
     return Math.sqrt(x * x + y * y);
 }
 
-export class SHIPP {
+export class SHIPP<T> {
 
     private map: Array<any>;
     private width: number;
     private height: number;
 
-    constructor(width, height) {
+    constructor(shipp?: any) {
         this.map = [];
-        this.width = Math.floor(width);
-        this.height = Math.floor(height);
-        for (let i = 0; i < width * height; i++) {
-            this.map[i] = 0;
+        this.width = Math.floor(32);
+        this.height = Math.floor(32);
+        if (shipp) {
+            this.width = Math.floor(shipp.width);
+            this.height = Math.floor(shipp.height);
+            if (shipp.map) {
+                this.map = shipp.map;
+            } else {
+                for (let i = 0; i < this.width * this.height; i++) {
+                    this.map[i] = 0;
+                }
+            }
+        } else {
+            for (let i = 0; i < this.width * this.height; i++) {
+                this.map[i] = 0;
+            }
         }
+
     }
 
     erode(c: number) {
@@ -35,17 +47,13 @@ export class SHIPP {
 
             for (let x = 0; x < this.getWidth(); x++) {
                 for (let y = 0; y < this.getHeight(); y++) {
-                    //drop.position.set(x, y);
-                    drop.position.set(Math.random()*this.getWidth(), Math.random()*this.getHeight());
+                    drop.position.set(Math.random() * this.getWidth(), Math.random() * this.getHeight());
                     for (let z = 0; z < 500; z++) {
                         drop.simulate(this);
-                        if (z > 100 && drop.velocity.mag()<0.001){
-
-                           // console.log("BREAKING EARLY", drop);
+                        if (z > 100 && drop.velocity.mag() < 0.001) {
                             break;
                         }
                     }
-                   // this.setPosition(drop.position.x, drop.position.y,0);
                     drop.end(this);
                 }
             }
@@ -75,23 +83,19 @@ export class SHIPP {
         if (amt == 0) {
             return;
         }
-        let m = new SHIPP(this.getWidth(), this.getHeight());
+        let m = new SHIPP(this);
 
         for (let x = 0; x <= this.getWidth(); x++) {
             for (let y = 0; y <= this.getHeight(); y++) {
 
-                let v = 0;//this.getPosition(x, y);
-                // let ov = this.getPosition(x, y);
-                //m.setPosition(x+ix,y+iy, this.getPosition(ix,iy) )
+                let v = 0;
                 let samples = 0;
                 let pool = [];
                 let total_influence = 0;
 
                 for (let ix = -amt; ix <= amt; ix++) {
                     for (let iy = -amt; iy <= amt; iy++) {
-                        // let influence_x = //Math.abs(((Math.abs(ix)) - (amt)) / amt);
-                        // let influence_y = //Math.abs(((Math.abs(iy)) - (amt)) / amt);
-                        let inf = (amt * 1.45) - getDistance(0, 0, Math.abs(ix), Math.abs(iy));//influence_y * influence_x;
+                        let inf = (amt * 1.45) - getDistance(0, 0, Math.abs(ix), Math.abs(iy));
                         if (inf <= amt * 1.45) {
                             total_influence += inf;
                             pool.push({
@@ -99,8 +103,6 @@ export class SHIPP {
                                 value: this.getPosition(x + ix, y + iy)
                             })
                         }
-                        //v += this.getPosition(x + ix, y + iy)
-                        //samples++;
                     }
                 }
 
@@ -123,7 +125,7 @@ export class SHIPP {
 
     run(fn) {
         let self = this;
-        let tmp = new SHIPP(this.width, this.height);
+        let tmp = new SHIPP(this);
         this.map.forEach(function (m, i) {
             let x = (i) % self.width;
             let y = (i / self.width) | 0;
@@ -153,15 +155,15 @@ export class SHIPP {
     }
 
     setPosition(x, y, value) {
-        x = (x + (this.width * 1000000)) % this.width;
-        y = (y + (this.height * 1000000)) % this.height;
+        x = (x + (this.width * 100000000)) % this.width;
+        y = (y + (this.height * 100000000)) % this.height;
         this.map[(x | 0) + ((y | 0) * this.width)] = value;
         return this;
     }
 
     getPosition(x, y) {
-        x = (x + (this.width * 1000000)) % this.width;
-        y = (y + (this.height * 1000000)) % this.height;
+        x = (x + (this.width * 100000000)) % this.width;
+        y = (y + (this.height * 100000000)) % this.height;
         return this.map[(x | 0) + ((y | 0) * this.width)];
     }
 
@@ -179,7 +181,7 @@ export class SHIPP {
         let f = fn || function (value, x, y) {
             return tag;
         };
-        let temp = new SHIPP(this.width, this.height);
+        let temp = new SHIPP(this);
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.regionContains(tag, x - size, y - size, x + size, y + size)) {
@@ -287,30 +289,45 @@ export class SHIPP {
             this.setPosition(dx, dy, value);
         }
 
-        //this.setPosition(x1,y1,0.75);
-        //this.setPosition(x2,y2,0.75);
     }
 
     placeCluster(x, y, width, height, value, real = 1) {
         let dox = x;// Math.floor((this.width * Math.random()) - width); //Math.floor(Math.random() * (( - (width * 2)) + width));
         let doy = y;// + Math.floor((this.height * Math.random()) - height);
 
-        for (let oix = dox; oix < dox + width; oix += 1) {
+        for (let oix = dox; oix < x + width; oix += 1) {
 
-            for (let oiy = doy; oiy < doy + height; oiy += 1) {
+            for (let oiy = doy; oiy < y + height; oiy += 1) {
 
-                if (real >= Math.random()) {
+                // if (real >= Math.random()) {
 
-                    let x = (oix + this.width) % this.width;
-                    let y = (oiy + this.height) % this.height;
+              //  let x = (oix + this.width) % this.width;
+              //  let y = (oiy + this.height) % this.height;
 
-                    this.setPosition(x, y, value);
-                    console.log(x, y);
-                }
-                //  y
-
+                this.setPosition(oix, oiy, value);
             }
+            //  y
 
+            // }
+
+        }
+    }
+
+    selectPortion(x, y, width, height) {
+        let map = new SHIPP({width: width, height: height});
+        for (let ix = 0; ix < width; ix++) {
+            for (let iy = 0; iy < height; iy++) {
+                map.setPosition(ix, iy, this.getPosition(x + ix, y + iy))
+            }
+        }
+        return map;
+    }
+
+    placeMap(map: SHIPP<any>, x, y) {
+        for (let ix = 0; ix < map.getWidth(); ix++) {
+            for (let iy = 0; iy < map.getHeight(); iy++) {
+                this.setPosition(x + ix, y + iy, map.getPosition(ix, iy))
+            }
         }
     }
 
@@ -406,7 +423,7 @@ export class SHIPP {
         let w = a.getWidth();
         let h = a.getHeight();
 
-        let f = new SHIPP(this.getWidth(), this.getHeight());
+        let f = new SHIPP({width: w, height: h});
 
         for (let x = 0; x < w; x++) {
             for (let y = 0; y < h; y++) {
@@ -437,13 +454,13 @@ export class SHIPP {
 
     }
 
-    addWide(b) {
+    addWide = (b) => {
         let a = this;
 
-        let w = a.getWidth();
-        let h = a.getHeight();
+        let w = this.getWidth();
+        let h = this.getHeight();
 
-        let f = new SHIPP(this.getWidth(), this.getHeight());
+        let f = new SHIPP({width: w, height: h});
 
         for (let x = 0; x < w; x++) {
             for (let y = 0; y < h; y++) {
@@ -467,10 +484,10 @@ export class SHIPP {
             }
         }
 
-        this.width = w;
-        this.height = h;
-        this.map = f.getMap();
-
+        // this.width = w;
+        // this.height = h;
+        //this.map = f.getMap();
+        return f;
 
     }
 

@@ -11,61 +11,61 @@ export class MongoDriver {
     private name;
 
     constructor(mongo_uri, dbName) {
-        console.log("connecting to", mongo_uri, dbName);
 
         this.connected = false;
         this.collections = [];
         this.name = "hello world";
 
         MongoClient.connect(mongo_uri, (err, client) => {
-            if (err) {
+            if (err || !client){
                 console.warn(err);
-                return;
             }
             console.log("Connected successfully to mongo server");
             this.client = client;
             this.db = client.db(dbName);
             this.connected = true;
+
         });
 
     }
 
 
-    getDB() {
+
+    getDB(){
         return this.db;
     }
 
-    async getCollection(collection) {
+    getCollection(collection){
         this.verifyCollection(collection);
         return this.collections[collection];
     }
 
-    async verifyCollection(collection) {
+    verifyCollection(collection) {
         if (!this.collections[collection]) {
-            this.collections[collection] = await this.db.collection(collection);
+            this.collections[collection] = this.db.collection(collection);
         }
     }
 
-    async findOrCreate(collection, search, data) {
+    findOrCreate(collection, search, data) {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
             this.collections[collection].findOne(search).then((document) => {
                 if (document === null) {
                     this.insertOne(collection, data).then((inserted) => {
-                        resolve({did_create: true, data: data});
+                        resolve({did_create:true,data:data});
                     });
                 } else {
-                    resolve({did_create: false, data: document});
+                    resolve({did_create:false,data:document});
                 }
             });
         });
     }
 
-    async insertOne(collection, data): Promise<any> {
-        return new Promise((resolve, reject) => {
-            this.verifyCollection(collection);
+    async insertOne(collection, data) {
+        return new Promise(async (resolve, reject) => {
+            await this.verifyCollection(collection);
 
-            this.collections[collection].insertOne(data).then((document) => {
+            this.db.collection(collection).insertOne(data).then((document) => {
                 resolve(document);
             }).catch((err) => {
                 console.error(err);
@@ -74,34 +74,22 @@ export class MongoDriver {
         });
     }
 
-    async insertMany(collection, data) {
-        return new Promise((resolve, reject) => {
-            this.verifyCollection(collection);
-            this.collections[collection].insertMany(data).then((res) => {
-                resolve(res);
-            }).catch((err) => {
-                console.error(err);
-                reject(err);
-            });
-        });
-    }
-
-    async updateOne(collection, search, data) {
+    updateOne(collection,search, data) {
         this.verifyCollection(collection);
         return this.collections[collection].updateOne(search, data);
     }
 
-    async deleteMany(collection, search) {
+    deleteMany(collection,search) {
         this.verifyCollection(collection);
-        return new Promise((resolve, reject) => {
-            this.collections[collection].deleteMany(search, function (ret) {
+        return new Promise((resolve, reject)=>{
+            this.collections[collection].deleteMany(search, function(ret){
                 resolve(ret);
             });
         });
 
     }
 
-    async update(collection, search, data) {
+    update(collection,search, data) {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
             return this.collections[collection].update(search,
@@ -111,17 +99,7 @@ export class MongoDriver {
         });
     }
 
-    async upsert(collection, search, data) {
-        return new Promise((resolve, reject) => {
-            this.verifyCollection(collection);
-            return this.collections[collection].update(search,
-                data, {upsert: true}, function (err, result) {
-                    resolve(result);
-                });
-        });
-    }
-
-    async findOne(collection, search) {
+    findOne(collection, search) {
         return new Promise((resolve, reject) => {
             this.verifyCollection(collection);
             this.collections[collection].findOne(search).then((document) => {
@@ -134,27 +112,17 @@ export class MongoDriver {
         });
     }
 
-    async sample(collection, search, count) {
-        await this.verifyCollection(collection);
-        let d = [];
-
-        for (let i = 0; i < count; i++) {
-            d.push(await this.findOne(collection, {$query: search, $orderby: {rnd: 1}}));
-        }
-
-        return d;
-    }
-
-    async find(collection, search, count = 25): Promise<any[]> {
-        return new Promise((resolve, reject) => {
-            this.verifyCollection(collection);
-            this.collections[collection].find(search).sort({ _id: -1 }).limit(count).toArray(function (err, result) {
+    find(collection, search) {
+        return new Promise(async (resolve, reject) => {
+            await this.verifyCollection(collection);
+            this.db.collection(collection).find(search).toArray(function (err, result) {
                 if (err) {
-                    console.error("ERRR", err);
+                    console.error("ERRR",err);
                     resolve([]);
                     return;
                 }
                 resolve(result);
+
             });
         });
     }

@@ -33,7 +33,7 @@ export class GLBuffer {
             self.indices.push(ind+indlen);
         });
 
-        //console.log(this.vertices, this.indices);
+        //console.log(this.verticesCount, this.indices);
         return this;
     }
 

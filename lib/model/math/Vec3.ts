@@ -62,7 +62,7 @@ export class Vec3 {
     }
 
     /** @type {function(number):Vec3} */
-    mulI(a) {
+    mulI(a:number) {
         this.x *= a;
         this.y *= a;
         this.z *= a;
@@ -70,7 +70,7 @@ export class Vec3 {
     }
 
     /** @type {function(number):Vec3} */
-    divI(a) {
+    divI(a:number) {
         this.x /= a;
         this.y /= a;
         this.z /= a;

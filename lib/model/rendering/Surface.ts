@@ -6,6 +6,7 @@ export interface SurfaceTextOptions {
     size?: number;
     color?: string;
     background?: string;
+    align?:string;
 }
 
 export interface SurfaceImageOptions {
@@ -33,7 +34,7 @@ export class Surface {
         this._width = this.context.width || 300;
         this._height = this.context.height || 150;
         this._scaling = 2;//(window.innerWidth < 600 ? 1 : window.devicePixelRatio) || 1;
-        this.context.font = (20 * this._scaling) + "px DM Sans";
+        this.context.font = (20 * this._scaling) + "px" //+" Font Name";
         return this;
     }
 
@@ -41,7 +42,7 @@ export class Surface {
         if (!options) {
             options = {};
         }
-        this.context.font = ((options.size || 20) * this._scaling) + "px Krona One";
+        this.context.font = ((options.size || 20) * this._scaling) + "px" // + Font Name;
         if (options.background) {
             let w = this.context.measureText(text).width;
             let h = (((options.size || 20)) * this._scaling);

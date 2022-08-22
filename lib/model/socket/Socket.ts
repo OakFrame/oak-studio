@@ -19,20 +19,25 @@ export class Socket {
         this._subscribe = new Subscribe();
         this.connected = false;
         //@ts-ignore
-        if (window){
-        this.loop = window.setInterval(this.healthcheck(), 3250);}else {
+        if (window) {
+            this.loop = window.setInterval(this.healthcheck(), 3250);
+        } else {
             this.loop = setInterval(this.healthcheck(), 3250);
         }
     }
 
-    isConnected(){
+    isConnected() {
         return this.connected;
     }
 
     healthcheck() {
         return () => {
-            if (!this.endpoint){return}
-           // console.log('healthcheck', this.connected);
+            if (!this.endpoint) {
+                return
+            }
+            if (!this.connected || this._queue.length) {
+                console.log('healthcheck connected', this.connected, "queue length", this._queue.length);
+            }
             if (!this.connected) {
                 console.info('Not connected to server, attemping');
                 // TODO Check if we even are on wifi or cellular before continuing
@@ -42,7 +47,7 @@ export class Socket {
 
                 this.connect(this.endpoint);
 
-            }else{
+            } else {
                 this._socket.send(JSON.stringify({
                     ping: true
                 }));
@@ -56,6 +61,8 @@ export class Socket {
             try {
                 this._socket.send(JSON.stringify(data));
             } catch (e) {
+                console.log('failed to send packet, put in queue');
+                this._queue.push(data);
                 this.connected = false;
                 this.publish('disconnect', e);
             }
@@ -73,6 +80,8 @@ export class Socket {
         this.endpoint = endpoint;
         this._socket = new WebSocket(endpoint);
 
+        this._socket.binaryType = "arraybuffer";
+
         this._socket.onopen = (e) => {
             console.log('connected:', e);
             this.connected = true;
@@ -86,14 +95,15 @@ export class Socket {
             this._queue.forEach((data) => {
                 console.log('SENDING FROM QUEUE', data);
 
-                window.setTimeout(()=>{
+                window.setTimeout(() => {
                     this.send((data));
-                },20);
+                }, 20);
             });
             this._queue = [];
             this.publish('connect', {});
         };
         this._socket.onmessage = function (e) {
+
             let json = JSON.parse(e.data);
             for (var key in json) {
                 if (json.hasOwnProperty(key)) {
@@ -103,23 +113,24 @@ export class Socket {
             }
             _socket.publish(JSON.parse(e.data), this);
         };
-        this._socket.onclose = this._socket.onerror = (e) => {
-            console.log('ERR', e);
-            if (this.connected) {
-                _socket.publish('disconnect', e);
-            }
-            this.connected = false;
-        }
+
+        this._socket.onclose = this._socket.onerror = function (e) {
+
+            _socket.connected = false;
+            console.error('socket disconnected');
+        };
+
     }
 
     subscribe(slug: string, fn): any {
-       return this._subscribe.subscribe(slug, fn);
+        return this._subscribe.subscribe(slug, fn);
     }
+
     unsubscribe(slug: string, uuid): any {
-       return this._subscribe.unsubscribe(slug,uuid);
+        return this._subscribe.unsubscribe(slug, uuid);
     }
 
     publish(packet, data) {
-       return this._subscribe.publish(packet, data);
+        return this._subscribe.publish(packet, data);
     }
 }

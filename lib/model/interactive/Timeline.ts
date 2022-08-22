@@ -17,7 +17,7 @@ function synthVoice(text, cb, voice?) {
     voices = window.speechSynthesis.getVoices();
     utterance.voice = voices[10];
     utterance.volume = 1; // 0 to 1
-    utterance.rate = 2;//0.8; // 0.1 to 10
+    utterance.rate = 0.8;//0.8; // 0.1 to 10
     utterance.pitch = 1.1; //0 to 2
     //utterance.rate = 1.2;
 
@@ -35,11 +35,44 @@ function synthVoice(text, cb, voice?) {
                 break;
 
                 case "narrator":
-                utterance.voice = voices[2];
+                utterance.voice = voices[1];
+                utterance.volume = 1; // 0 to 1
+                utterance.rate = 1.2;//0.8; // 0.1 to 10
+                utterance.pitch = 0.5; //0 to 2
+                break;
+
+                case "28":
+                utterance.voice = voices[28];
+                utterance.volume = 1; // 0 to 1
+                utterance.rate = 1.2;//0.8; // 0.1 to 10
+                utterance.pitch = 1; //0 to 2
+                break;
+
+                case "11":
+                utterance.voice = voices[11];
+                utterance.volume = 1; // 0 to 1
+                utterance.rate = 1.2;//0.8; // 0.1 to 10
+                utterance.pitch = 1; //0 to 2
+                break;
+                case "49":
+                utterance.voice = voices[49];
+                utterance.volume = 1; // 0 to 1
+                utterance.rate = 1.2;//0.8; // 0.1 to 10
+                utterance.pitch = 1; //0 to 2
+                break;
+                case "4":
+                utterance.voice = voices[4];
                 utterance.volume = 1; // 0 to 1
                 utterance.rate = 1;//0.8; // 0.1 to 10
-                utterance.pitch = 1.1; //0 to 2
+                utterance.pitch = 1; //0 to 2
+                break;    case "5":
+                utterance.voice = voices[5];
+                utterance.volume = 1; // 0 to 1
+                utterance.rate = 1;//0.8; // 0.1 to 10
+                utterance.pitch = 1; //0 to 2
                 break;
+
+
         }
     }
 
@@ -461,7 +494,9 @@ export class DialogTimelineEvent extends TimelineEvent {
         document.getElementsByClassName('content-container')[0].scrollTop = 1000000;
 
         if (this.voice) {
-            synthVoice(this.text, () => {
+            synthVoice(this.text.split(" ").map((v)=>{
+               return v;//v.slice(0,2+Math.floor(Math.random()*2));
+            }).join(" "), () => {
                 this.finished = true;
             }, this.voice)
         }

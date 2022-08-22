@@ -5,6 +5,13 @@ export class RGB {
     r = 0;
     g = 0;
     b = 0;
+
+    constructor(r=0, g=0, b=0) {
+        this.r = r;
+        this.g = g;
+        this.b= b;
+    }
+
     set = (r, g, b) => {
         this.r = r | 0;
         this.g = g | 0;
@@ -44,6 +51,12 @@ export class RGBA {
     g = 0;
     b = 0;
     a = 1;
+    constructor(r?, g?, b?, a?) {
+        if (r){this.r= r;}
+        if (g){this.g= g;}
+        if (b){this.b= b;}
+        if (a){this.a= a;}
+    }
 
     set = (r, g, b, a) => {
         this.r = r;

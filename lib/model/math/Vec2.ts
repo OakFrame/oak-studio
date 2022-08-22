@@ -146,7 +146,7 @@ export class Vec2 {
 
     /** @type {function():Vec2} */
     clone() {
-        return (new Vec2().set(this.x, this.y));
+        return (new Vec2().set(this.x *  1, this.y *  1));
     }
 
     /** @type {function(Vec2):Vec2} */

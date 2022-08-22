@@ -288,6 +288,16 @@ export class Mesh {
         return m;
     }
 
+    setColor(rgb:RGB) {
+        let m = new Mesh();
+        this._children.forEach(function (face) {
+            face.color1 = rgb;
+            face.color2 = rgb;
+            face.color3 = rgb;
+        });
+        return m;
+    }
+
     join(mesh, parent) {
         //this._children = this._children.concat(mesh._children);
         var target = this;
@@ -477,6 +487,10 @@ export class Mesh {
                 vertices: [],
                 indeces: []
             },
+            exportedElements={
+                vertex:[],
+                index:[]
+            },
             arr = [],
             checkLineIndices = 0, //0-headers,verticesCount,indecesCount
             read_pos = 0;
@@ -523,7 +537,34 @@ export class Mesh {
             } else if (checkLineIndices === 1) { // READING VERTICES
                 if (line_arr[0]) {
 
-                    elements.vertices.push(parseFloat(line_arr[0])); //x
+                    let vertex = {};
+                    for (let p=0;p<plyProperties.properties.length;p++) {
+                        let prop = plyProperties.properties[p];
+                        vertex[prop.name] = PlyPropertyTypeToValue(prop.type,line_arr[p]);
+                    }
+                    exportedElements.vertex.push(vertex);
+
+                    elements.vertices.push(vertex["x"]); //x
+                    elements.vertices.push(vertex["y"]); //y
+                    elements.vertices.push(vertex["z"]); //z
+                    elements.vertices.push(vertex["s"]||0); //u
+                    elements.vertices.push(vertex["t"]||0); //v
+                    elements.vertices.push(vertex["red"]); //r
+                    elements.vertices.push(vertex["green"]); //g
+                    elements.vertices.push(vertex["blue"]); //b
+
+                    model._bounds[0] = Math.min(model._bounds[0], vertex["x"]);
+                    model._bounds[1] = Math.min(model._bounds[1], vertex["y"]);
+                    model._bounds[2] = Math.min(model._bounds[2], vertex["z"]);
+
+                    model._bounds[3] = Math.max(model._bounds[3], vertex["x"]);
+                    model._bounds[4] = Math.max(model._bounds[4], vertex["y"]);
+                    model._bounds[5] = Math.max(model._bounds[5], vertex["z"]);
+
+
+                    // OLD
+
+                  /*  elements.vertices.push(parseFloat(line_arr[0])); //x
                     elements.vertices.push(parseFloat(line_arr[1])); //y
                     elements.vertices.push(parseFloat(line_arr[2])); //z
                     elements.vertices.push(parseFloat(line_arr[3])); //u
@@ -538,14 +579,14 @@ export class Mesh {
 
                     model._bounds[3] = Math.max(model._bounds[3], parseFloat(line_arr[0]));
                     model._bounds[4] = Math.max(model._bounds[4], parseFloat(line_arr[1]));
-                    model._bounds[5] = Math.max(model._bounds[5], parseFloat(line_arr[2]));
+                    model._bounds[5] = Math.max(model._bounds[5], parseFloat(line_arr[2]));*/
 
                 }
                 plyProperties.verticesCount--;
                 if (plyProperties.verticesCount === 0) {
                     checkLineIndices = 2;
                 }
-            } else if (checkLineIndices === 2) {
+            } else if (checkLineIndices === 2) { // READING INDICES
                 if (line_arr[0]) {
                     elements.indeces.push(parseInt(line_arr[0], 10)); //facedefinition
                     elements.indeces.push(parseInt(line_arr[1], 10)); //v1
@@ -613,4 +654,15 @@ export class Mesh {
 export class PlyPropertyType {
     type: string;
     name: string;
+}
+
+
+export function PlyPropertyTypeToValue(type, input){
+    switch (type){
+        case "float":
+            return parseFloat(input)
+
+        default:
+            return parseInt(input, 10)
+    }
 }

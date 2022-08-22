@@ -19,7 +19,7 @@ export class Projection {
     private tfovpower: number;
     private tfovpoweraspect: number;
 
-    private _set=false;
+    private _set = false;
 
 
     constructor() {
@@ -64,8 +64,11 @@ export class Projection {
 
     }
 
-    toWorld(surface:Surface, mousePosition, from, target) {
-        if (!this._set){console.error("Projection has not been set from Camera source");this._set=true;}
+    toWorld(surface: Surface, mousePosition, from, target) {
+        if (!this._set) {
+            console.error("Projection has not been set from Camera source");
+            this._set = true;
+        }
         this.s.x = 2 * mousePosition.x / surface.getWidth() - 1;
         this.s.y = 1 - 2 * mousePosition.y / surface.getHeight();
         this.p.x = this.d.x + this.u.x * this.s.y + this.v.x * this.s.x;
@@ -79,8 +82,11 @@ export class Projection {
 
     }
 
-    toScreen(surface:Surface, position, from, target) {
-        if (!this._set){console.error("Projection has not been set from Camera source");this._set=true;}
+    toScreen(surface: Surface, position: Vec3, from, target) {
+        if (!this._set) {
+            console.error("Projection has not been set from Camera source");
+            this._set = true;
+        }
         this.p.set(position.x - from.x, position.y - from.y, position.z - from.z);
         this.mm = this.p.dot(this.d);
         if (this.mm > 0) {
