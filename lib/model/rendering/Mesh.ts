@@ -44,9 +44,9 @@ export class Face3 {
     public uv2;
     public pos3;
     public uv3;
-    public color1:RGB;
-    public color2:RGB;
-    public color3:RGB;
+    public color1: RGB;
+    public color2: RGB;
+    public color3: RGB;
     public center;
     public normal;
     public _cullvec;
@@ -174,10 +174,8 @@ export class Face3 {
         return this;
     };
 
-    /**
-     * @type {function(Vec3):Face3}
-     */
-    translate(vec3) {
+
+    translate(vec3: Vec3): Face3 {
         this.pos1.add(vec3);
         this.pos2.add(vec3);
         this.pos3.add(vec3);
@@ -280,7 +278,7 @@ export class Mesh {
         return this;
     }
 
-    clone() {
+    clone(): Mesh {
         let m = new Mesh();
         this._children.forEach(function (face) {
             m._children.push(face.clone().recalc());
@@ -288,7 +286,16 @@ export class Mesh {
         return m;
     }
 
-    setColor(rgb:RGB) {
+    translate(vec: Vec3): Mesh {
+
+        this._children.forEach(function (face) {
+            this._children.push(face.translate(vec).recalc());
+        });
+        return this;
+    }
+
+
+    setColor(rgb: RGB) {
         let m = new Mesh();
         this._children.forEach(function (face) {
             face.color1 = rgb;
@@ -487,9 +494,9 @@ export class Mesh {
                 vertices: [],
                 indeces: []
             },
-            exportedElements={
-                vertex:[],
-                index:[]
+            exportedElements = {
+                vertex: [],
+                index: []
             },
             arr = [],
             checkLineIndices = 0, //0-headers,verticesCount,indecesCount
@@ -523,10 +530,10 @@ export class Mesh {
                         type: line_arr[1]
                     }
 
-                   // if (prop.type == "list") {
+                    // if (prop.type == "list") {
 
-                   // } else {
-                        plyProperties.properties.push(prop);
+                    // } else {
+                    plyProperties.properties.push(prop);
                     //}
 
                 } else if (line_arr[0] === 'ply') {
@@ -538,17 +545,17 @@ export class Mesh {
                 if (line_arr[0]) {
 
                     let vertex = {};
-                    for (let p=0;p<plyProperties.properties.length;p++) {
+                    for (let p = 0; p < plyProperties.properties.length; p++) {
                         let prop = plyProperties.properties[p];
-                        vertex[prop.name] = PlyPropertyTypeToValue(prop.type,line_arr[p]);
+                        vertex[prop.name] = PlyPropertyTypeToValue(prop.type, line_arr[p]);
                     }
                     exportedElements.vertex.push(vertex);
 
                     elements.vertices.push(vertex["x"]); //x
                     elements.vertices.push(vertex["y"]); //y
                     elements.vertices.push(vertex["z"]); //z
-                    elements.vertices.push(vertex["s"]||0); //u
-                    elements.vertices.push(vertex["t"]||0); //v
+                    elements.vertices.push(vertex["s"] || 0); //u
+                    elements.vertices.push(vertex["t"] || 0); //v
                     elements.vertices.push(vertex["red"]); //r
                     elements.vertices.push(vertex["green"]); //g
                     elements.vertices.push(vertex["blue"]); //b
@@ -564,22 +571,22 @@ export class Mesh {
 
                     // OLD
 
-                  /*  elements.vertices.push(parseFloat(line_arr[0])); //x
-                    elements.vertices.push(parseFloat(line_arr[1])); //y
-                    elements.vertices.push(parseFloat(line_arr[2])); //z
-                    elements.vertices.push(parseFloat(line_arr[3])); //u
-                    elements.vertices.push(parseFloat(line_arr[4])); //v
-                    elements.vertices.push(parseInt(line_arr[5], 10)); //r
-                    elements.vertices.push(parseInt(line_arr[6], 10)); //g
-                    elements.vertices.push(parseInt(line_arr[7], 10)); //b
+                    /*  elements.vertices.push(parseFloat(line_arr[0])); //x
+                      elements.vertices.push(parseFloat(line_arr[1])); //y
+                      elements.vertices.push(parseFloat(line_arr[2])); //z
+                      elements.vertices.push(parseFloat(line_arr[3])); //u
+                      elements.vertices.push(parseFloat(line_arr[4])); //v
+                      elements.vertices.push(parseInt(line_arr[5], 10)); //r
+                      elements.vertices.push(parseInt(line_arr[6], 10)); //g
+                      elements.vertices.push(parseInt(line_arr[7], 10)); //b
 
-                    model._bounds[0] = Math.min(model._bounds[0], parseFloat(line_arr[0]));
-                    model._bounds[1] = Math.min(model._bounds[1], parseFloat(line_arr[1]));
-                    model._bounds[2] = Math.min(model._bounds[2], parseFloat(line_arr[2]));
+                      model._bounds[0] = Math.min(model._bounds[0], parseFloat(line_arr[0]));
+                      model._bounds[1] = Math.min(model._bounds[1], parseFloat(line_arr[1]));
+                      model._bounds[2] = Math.min(model._bounds[2], parseFloat(line_arr[2]));
 
-                    model._bounds[3] = Math.max(model._bounds[3], parseFloat(line_arr[0]));
-                    model._bounds[4] = Math.max(model._bounds[4], parseFloat(line_arr[1]));
-                    model._bounds[5] = Math.max(model._bounds[5], parseFloat(line_arr[2]));*/
+                      model._bounds[3] = Math.max(model._bounds[3], parseFloat(line_arr[0]));
+                      model._bounds[4] = Math.max(model._bounds[4], parseFloat(line_arr[1]));
+                      model._bounds[5] = Math.max(model._bounds[5], parseFloat(line_arr[2]));*/
 
                 }
                 plyProperties.verticesCount--;
@@ -657,8 +664,8 @@ export class PlyPropertyType {
 }
 
 
-export function PlyPropertyTypeToValue(type, input){
-    switch (type){
+export function PlyPropertyTypeToValue(type, input) {
+    switch (type) {
         case "float":
             return parseFloat(input)
 

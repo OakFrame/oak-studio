@@ -2,435 +2,273 @@ import {Vec3} from "../math/Vec3";
 
 // @ts-ignore
 import {mat4, mat3, vec3, glMatrix} from "gl-matrix";
-import {GLCameraShadowTextureShader, GLLightShadowTextureShader, GLShaderBasic, GLShaderTexture} from "./GLShaderBasic";
+import {
+    GLCameraShadowTextureShader, GLLightShadowTextureShader,
+    GLShader,
+    GLShaderBasic, GLShaderBasicPosition, GLShaderTexture
+} from "./GLShaderBasic";
 import {GLCubeBuffer, GLCubeBufferUV, GLPlaneBufferUV} from "./GLBuffer";
 import {Sprite} from "./Sprite";
+import {Mesh} from "./Mesh";
+
+
+var gl;
+var vertexPositionBuffer;
+var vertexColorBuffer;
+var modelMatrix = mat4.create();
+var projectionMatrix = mat4.create();
+var shaderProgram;
+var cubeRotation = 0.0;
+
+
+let camera = {
+    from: (new Vec3()).set(0, 20, 20),
+    to: (new Vec3()).set(0, 0, 0),
+    up: (new Vec3()).set(0, 0, 1)
+}
+
 
 export class SurfaceGL {
 
     element;
-    _width;
-    _height;
     _scaling;
-    gl;
-    _render_loop;
-    _draw_model;
+    bufferMesh;
 
-setDrawModel(dm){
-    this._draw_model = dm;
-}
-
-    constructor(canvas?, sprite?:Sprite) {
-
-        let surface = this;
-
-        let shader = new GLShaderTexture();//new GLShaderBasic();
-        //let shader_texture = new GLShaderTexture();
-
-        this.element = canvas;
+    constructor(canvas) {
+        //var canvas = document.getElementById("lesson01-canvas");
         this._scaling = (window.innerWidth < 600 ? 1 : window.devicePixelRatio) || 1;
 
-        canvas = canvas || <HTMLCanvasElement>document.getElementById('canvas-play');
-        this.gl = canvas.getContext('webgl');
+        this.element = canvas;
+        this.initGL(canvas);
+        this.initShaders(GLShaderBasic);
+        this.clearBuffers();
+        this.initBuffers();
 
-        if (!this.gl) {
-            console.log('WebGL not supported, falling back on experimental-webgl');
-            this.gl = canvas.getContext('experimental-webgl');
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.enable(gl.DEPTH_TEST);
+
+        //.   this.render();
+    }
+
+
+    clearBuffers() {
+
+        this.bufferMesh = {
+            vertices: [],
+            uv: [],
+            color: []
         }
+    }
 
-        if (!this.gl) {
-            alert('Your browser does not support WebGL');
+    addMeshToRenderBuffer(mesh: Mesh) {
+        for (var i = 0; i < mesh._children.length; i++) {
+            this.bufferMesh.vertices.push(mesh._children[i].pos1.x);
+            this.bufferMesh.vertices.push(mesh._children[i].pos1.y);
+            this.bufferMesh.vertices.push(mesh._children[i].pos1.z);
+
+            this.bufferMesh.vertices.push(mesh._children[i].pos2.x);
+            this.bufferMesh.vertices.push(mesh._children[i].pos2.y);
+            this.bufferMesh.vertices.push(mesh._children[i].pos2.z);
+
+            this.bufferMesh.vertices.push(mesh._children[i].pos3.x);
+            this.bufferMesh.vertices.push(mesh._children[i].pos3.y);
+            this.bufferMesh.vertices.push(mesh._children[i].pos3.z);
+
+            this.bufferMesh.uv.push(mesh._children[i].uv1.x);
+            this.bufferMesh.uv.push(mesh._children[i].uv1.y);
+
+            this.bufferMesh.uv.push(mesh._children[i].uv2.x);
+            this.bufferMesh.uv.push(mesh._children[i].uv2.y);
+
+            this.bufferMesh.uv.push(mesh._children[i].uv3.x);
+            this.bufferMesh.uv.push(mesh._children[i].uv3.y);
+
+            this.bufferMesh.color.push(mesh._children[i].color1.r / 255);
+            this.bufferMesh.color.push(mesh._children[i].color1.g / 255);
+            this.bufferMesh.color.push(mesh._children[i].color1.b / 255);
+            //this.bufferMesh.color.push(1);
+            this.bufferMesh.color.push(mesh._children[i].color2.r / 255);
+            this.bufferMesh.color.push(mesh._children[i].color2.g / 255);
+            this.bufferMesh.color.push(mesh._children[i].color2.b / 255);
+            //this.bufferMesh.color.push(1);
+            this.bufferMesh.color.push(mesh._children[i].color3.r / 255);
+            this.bufferMesh.color.push(mesh._children[i].color3.g / 255);
+            this.bufferMesh.color.push(mesh._children[i].color3.b / 255);
+            // this.bufferMesh.color.push(1);
         }
+    }
 
-        var shadowDepthTextureSize = 512;
 
-        var gl = this.gl;
-        gl.enable(gl.DEPTH_TEST)
+    initGL(canvas) {
 
-// We set up controls so that we can drag our mouse or finger to adjust the rotation of
-// the camera about the X and Y axes
-        var canvasIsPressed = false
-        var xRotation = Math.PI / 20
-        var yRotation = 0
-        var xVelocity = 0;
-        var yVelocity = 0;
-        var lastPressX
-        var lastPressY
-        canvas.onmousedown = function (e) {
-            canvasIsPressed = true
-            lastPressX = e.pageX
-            lastPressY = e.pageY
-        }
-        canvas.onmouseup = function () {
-            canvasIsPressed = false
-        }
-        canvas.onmouseout = function () {
-            canvasIsPressed = false
-        }
-        canvas.onmousemove = function (e) {
-            if (canvasIsPressed) {
-                xVelocity = (e.pageY - lastPressY) / 50
-                yVelocity = -(e.pageX - lastPressX) / 50;
+        try {
+            canvas = canvas || <HTMLCanvasElement>document.getElementById('canvas-play');
 
-                lastPressX = e.pageX
-                lastPressY = e.pageY
+            gl = canvas.getContext('webgl');
+
+            if (!gl) {
+                console.log('WebGL not supported, falling back on experimental-webgl');
+                gl = canvas.getContext('experimental-webgl');
             }
+
+            if (!gl) {
+                alert('Your browser does not support WebGL');
+            }
+
+            gl.enable(gl.DEPTH_TEST);
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
+        } catch (e) {
+        }
+        if (!gl) {
+            alert("Could not initialise WebGL, sorry :-(");
+        }
+    }
+
+    getShader(gl, type, data) {
+
+        var shader;
+        if (type == "x-shader/x-fragment") {
+            shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (type == "x-shader/x-vertex") {
+            shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+            return null;
         }
 
-// As you drag your finger we move the camera
-        canvas.addEventListener('touchstart', function (e) {
-            lastPressX = e.touches[0].clientX
-            lastPressY = e.touches[0].clientY
-        })
-        canvas.addEventListener('touchmove', function (e) {
-            e.preventDefault()
-            xVelocity = (e.touches[0].clientY - lastPressY) / 100
-            yVelocity = -(e.touches[0].clientX - lastPressX) / 50
-            
-            lastPressX = e.touches[0].clientX
-            lastPressY = e.touches[0].clientY
-        })
+        gl.shaderSource(shader, data);
+        gl.compileShader(shader);
 
-        /**
-         * Section 2 - Shaders
-         */
-
-        var shadowDepthTextureSize = 1024;
-
-        let lightShader = new GLLightShadowTextureShader();
-        let cameraShader = new GLCameraShadowTextureShader();
-
-        var lightVertexGLSL = lightShader.vertexShader;
-        var lightFragmentGLSL = lightShader.fragmentShader;
-
-// We create a vertex shader that renders the scene from the camera's point of view.
-// This is what you see when you view the demo
-        var cameraVertexGLSL = cameraShader.vertexShader;
-        var cameraFragmentGLSL = cameraShader.fragmentShader;
-
-// Link our light and camera shader programs
-        var cameraVertexShader = gl.createShader(gl.VERTEX_SHADER)
-        gl.shaderSource(cameraVertexShader, cameraVertexGLSL)
-        gl.compileShader(cameraVertexShader)
-
-        var cameraFragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
-        gl.shaderSource(cameraFragmentShader, cameraFragmentGLSL)
-        gl.compileShader(cameraFragmentShader)
-
-        var cameraShaderProgram = gl.createProgram()
-        gl.attachShader(cameraShaderProgram, cameraVertexShader)
-        gl.attachShader(cameraShaderProgram, cameraFragmentShader)
-        gl.linkProgram(cameraShaderProgram)
-
-        var lightVertexShader = gl.createShader(gl.VERTEX_SHADER)
-        gl.shaderSource(lightVertexShader, lightVertexGLSL)
-        gl.compileShader(lightVertexShader)
-
-        var lightFragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
-        gl.shaderSource(lightFragmentShader, lightFragmentGLSL)
-        gl.compileShader(lightFragmentShader)
-
-        var lightShaderProgram = gl.createProgram()
-        gl.attachShader(lightShaderProgram, lightVertexShader)
-        gl.attachShader(lightShaderProgram, lightFragmentShader)
-        gl.linkProgram(lightShaderProgram)
-
-        /**
-         * Setting up our buffered data
-         */
-
-
-        let drawModel = new GLPlaneBufferUV();
-        drawModel.scale(8);
-
-        let box = new GLCubeBufferUV();
-        box.translate(0,1,0);
-
-            drawModel.appendBuffer(box);
-
-        var bufferedVertices = [];
-        var bufferedIndices = [];
-
-        var vertexPositionAttrib;
-
-
-        var shadowFramebuffer = gl.createFramebuffer()
-        var shadowDepthTexture = gl.createTexture()
-        var renderBuffer = gl.createRenderbuffer()
-
-        var glPositionBuffer = gl.createBuffer()
-        var glIndexBuffer = gl.createBuffer()
-
-        var lightProjectionMatrix = mat4.ortho([], -20, 20, -20, 20, -20.0, 80)
-        var lightViewMatrix = mat4.lookAt([], [0, 4, 0], [3, 0, 5], [0, 1, 0])
-
-
-        var shadowPMatrix;
-        var shadowMVMatrix;
-        var uPMatrix;
-        var uMVMatrix;
-        var uColor;
-        var uLightMatrix;
-        var uLightProjection;
-        var samplerUniform;
-
-
-
-        function setupBufferedGeometry(drawModel) {
-
-            bufferedVertices = drawModel.vertices;
-            bufferedIndices = drawModel.indices;
-
-            /**
-             * Camera shader setup
-             */
-
-// We enable our vertex attributes for our camera's shader.
-            vertexPositionAttrib = gl.getAttribLocation(lightShaderProgram, 'aVertexPosition')
-            gl.bindBuffer(gl.ARRAY_BUFFER, glPositionBuffer)
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bufferedVertices), gl.STATIC_DRAW)
-            gl.vertexAttribPointer(vertexPositionAttrib, 3, // Number of elements per attribute
-                gl.FLOAT, // Type of elements
-                gl.FALSE,
-                5 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-                0 // Offset from the beginning of a single vertex to this attribute
-            )
-
-
-            gl.enableVertexAttribArray(vertexPositionAttrib);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, glIndexBuffer)
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(bufferedIndices), gl.STATIC_DRAW)
-
-
-            /**
-             * Light shader setup
-             */
-
-            gl.useProgram(lightShaderProgram)
-
-// This section is the meat of things. We create an off screen frame buffer that we'll render
-// our scene onto from our light's viewpoint. We output that to a color texture `shadowDepthTexture`.
-// Then later our camera shader will use `shadowDepthTexture` to determine whether or not fragments
-// are in the shadow.
-//            var shadowFramebuffer = gl.createFramebuffer()
-            gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFramebuffer)
-
-            //var shadowDepthTexture = gl.createTexture()
-            gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, shadowDepthTextureSize, shadowDepthTextureSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
-
-           // var renderBuffer = gl.createRenderbuffer()
-            gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer)
-            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, shadowDepthTextureSize, shadowDepthTextureSize)
-
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, shadowDepthTexture, 0)
-            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer)
-
-            gl.bindTexture(gl.TEXTURE_2D, null)
-            gl.bindRenderbuffer(gl.RENDERBUFFER, null)
-
-// We create an orthographic projection and view matrix from which our light
-// will vie the scene
-
-            shadowPMatrix = gl.getUniformLocation(lightShaderProgram, 'uPMatrix')
-            shadowMVMatrix = gl.getUniformLocation(lightShaderProgram, 'uMVMatrix')
-
-            gl.uniformMatrix4fv(shadowPMatrix, false, lightProjectionMatrix)
-            gl.uniformMatrix4fv(shadowMVMatrix, false, lightViewMatrix)
-
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-
-            /**
-             * Scene uniforms
-             */
-            gl.useProgram(cameraShaderProgram)
-
-            samplerUniform = gl.getUniformLocation(cameraShaderProgram, 'depthColorTexture')
-
-            gl.activeTexture(gl.TEXTURE0)
-            gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
-            gl.uniform1i(samplerUniform, 0)
-
-            uMVMatrix = gl.getUniformLocation(cameraShaderProgram, 'uMVMatrix')
-            uPMatrix = gl.getUniformLocation(cameraShaderProgram, 'uPMatrix')
-            uLightMatrix = gl.getUniformLocation(cameraShaderProgram, 'lightMViewMatrix')
-            uLightProjection = gl.getUniformLocation(cameraShaderProgram, 'lightProjectionMatrix')
-            uColor = gl.getUniformLocation(cameraShaderProgram, 'uColor')
-
-            gl.uniformMatrix4fv(uLightMatrix, false, lightViewMatrix)
-            gl.uniformMatrix4fv(uLightProjection, false, lightProjectionMatrix)
-            gl.uniformMatrix4fv(uPMatrix, false, mat4.perspective([], glMatrix.toRadian(45), surface._width / surface._height, 0.01, 900.0))
-
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            alert(gl.getShaderInfoLog(shader));
+            return null;
         }
 
-// We rotate the dragon about the y axis every frame
-        var dragonRotateY = 0
-        function drawShadowMap () {
+        return shader;
+    }
 
-            gl.useProgram(lightShaderProgram)
 
-            // Draw to our off screen drawing buffer
-            gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFramebuffer)
+    initShaders(shader: any) {
 
-            // Set the viewport to our shadow texture's size
-            gl.viewport(0, 0, shadowDepthTextureSize, shadowDepthTextureSize)
-            gl.clearColor(0, 0, 0, 1)
-            gl.clearDepth(1.0)
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+        // @ts-ignore
+        let GLShader = new shader();
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, glPositionBuffer)
-            gl.vertexAttribPointer(vertexPositionAttrib, 3, // Number of elements per attribute
-                gl.FLOAT, // Type of elements
-                gl.FALSE,
-                5 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-                0 // Offset from the beginning of a single vertex to this attribute
-            );
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, glIndexBuffer)
+        var fragmentShader = this.getShader(gl, "x-shader/x-fragment", GLShader.fragmentShader);
+        var vertexShader = this.getShader(gl, "x-shader/x-vertex", GLShader.vertexShader);
 
-            // We draw our dragon onto our shadow map texture
-            var lightModelMVMatrix = mat4.create()
-                // mat4.rotateY(lightModelMVMatrix, lightModelMVMatrix, dragonRotateY)
-            mat4.multiply(lightModelMVMatrix, lightViewMatrix, lightModelMVMatrix)
-            gl.uniformMatrix4fv(shadowMVMatrix, false, lightModelMVMatrix)
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
 
-            gl.drawElements(gl.TRIANGLES, bufferedIndices.length, gl.UNSIGNED_SHORT, 0);
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+            alert("Could not initialise shaders");
         }
 
+        gl.useProgram(shaderProgram);
+
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "vertPosition");
+        shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "vertColor");
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+        gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+
+        shaderProgram.projectionMatrixUniform = gl.getUniformLocation(shaderProgram, "mProj");
+        shaderProgram.modelMatrixUniform = gl.getUniformLocation(shaderProgram, "mWorld");
+    }
 
 
-        this._render_loop = function () {
+    setMatrixUniforms() {
+        gl.uniformMatrix4fv(shaderProgram.projectionMatrixUniform, false, projectionMatrix);
+        gl.uniformMatrix4fv(shaderProgram.modelMatrixUniform, false, modelMatrix);
+    }
 
-            xVelocity *= 0.8;
-            yVelocity *= 0.8;
+    initBuffers() {
 
-            xRotation += xVelocity
-            yRotation += yVelocity
+        vertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.bufferMesh.vertices), gl.STATIC_DRAW);
+        vertexPositionBuffer.itemSize = 3;
+        vertexPositionBuffer.numItems = this.bufferMesh.vertices.length / vertexPositionBuffer.itemSize;
 
-            xRotation = Math.min(xRotation, Math.PI / 2.5);
-            xRotation = Math.max(xRotation, 0.1);
-
-            setupBufferedGeometry(surface._draw_model||drawModel);
-            drawShadowMap();
-            gl.useProgram(cameraShaderProgram)
-            gl.viewport(0, 0, surface._width, surface._height)
-            gl.clearColor(0.98, 0.98, 0.98, 1)
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-            // Create our camera view matrix
-            var camera = mat4.create()
-            mat4.translate(camera, camera, [12, 0, 24])
-            var xRotMatrix = mat4.create()
-            var yRotMatrix = mat4.create()
-            mat4.rotateX(xRotMatrix, xRotMatrix, -xRotation)
-            mat4.rotateY(yRotMatrix, yRotMatrix, yRotation)
-            mat4.multiply(camera, xRotMatrix, camera)
-            mat4.multiply(camera, yRotMatrix, camera)
-            camera = mat4.lookAt(camera, [camera[12], camera[13], camera[14]], [0, 1, 0], [0, 1, 0])
-
-            gl.uniformMatrix4fv(uPMatrix, false, mat4.perspective([], glMatrix.toRadian(45), surface._width / surface._height, 0.01, 900.0))
+        vertexColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.bufferMesh.color), gl.STATIC_DRAW);
+        vertexColorBuffer.itemSize = 3;
+        vertexColorBuffer.numItems = this.bufferMesh.color.length / vertexColorBuffer.itemSize;
+    }
 
 
-            var dragonModelMatrix = mat4.create()
-            mat4.rotateY(dragonModelMatrix, dragonModelMatrix, dragonRotateY)
+    render() {
 
-            // We use the light's model view matrix of our dragon so that our camera knows if
-            // parts of the dragon are in the shadow
-            var lightModelMVMatrix = mat4.create()
-            mat4.multiply(lightModelMVMatrix, lightViewMatrix, dragonModelMatrix)
-            gl.uniformMatrix4fv(uLightMatrix, false, lightModelMVMatrix)
+        this.initBuffers();
 
-            gl.uniformMatrix4fv(
-                uMVMatrix,
-                false,
-                mat4.multiply(dragonModelMatrix, camera, dragonModelMatrix)
-            )
+        // rot += 0.01;
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        console.log('rendering', 0, 0, gl.viewportWidth, gl.viewportHeight, this.bufferMesh);
+        gl.clearColor(0.98, 0.98, 0.98, 1)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+        //  gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            gl.uniform3fv(uColor, [0.36, 0.66, 0.8])
+        var rads = 45 * (Math.PI / 180);
 
-            gl.activeTexture(gl.TEXTURE0)
-            gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
-            gl.uniform1i(samplerUniform, 0)
+        mat4.perspective(projectionMatrix, rads, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
-            gl.drawElements(gl.TRIANGLES, bufferedIndices.length, gl.UNSIGNED_SHORT, 0)
+        mat4.identity(modelMatrix);
+        // mat4.rotateY(modelMatrix, modelMatrix, rot);
+        mat4.translate(modelMatrix, modelMatrix, [camera.from.x, camera.from.z, camera.from.y]); //camera position
+        mat4.lookAt(modelMatrix, [camera.from.x, camera.from.z, camera.from.y], [camera.to.x, camera.to.z, camera.to.y], [camera.up.x, -camera.up.y, camera.up.z]);
 
-        };
+        //   mat4.identity(modelMatrix);
 
+        //  mat4.translate(modelMatrix, modelMatrix, [3.0, 0.0, 0.0]);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        this.setMatrixUniforms();
+        gl.drawArrays(gl.TRIANGLES, 0, vertexPositionBuffer.numItems);
     }
 
     maximize() {
-        let node = this.getElement().parentNode;
-        if (node) {
-            let w = node.offsetWidth - (parseInt(node.style.paddingRight || "0", 10) + parseInt(node.style.paddingLeft || "0", 10) + parseInt(node.style.borderLeftWidth || "0", 10)) || 1;
-            let h = node.offsetHeight || this.getHeight() || 1;
-            if (this._width !== w * this._scaling || this._height !== h * this._scaling) {
-                this.resize(w * this._scaling, h * this._scaling);
-            }
+        //let node = this.getElement().parentNode;
+        //if (node) {
+        let w = window.innerWidth;// - (parseInt(node.style.paddingRight || "0", 10) + parseInt(node.style.paddingLeft || "0", 10) ) || 1;
+        let h = window.innerHeight;// || this.getHeight() || 1;
+        if (this.getWidth() !== w * this._scaling || this.getHeight() !== h * this._scaling) {
+            this.resize(w * this._scaling, h * this._scaling);
         }
+        // }*/
+    }
+
+    getWidth() {
+        return this.element.offsetWidth;
+    }
+
+    getHeight() {
+        return this.element.offsetHeight;
     }
 
     getElement() {
         return this.element;
     }
 
-    getContext() {
-        return this.gl;
-    }
-
-    getScaling() {
-        return this._scaling;
-    }
-
-    getWidth() {
-        return this._width;
-    }
-
-    getHeight() {
-        return this._height;
-    }
-
-    attach(x, y) {
-        /* document.body.appendChild(this.element);
-         this.element.style.position = "fixed";
-         this.element.style.left = x + "px";
-         this.element.style.top = y + "px";
-         return this;*/
-    }
-
-    createShadowPrograms(){
-
-    }
-
     resize(width, height) {
         this.element.width = width;
         this.element.height = height;
-        this._width = width;
-        this._height = height;
-        this.gl.width = width;
-        this.gl.height = height;
-        this.gl.viewportWidth = width;
-        this.gl.viewportHeight = height;
-        //this._camera.ascent = width/height;
+        gl.width = width;
+        gl.height = height;
+        gl.viewportWidth = width;
+        gl.viewportHeight = height;
 
-        this.gl.viewport(0, 0, width, height);
+        gl.viewport(0, 0, width, height);
 
         if (this._scaling !== 1) {
             this.element.style.width = "100%";
-            /*this.element.style.transform = "scale(" + (1 / this._scaling) + ")";
-            this.element.style.WebkitTransform = "scale(" + (1 / this._scaling) + ")";
-            this.element.style.msTransform = "scale(" + (1 / this._scaling) + ")";
-            this.element.style.transformOrigin = "0 0";
-            this.element.style.WebkitTransformOrigin = "0 0";
-            this.element.style.msTransformOrigin = "0 0";*/
         }
 
         return this;
     }
 
-    render(){
-        return this._render_loop();
-    }
 
 }
