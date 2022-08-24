@@ -14,16 +14,16 @@ export function byteLength(str) {
     return s;
 }
 
-export function findInArray(arr:any[], prop:string, value?){
+export function findInArray(arr: any[], prop: string, value?) {
     let found = undefined;
-    arr.forEach((e)=>{
-        if (e[prop] !== undefined){
-            if (value !== undefined){
-                if (value === e[prop]){
+    arr.forEach((e) => {
+        if (e[prop] !== undefined) {
+            if (value !== undefined) {
+                if (value === e[prop]) {
                     found = e;
                     return e;
                 }
-            }else{
+            } else {
                 found = e;
                 return e;
             }
@@ -32,17 +32,17 @@ export function findInArray(arr:any[], prop:string, value?){
     return found;
 }
 
-export function findIndexInArray(arr:any[], prop:string, value?){
+export function findIndexInArray(arr: any[], prop: string, value?) {
     let found = -1;
-    for (let i =0; i<arr.length;i++){
+    for (let i = 0; i < arr.length; i++) {
         let e = arr[i];
-        if (e[prop] !== undefined){
-            if (value !== undefined){
-                if (value === e[prop]){
+        if (e[prop] !== undefined) {
+            if (value !== undefined) {
+                if (value === e[prop]) {
                     found = i;
                     return i;
                 }
-            }else{
+            } else {
                 found = i;
                 return i;
             }
@@ -217,6 +217,14 @@ export const mimeTypes = {
     'manifest': 'text/cache-manifest'
 };
 
+export function RadToDeg(rad) {
+    return rad * 57.2958;
+}
+
+export function DegToRad(deg) {
+    return 0.0174533 * deg;
+}
+
 export function timeago(dateString, now?) {
     var rightNow = now || new Date().getTime();
     var then = new Date(dateString).getTime();
@@ -273,8 +281,9 @@ export function timeago(dateString, now?) {
         return "over a year ago";
     }
 }
+
 export function shuffleArray(array) {
-    let currentIndex = array.length,  randomIndex;
+    let currentIndex = array.length, randomIndex;
 
     // While there remain elements to shuffle...
     while (currentIndex != 0) {

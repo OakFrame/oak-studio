@@ -12,13 +12,19 @@ export function getDistance(x1, y1, x2, y2) {
     return Math.sqrt(x * x + y * y);
 }
 
+export  interface SHIPPOptionsInterface {
+    map?:any[];
+    width: number;
+    height: number;
+}
+
 export class SHIPP<T> {
 
-    private map: Array<any>;
+    private map: any[];
     private width: number;
     private height: number;
 
-    constructor(shipp?: any) {
+    constructor(shipp?:any) {
         this.map = [];
         this.width = Math.floor(32);
         this.height = Math.floor(32);
@@ -78,12 +84,18 @@ export class SHIPP<T> {
         }
         return m;
     }
-
+    toJSON():SHIPPOptionsInterface{
+        return {
+            map:this.map,
+            width:this.width,
+            height:this.height
+        }
+    }
     blur(amt) {
         if (amt == 0) {
             return;
         }
-        let m = new SHIPP(this);
+        let m = new SHIPP(this.toJSON());
 
         for (let x = 0; x <= this.getWidth(); x++) {
             for (let y = 0; y <= this.getHeight(); y++) {
@@ -125,7 +137,7 @@ export class SHIPP<T> {
 
     run(fn) {
         let self = this;
-        let tmp = new SHIPP(this);
+        let tmp = new SHIPP(this.toJSON());
         this.map.forEach(function (m, i) {
             let x = (i) % self.width;
             let y = (i / self.width) | 0;
@@ -181,7 +193,7 @@ export class SHIPP<T> {
         let f = fn || function (value, x, y) {
             return tag;
         };
-        let temp = new SHIPP(this);
+        let temp = new SHIPP(this.toJSON());
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.regionContains(tag, x - size, y - size, x + size, y + size)) {
@@ -278,10 +290,6 @@ export class SHIPP<T> {
 
         let dir = v.pointTo(v2).mulI(-1).toRad();
         let dist = v.set(x1, y1).dist(v2);
-
-        console.log('line', x1, y1, x2, y2, v.set(x1, y1).dist(v2));
-        console.log('dist', dist);
-        console.log('dir', dir);
 
         for (let p2 = 1; p2 < dist; p2 += 0.5) {
             let dx = x1 + ((Math.sin(dir)) * p2) | 0;

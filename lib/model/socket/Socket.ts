@@ -20,9 +20,9 @@ export class Socket {
         this.connected = false;
         //@ts-ignore
         if (window) {
-            this.loop = window.setInterval(this.healthcheck(), 3250);
+            this.loop = window.setInterval(this.healthcheck(), 31250);
         } else {
-            this.loop = setInterval(this.healthcheck(), 3250);
+            this.loop = setInterval(this.healthcheck(), 31250);
         }
     }
 
@@ -44,8 +44,7 @@ export class Socket {
                 if (!this.endpoint) {
                     return;
                 }
-
-                this.connect(this.endpoint);
+               // this.connect(this.endpoint);
 
             } else {
                 this._socket.send(JSON.stringify({

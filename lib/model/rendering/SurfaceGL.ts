@@ -10,6 +10,7 @@ import {
 import {GLCubeBuffer, GLCubeBufferUV, GLPlaneBufferUV} from "./GLBuffer";
 import {Sprite} from "./Sprite";
 import {Mesh} from "./Mesh";
+import {Camera} from "../interactive/Camera";
 
 
 var gl;
@@ -21,9 +22,9 @@ var shaderProgram;
 var cubeRotation = 0.0;
 
 
-let camera = {
+const camera = {
     from: (new Vec3()).set(0, 20, 20),
-    to: (new Vec3()).set(0, 0, 0),
+    to: (new Vec3()).set(0, 0, 1),
     up: (new Vec3()).set(0, 0, 1)
 }
 
@@ -36,7 +37,7 @@ export class SurfaceGL {
 
     constructor(canvas) {
         //var canvas = document.getElementById("lesson01-canvas");
-        this._scaling = (window.innerWidth < 600 ? 1 : window.devicePixelRatio) || 1;
+        this._scaling = (window.devicePixelRatio ? window.devicePixelRatio : 1);
 
         this.element = canvas;
         this.initGL(canvas);
@@ -50,6 +51,11 @@ export class SurfaceGL {
         //.   this.render();
     }
 
+    setCamera(cam:Camera){
+        camera.from = cam.from;
+        camera.to = cam.to;
+        camera.up = cam.up;
+    }
 
     clearBuffers() {
 
@@ -62,15 +68,15 @@ export class SurfaceGL {
 
     addMeshToRenderBuffer(mesh: Mesh) {
         for (var i = 0; i < mesh._children.length; i++) {
-            this.bufferMesh.vertices.push(mesh._children[i].pos1.x);
+            this.bufferMesh.vertices.push(-mesh._children[i].pos1.x);
             this.bufferMesh.vertices.push(mesh._children[i].pos1.y);
             this.bufferMesh.vertices.push(mesh._children[i].pos1.z);
 
-            this.bufferMesh.vertices.push(mesh._children[i].pos2.x);
+            this.bufferMesh.vertices.push(-mesh._children[i].pos2.x);
             this.bufferMesh.vertices.push(mesh._children[i].pos2.y);
             this.bufferMesh.vertices.push(mesh._children[i].pos2.z);
 
-            this.bufferMesh.vertices.push(mesh._children[i].pos3.x);
+            this.bufferMesh.vertices.push(-mesh._children[i].pos3.x);
             this.bufferMesh.vertices.push(mesh._children[i].pos3.y);
             this.bufferMesh.vertices.push(mesh._children[i].pos3.z);
 
@@ -123,6 +129,9 @@ export class SurfaceGL {
         if (!gl) {
             alert("Could not initialise WebGL, sorry :-(");
         }
+
+        gl.disable(gl.CULL_FACE);
+        //gl.cullFace(gl.BACK);
     }
 
     getShader(gl, type, data) {
@@ -204,20 +213,20 @@ export class SurfaceGL {
 
         // rot += 0.01;
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        console.log('rendering', 0, 0, gl.viewportWidth, gl.viewportHeight, this.bufferMesh);
+       // console.log('rendering', 0, 0, gl.viewportWidth, gl.viewportHeight, this.bufferMesh);
         gl.clearColor(0.98, 0.98, 0.98, 1)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
         //  gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        var rads = 45 * (Math.PI / 180);
+        var rads = 20 * (Math.PI / 180);
 
         mat4.perspective(projectionMatrix, rads, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
         mat4.identity(modelMatrix);
         // mat4.rotateY(modelMatrix, modelMatrix, rot);
-        mat4.translate(modelMatrix, modelMatrix, [camera.from.x, camera.from.z, camera.from.y]); //camera position
-        mat4.lookAt(modelMatrix, [camera.from.x, camera.from.z, camera.from.y], [camera.to.x, camera.to.z, camera.to.y], [camera.up.x, -camera.up.y, camera.up.z]);
+       // mat4.translate(modelMatrix, modelMatrix, [camera.from.x, camera.from.z, camera.from.y]); //camera position
+        mat4.lookAt(modelMatrix, [-camera.from.x, camera.from.y, camera.from.z], [-camera.to.x, camera.to.y, camera.to.z], [-camera.up.x, camera.up.y, camera.up.z]);
 
         //   mat4.identity(modelMatrix);
 

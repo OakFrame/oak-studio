@@ -8,7 +8,7 @@ var Tri3_Temp = {
     a: 0, i: 0, t: 0, e: 0, u: 0, v: 0, f: 0, g: 0, s: 0, c: 0, h: 0, M: 0
 };
 
-function rayTriangle(origin, direction, tri) { // rayTriangle(from:Vec3, direction:Vec3 triangle:Face3)
+function rayTriangle(origin:Vec3, direction:Vec3, tri:Face3) { // rayTriangle(from:Vec3, direction:Vec3 triangle:Face3)
     Tri3_Temp.a = (tri.pos2.y - tri.pos1.y) * (tri.pos3.z - tri.pos1.z) - (tri.pos3.y - tri.pos1.y) * (tri.pos2.z - tri.pos1.z);
     Tri3_Temp.i = (tri.pos2.z - tri.pos1.z) * (tri.pos3.x - tri.pos1.x) - (tri.pos3.z - tri.pos1.z) * (tri.pos2.x - tri.pos1.x);
     Tri3_Temp.t = (tri.pos2.x - tri.pos1.x) * (tri.pos3.y - tri.pos1.y) - (tri.pos3.x - tri.pos1.x) * (tri.pos2.y - tri.pos1.y);
@@ -38,20 +38,20 @@ function rayTriangle(origin, direction, tri) { // rayTriangle(from:Vec3, directi
  */
 export class Face3 {
 
-    public pos1;
-    public uv1;
-    public pos2;
-    public uv2;
-    public pos3;
-    public uv3;
+    public pos1:Vec3;
+    public uv1:Vec2;
+    public pos2:Vec3;
+    public uv2:Vec2;
+    public pos3:Vec3;
+    public uv3:Vec2;
     public color1: RGB;
     public color2: RGB;
     public color3: RGB;
-    public center;
-    public normal;
-    public _cullvec;
-    public _dotvec;
-    public _depth;
+    public center:Vec3;
+    public normal:Vec3;
+    public _cullvec:Vec3;
+    public _dotvec:Vec3;
+    public _depth:number;
 
     constructor() {
 
@@ -76,7 +76,10 @@ export class Face3 {
     }
 
 
-    set(x1, y1, z1, u1, v1, x2, y2, z2, u2, v2, x3, y3, z3, u3, v3, r1, g1, b1, r2, g2, b2, r3, g3, b3) {
+    set(x1:number, y1:number, z1:number, u1:number, v1:number,
+        x2:number, y2:number, z2:number, u2:number, v2:number,
+        x3:number, y3:number, z3:number, u3:number, v3:number,
+        r1:number, g1:number, b1:number, r2:number, g2:number, b2:number, r3:number, g3:number, b3:number):Face3 {
         this.pos1.set(x1, y1, z1);
         this.uv1.set(u1, v1);
 
@@ -99,14 +102,14 @@ export class Face3 {
     /**
      * @type {function():Vec3}
      */
-    getcenter() {
+    getcenter():Vec3 {
         return new Vec3().set((this.pos1.x + this.pos2.x + this.pos3.x) / 3, (this.pos1.y + this.pos2.y + this.pos3.y) / 3, (this.pos1.z + this.pos2.z + this.pos3.z) / 3);
     };
 
     /**
      * @type {function():Vec3}
      */
-    recalc() {
+    recalc():Face3 {
         this.center.set((this.pos1.x + this.pos2.x + this.pos3.x) / 3, (this.pos1.y + this.pos2.y + this.pos3.y) / 3, (this.pos1.z + this.pos2.z + this.pos3.z) / 3);
         return this;
     };
@@ -114,7 +117,7 @@ export class Face3 {
     /**
      * @type {function():Vec3}
      */
-    getnormal() {
+    getnormal():Vec3 {
 
         var ax, ay, az, bx, by, bz, rx, ry, rz, m;
 
@@ -143,7 +146,7 @@ export class Face3 {
     /**
      * @type {function():Face3}
      */
-    clone() {
+    clone():Face3 {
         return new Face3().set(this.pos1.x, this.pos1.y, this.pos1.z, this.uv1.x, this.uv1.y,
             this.pos2.x, this.pos2.y, this.pos2.z, this.uv2.x, this.uv2.y,
             this.pos3.x, this.pos3.y, this.pos3.z, this.uv3.x, this.uv3.y,
@@ -154,7 +157,7 @@ export class Face3 {
     /**
      * @type {function(Face3):Face3}
      */
-    copy(face3) {
+    copy(face3:Face3):Face3 {
         this.pos1.copy(face3.pos1);
         this.pos2.copy(face3.pos2);
         this.pos3.copy(face3.pos3);
@@ -164,10 +167,8 @@ export class Face3 {
         return this;
     };
 
-    /**
-     * @type {function():Face3}
-     */
-    flipX() {
+
+    flipX():Face3 {
         //this.pos1.flipX(vec3);
         //this.pos2.flipX(vec3);
         // this.pos3.flipX(vec3);
@@ -182,10 +183,7 @@ export class Face3 {
         return this;
     };
 
-    /**
-     * @type {function(number,number,number):Face3}
-     */
-    rotate(rx, ry, rz) {
+    rotate(rx:number, ry:number, rz:number) {
         this.pos1.rotX(rx);
         this.pos2.rotX(rx);
         this.pos3.rotX(rx);
@@ -201,7 +199,7 @@ export class Face3 {
     /**
      * @type {function(number):Face3}
      */
-    rotX(rot) {
+    rotX(rot:number) {
         this.pos1.rotX(rot);
         this.pos2.rotX(rot);
         this.pos3.rotX(rot);
@@ -211,7 +209,7 @@ export class Face3 {
     /**
      * @type {function(number):Face3}
      */
-    rotY(rot) {
+    rotY(rot:number) {
         this.pos1.rotY(rot);
         this.pos2.rotY(rot);
         this.pos3.rotY(rot);
@@ -221,7 +219,7 @@ export class Face3 {
     /**
      * @type {function(number):Face3}
      */
-    rotZ(rot) {
+    rotZ(rot:number) {
         this.pos1.rotZ(rot);
         this.pos2.rotZ(rot);
         this.pos3.rotZ(rot);
@@ -238,7 +236,7 @@ export class Face3 {
         return this;
     };
 
-    size() {
+    size():number {
 
         var r: any = {},
             n: any = {},
@@ -289,20 +287,19 @@ export class Mesh {
     translate(vec: Vec3): Mesh {
 
         this._children.forEach(function (face) {
-            this._children.push(face.translate(vec).recalc());
+            face.translate(vec).recalc();
         });
         return this;
     }
 
 
     setColor(rgb: RGB) {
-        let m = new Mesh();
         this._children.forEach(function (face) {
             face.color1 = rgb;
             face.color2 = rgb;
             face.color3 = rgb;
         });
-        return m;
+        return this;
     }
 
     join(mesh, parent) {
@@ -544,7 +541,8 @@ export class Mesh {
             } else if (checkLineIndices === 1) { // READING VERTICES
                 if (line_arr[0]) {
 
-                    let vertex = {};
+                    // @ts-ignore
+                    let vertex:PLYVertexProperty = {};
                     for (let p = 0; p < plyProperties.properties.length; p++) {
                         let prop = plyProperties.properties[p];
                         vertex[prop.name] = PlyPropertyTypeToValue(prop.type, line_arr[p]);
@@ -658,7 +656,18 @@ export class Mesh {
 
 }
 
-export class PlyPropertyType {
+export interface PLYVertexProperty {
+    x:number;
+    y:number;
+    z:number;
+    s:number;
+    t:number;
+    red:number;
+    green:number;
+    blue:number;
+}
+
+export interface PlyPropertyType {
     type: string;
     name: string;
 }

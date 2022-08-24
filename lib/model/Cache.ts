@@ -16,7 +16,7 @@ export class CacheModel extends GameEventEmitter {
     private projects: Resource<any>[] = [];
     public maxByteSize: number = 128;
     public memoryCache = [];
-    private resourceTypes : string[] = [];
+    private resourceTypes: string[] = [];
 
     getDataProvider() {
         return this.dataProvider;
@@ -84,7 +84,7 @@ export class CacheModel extends GameEventEmitter {
     }
 
     mutate(key?, value?) {
-          console.log('MUTATING CACHE', this.serialize());
+        console.log('MUTATING CACHE', this.serialize());
         window.localStorage.setItem('kp-cache', this.serializeFiltered());
         this.publish('mutate', this.serialize());
     }
@@ -129,7 +129,7 @@ export class CacheModel extends GameEventEmitter {
         return res;
     }
 
-    getResources(res){
+    getResources(res) {
         return this.cache.getResources(res);
     }
 
@@ -143,17 +143,17 @@ export class CacheModel extends GameEventEmitter {
         return this.cache.getResources('project');
     }
 
-/*    getImages() {
-        return (this.cache.getResources("image")).sort((a, b) => {
-            return b._last_modified - a._last_modified;
-        });
-    }
+    /*    getImages() {
+            return (this.cache.getResources("image")).sort((a, b) => {
+                return b._last_modified - a._last_modified;
+            });
+        }
 
-    getComments() {
-        return (this.cache.getResources("comment")).sort((a, b) => {
-            return b._last_modified - a._last_modified;
-        });
-    }*/
+        getComments() {
+            return (this.cache.getResources("comment")).sort((a, b) => {
+                return b._last_modified - a._last_modified;
+            });
+        }*/
 
     search(schema?, filter?) {
         this.registerSchema(schema);
@@ -165,14 +165,14 @@ export class CacheModel extends GameEventEmitter {
         return this.cache.getResourceByUUID(schema, uuid);
     }
 
-    registerSchema(schema:string){
-        if (this.resourceTypes.indexOf(schema) == -1){
+    registerSchema(schema: string) {
+        if (this.resourceTypes.indexOf(schema) == -1) {
             this.resourceTypes.push(schema);
         }
     }
 
 
-     getSprite(id): Sprite {
+    getSprite(id): Sprite {
         let str_id = JSON.stringify(id);
         if (this.memoryCache[str_id]) {
             return this.memoryCache[str_id];
@@ -218,7 +218,7 @@ export class CacheModel extends GameEventEmitter {
         return id;
     }*/
 
-    async addResource(schema:string,resource: Resource<any>) {
+    async addResource(schema: string, resource: Resource<any>) {
         this.registerSchema(schema);
         await this.cache.addResource(schema, resource);
     }
@@ -238,8 +238,8 @@ export class CacheModel extends GameEventEmitter {
     getSerializedResourcesFiltered() {
 
         let ob = {};
-        this.resourceTypes.forEach((type)=>{
-            ob['type']= this.cache.getResources(type).filter((p) => {
+        this.resourceTypes.forEach((type) => {
+            ob['type'] = this.cache.getResources(type).filter((p) => {
                 return (p.status === CacheResourceStatus.THUMB || p.status === CacheResourceStatus.FULL)
             })
         });
@@ -353,13 +353,19 @@ export class Resource<T> {
             if (props._id) {
                 this._id = props._id;
             }
-            if (props.data) {
-                if (dataObject){
+
+            if (dataObject) {
+                if (props.data) {
                     this.data = new dataObject(props.data);
-                }else {
+                } else {
+                    this.data = new dataObject();
+                }
+            } else {
+                if (props.data) {
                     this.data = props.data;
                 }
             }
+
             if (props._thumbnail) {
                 this._thumbnail = props._thumbnail;
             }
@@ -373,11 +379,11 @@ export class Resource<T> {
         this._last_modified = Date.now();
     }
 
-    setOwner(uuid:string){
+    setOwner(uuid: string) {
         this._owner = uuid;
     }
 
-    getDataObject(){
+    getDataObject() {
         return this.data;
     }
 

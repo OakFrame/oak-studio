@@ -107,7 +107,7 @@ export class Vec3 {
 
     /** @type {function(number):Vec3} */
     rotZ(deg) {
-        deg *= (Math.PI / 180);
+        //deg *= (Math.PI / 180);
         //let b = new Vec3().set((this.x * Math.cos(a) - this.y * Math.sin(a)), (this.x * Math.sin(a) + this.y * Math.cos(a)), this.z);
         Vec3_TempV.x = (this.x * Math.cos(deg) - this.y * Math.sin(deg));
         Vec3_TempV.y = (this.x * Math.sin(deg) + this.y * Math.cos(deg));

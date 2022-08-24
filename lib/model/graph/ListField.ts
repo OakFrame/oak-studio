@@ -1,8 +1,8 @@
 import {Field} from "../Field";
 
 export class ListField extends Field {
-    _type: string;
-    _value: any[];
+    _type: string = "List";
+    _value: any[] = [];
 
     _displayArea = document.createElement('div');
     _inputArea = document.createElement('ul');

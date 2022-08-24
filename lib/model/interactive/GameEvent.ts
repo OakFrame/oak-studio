@@ -13,7 +13,7 @@ export class GameEventEmitter {
     _subscribers = [];
 
     on(identifier: string, callback: any): string {
-        console.log("SUBSCRIBING TO ", identifier);
+
         if (!this._subscribers[identifier]) {
             this._subscribers[identifier] = [];
         }

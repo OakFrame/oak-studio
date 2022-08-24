@@ -43,7 +43,7 @@ describe('SHIPP', () => {
 
     it('should be created', () => {
 
-        let shipp = new SHIPP(2, 2);
+        let shipp = new SHIPP({width: 2, height: 2});
 
         expect(shipp).not.equal(undefined);
         expect(shipp.getMap()).not.equal(undefined);
@@ -55,7 +55,7 @@ describe('SHIPP', () => {
 
         let v = 0.25;
 
-        let shipp = new SHIPP(2, 2);
+        let shipp = new SHIPP({width: 2, height: 2});
 
         shipp.setPosition(0, 0, v);
         shipp.setPosition(1, 0, v * 2);
@@ -73,7 +73,7 @@ describe('SHIPP', () => {
 
         let v = 0.25;
 
-        let shipp = new SHIPP(2, 2);
+        let shipp = new SHIPP({width: 2, height: 2});
 
         shipp.setPosition(0, 0, v);
         shipp.setPosition(1, 0, v * 2);
@@ -92,7 +92,7 @@ describe('SHIPP', () => {
     it('should place cluster', () => {
 
 
-        let shipp = new SHIPP(4, 4);
+        let shipp = new SHIPP({width: 4, height: 4});
 
         shipp.placeCluster(1, 1, 2, 2, 1);
 
@@ -107,8 +107,8 @@ describe('SHIPP', () => {
 
     it('should blur', () => {
 
-        let shipp = new SHIPP(9, 9);
-        let blur = new SHIPP(2, 1);
+        let shipp = new SHIPP({width: 9, height: 9});
+        let blur = new SHIPP({width: 2, height: 1});
         //blur.setPosition(1,0,1);
 
         //shipp.addWide(blur);
@@ -127,7 +127,7 @@ describe('SHIPP', () => {
 
     it('should erode', () => {
 
-        let shipp = new SHIPP(9, 9);
+        let shipp = new SHIPP({width: 9, height: 9});
         shipp.placeCluster(3, 3, 3, 3, 1);
 
         //shipp.blur(1);
@@ -153,14 +153,14 @@ describe('SHIPP', () => {
     it('should erode 2', () => {
 
 
-        let shipp = new SHIPP(20, 20);
-        let shippB = new SHIPP(9, 9);
+        let shipp = new SHIPP({width: 20, height: 20});
+        let shippB = new SHIPP({width: 9, height: 9});
         shippB.placeCluster(3, 3, 3, 3, 1);
 
         shipp.addWide(shippB);
         shipp.blur(2);
 
-        for (let i =0; i < 10;i++) {
+        for (let i = 0; i < 10; i++) {
 
             for (let x = 0; x < shipp.getWidth(); x++) {
                 for (let y = 0; y < shipp.getHeight(); y++) {
@@ -170,7 +170,7 @@ describe('SHIPP', () => {
                     for (let i = 0; i < 128; i++) {
                         drop.simulate(shipp);
                         //console.log('sed', drop.sediment);
-                        if (i > 20 && drop.velocity.mag()<0.001){
+                        if (i > 20 && drop.velocity.mag() < 0.001) {
                             // console.log("BREAKING EARLY", drop);
                             break;
                         }
@@ -181,7 +181,7 @@ describe('SHIPP', () => {
             }
         }
 
-       // expect(drop.velocity.x).lt(0);
+        // expect(drop.velocity.x).lt(0);
 
         //expect(shipp.getMap().length).equal(9 * 9);
 

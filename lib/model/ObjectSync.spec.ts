@@ -1,6 +1,5 @@
 import {expect} from 'chai';
-import {CacheModel, Resource} from './Cache';
-import {CacheSchemaModelProvider} from "./provider/cache-schema-model/CacheSchemaModelProvider";
+import {Resource} from './Cache';
 import {SchemaProvider} from "../interface/Provider";
 import {GameEventEmitter} from "./interactive/GameEvent";
 import {ObjectSync} from './ObjectSync';
@@ -32,7 +31,7 @@ describe('ObjectSync', () => {
         publish(identifier, data?): any {
         }
 
-        register(schema: string, res: Resource) {
+        register(schema: string, res: Resource<any>) {
         }
 
     }
