@@ -27,8 +27,13 @@ function renderSHIPPToImage(f, shipp) {
     for (let x = 0; x < shipp.getWidth(); x++) {
 
         for (let y = 0; y < shipp.getHeight(); y++) {
-            let c = Math.floor(shipp.getPosition(x, y) * 255);
-            drawPixel(context, x, y, `rgb(${c},${c},${c})`)
+            let v = shipp.getPosition(x, y);
+            if  (typeof v === "number") {
+                let c = Math.floor(v * 255);
+                drawPixel(context, x, y, `rgb(${c},${c},${c})`)
+            }else if (v && v.r &&  v.g && v.b){
+                drawPixel(context, x, y, `rgb(${Math.floor(v.r)},${Math.floor(v.g)},${Math.floor(v.b)})`)
+            }
         }
 
     }
@@ -190,6 +195,63 @@ describe('SHIPP', () => {
         }
 
     }).timeout(10000);
+
+
+
+
+    it('get normal', () => {
+
+        let shipp = new SHIPP({width: 3, height: 3});
+        shipp.placeCluster(0, 0, 1, 3, 0);
+        shipp.placeCluster(1, 0, 1, 3, 0.5);
+        shipp.placeCluster(2, 0, 1, 3, 1);
+
+        //shipp.blur(1);
+
+        let normal = shipp.getNormalAtPosition(1,1);
+
+        let drop = new ErosionDrop();
+        drop.position.set(3, 4);
+
+        for (let i = 0; i < 3; i++) {
+            drop.simulate(shipp);
+            console.log('sed', drop.sediment);
+        }
+        console.log(drop);
+        drop.end(shipp);
+        expect(drop.velocity.x).lte(0);
+        if (export_shipp_to_image) {
+            renderSHIPPToImage('./tmp/shipp/03.png', shipp);
+        }
+        expect(shipp.getMap().length).equal(9 * 9);
+
+
+    });
+
+    it('should pathfind', () => {
+
+        let shipp = new SHIPP({width: 9, height: 9});
+        shipp.placeCluster(3, 3, 3, 3, 1);
+
+        //shipp.blur(1);
+
+        let drop = new ErosionDrop();
+        drop.position.set(3, 4);
+
+        for (let i = 0; i < 3; i++) {
+            drop.simulate(shipp);
+            console.log('sed', drop.sediment);
+        }
+        console.log(drop);
+        drop.end(shipp);
+        expect(drop.velocity.x).lte(0);
+        if (export_shipp_to_image) {
+            renderSHIPPToImage('./tmp/shipp/03.png', shipp);
+        }
+        expect(shipp.getMap().length).equal(9 * 9);
+
+
+    });
 
 
 });

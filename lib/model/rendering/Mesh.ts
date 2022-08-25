@@ -3,6 +3,7 @@ import {Vec2} from "../math/Vec2";
 import {RGB} from "../RGB";
 import {AssetLoader} from "../AssetLoader";
 import {Camera} from "../interactive/Camera";
+import { replaceAll } from "../Utils";
 
 var Tri3_Temp = {
     a: 0, i: 0, t: 0, e: 0, u: 0, v: 0, f: 0, g: 0, s: 0, c: 0, h: 0, M: 0
@@ -500,7 +501,7 @@ export class Mesh {
             read_pos = 0;
 
 
-        arr = a.split('\n');
+        arr = replaceAll(a,"\r","").split('\n');
 
         //console.log(arr);
 
