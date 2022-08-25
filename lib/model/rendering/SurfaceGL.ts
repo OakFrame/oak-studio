@@ -1,16 +1,9 @@
-import {Vec3} from "../math/Vec3";
-
 // @ts-ignore
 import {mat4, mat3, vec3, glMatrix} from "gl-matrix";
-import {
-    GLCameraShadowTextureShader, GLLightShadowTextureShader,
-    GLShader,
-    GLShaderBasic, GLShaderBasicPosition, GLShaderTexture
-} from "./GLShaderBasic";
-import {GLCubeBuffer, GLCubeBufferUV, GLPlaneBufferUV} from "./GLBuffer";
-import {Sprite} from "./Sprite";
+import {GLShaderBasic} from "./GLShaderBasic";
 import {Mesh} from "./Mesh";
 import {Camera} from "../interactive/Camera";
+import {Vec3} from "../math/Vec3";
 
 
 var gl;
@@ -26,7 +19,7 @@ const camera = {
     from: (new Vec3()).set(0, 20, 20),
     to: (new Vec3()).set(0, 0, 1),
     up: (new Vec3()).set(0, 0, 1)
-}
+};
 
 
 export class SurfaceGL {
@@ -36,7 +29,6 @@ export class SurfaceGL {
     bufferMesh;
 
     constructor(canvas) {
-        //var canvas = document.getElementById("lesson01-canvas");
         this._scaling = (window.devicePixelRatio ? window.devicePixelRatio : 1);
 
         this.element = canvas;
@@ -48,7 +40,6 @@ export class SurfaceGL {
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
 
-        //.   this.render();
     }
 
     setCamera(cam:Camera){
@@ -131,7 +122,6 @@ export class SurfaceGL {
         }
 
         gl.disable(gl.CULL_FACE);
-        //gl.cullFace(gl.BACK);
     }
 
     getShader(gl, type, data) {
@@ -211,27 +201,17 @@ export class SurfaceGL {
 
         this.initBuffers();
 
-        // rot += 0.01;
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-       // console.log('rendering', 0, 0, gl.viewportWidth, gl.viewportHeight, this.bufferMesh);
         gl.clearColor(0.98, 0.98, 0.98, 1)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-        //  gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         var rads = 20 * (Math.PI / 180);
 
-        mat4.perspective(projectionMatrix, rads, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+        mat4.perspective(projectionMatrix, rads, gl.viewportWidth / gl.viewportHeight, 10, 100.0);
 
         mat4.identity(modelMatrix);
-        // mat4.rotateY(modelMatrix, modelMatrix, rot);
-       // mat4.translate(modelMatrix, modelMatrix, [camera.from.x, camera.from.z, camera.from.y]); //camera position
         mat4.lookAt(modelMatrix, [-camera.from.x, camera.from.y, camera.from.z], [-camera.to.x, camera.to.y, camera.to.z], [-camera.up.x, camera.up.y, camera.up.z]);
-
-        //   mat4.identity(modelMatrix);
-
-        //  mat4.translate(modelMatrix, modelMatrix, [3.0, 0.0, 0.0]);
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -240,15 +220,12 @@ export class SurfaceGL {
     }
 
     maximize() {
-        //let node = this.getElement().parentNode;
-        //if (node) {
-        let w = window.innerWidth;// - (parseInt(node.style.paddingRight || "0", 10) + parseInt(node.style.paddingLeft || "0", 10) ) || 1;
-        let h = window.innerHeight;// || this.getHeight() || 1;
+              let w = window.innerWidth;
+        let h = window.innerHeight;
         if (this.getWidth() !== w * this._scaling || this.getHeight() !== h * this._scaling) {
             this.resize(w * this._scaling, h * this._scaling);
         }
-        // }*/
-    }
+       }
 
     getWidth() {
         return this.element.offsetWidth;
