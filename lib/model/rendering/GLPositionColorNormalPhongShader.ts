@@ -1,10 +1,10 @@
-import shaderPositionColorPhongVertex from "*.glsl";
-import shaderPositionColorPhongFragment from "*.glsl";
+import shaderPositionColorNormalPhongVertex from "./shader/shaderPositionColorNormalGouraudNormal.glsl";
+import shaderPositionColorNormalPhongFragment from "./shader/shaderPositionColorNormalGouraudFragment.glsl";
 import {GLShader} from "./GLShader";
 
 export class GLPositionColorNormalPhongShader implements GLShader {
-    vertexShader = shaderPositionColorPhongVertex;
-    fragmentShader = shaderPositionColorPhongFragment;
+    vertexShader = shaderPositionColorNormalPhongVertex;
+    fragmentShader = shaderPositionColorNormalPhongFragment;
     vertexAttributeNames = {
         position: "vertPosition",
         color: "vertColor",

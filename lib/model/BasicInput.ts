@@ -1,5 +1,6 @@
 import {Vec2} from "./math/Vec2";
 import {Vec3} from "./math/Vec3";
+import {arrayGetAverage} from "./Utils";
 
 export class BasicInput {
     private TouchMoveAllowed: boolean;
@@ -385,17 +386,6 @@ export class BasicInput {
         return orientation;
     }
 
-    arrayGetAverage(a) {
-        let ret = 0;
-        if (a.length && a.length !== 0) {
-            a.forEach(function (list) {
-                ret += list;
-            });
-            return (ret / a.length)
-        }
-        return 0;
-    }
-
     onHeadingChange(event) {
 
         let TILT = window['BasicInput'].TILT;
@@ -403,7 +393,6 @@ export class BasicInput {
         let ABSTILT = window['BasicInput'].ABSTILT;
         let defaultOrientation = window['BasicInput'].defaultOrientation;
         let positionCurrent = window['BasicInput'].positionCurrent;
-        let arrayGetAverage = window['BasicInput'].arrayGetAverage;
         let lengthdir_x = window['BasicInput'].lengthdir_x;
         let lengthdir_y = window['BasicInput'].lengthdir_y;
         //var frontToBack = event.beta;

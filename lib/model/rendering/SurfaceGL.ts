@@ -3,8 +3,9 @@ import {mat4, mat3, vec3, glMatrix} from "gl-matrix";
 import {Mesh} from "./Mesh";
 import {Camera} from "../interactive/Camera";
 import {Vec3} from "../math/Vec3";
-import {GLShader } from "./GLShader";
+import {GLShader} from "./GLShader";
 import {GLPositionColorShader} from "./GLPositionColorShader";
+import {mergeTypedArraysUnsafe} from "../Utils";
 
 
 var gl;
@@ -17,6 +18,7 @@ const camera = {
     to: (new Vec3()).set(0, 0, 1),
     up: (new Vec3()).set(0, 0, 1)
 };
+
 
 export class SurfaceGL {
 
@@ -55,14 +57,27 @@ export class SurfaceGL {
     clearBuffers() {
 
         this.bufferMesh = {
-            position: [],
-            uv: [],
-            color: [],
-            normal: []
+            position: new Float32Array(),
+            uv: new Float32Array(),
+            color: new Float32Array(),
+            normal: new Float32Array()
         }
     }
 
     addMeshToRenderBuffer(mesh: Mesh) {
+
+        if (mesh._buffered) {
+            this.bufferMesh.position = mergeTypedArraysUnsafe(this.bufferMesh.position, mesh._buffered.position);
+            this.bufferMesh.color = mergeTypedArraysUnsafe(this.bufferMesh.color, mesh._buffered.color);
+            this.bufferMesh.uv = mergeTypedArraysUnsafe(this.bufferMesh.uv, mesh._buffered.uv);
+            this.bufferMesh.normal = mergeTypedArraysUnsafe(this.bufferMesh.normal, mesh._buffered.normal);
+            //  this.bufferMesh.position = this.bufferMesh.position.concat(mesh._buffered.position);
+            // this.bufferMesh.color = this.bufferMesh.color.concat(mesh._buffered.color);
+            // this.bufferMesh.uv = this.bufferMesh.uv.concat(mesh._buffered.uv);
+            //this.bufferMesh.normal = this.bufferMesh.normal.concat(mesh._buffered.normal);
+        }
+        return;
+
         for (var i = 0; i < mesh._children.length; i++) {
             this.bufferMesh.position.push(-mesh._children[i].pos1.x);
             this.bufferMesh.position.push(mesh._children[i].pos1.y);
@@ -227,7 +242,7 @@ export class SurfaceGL {
             }
 
             gl.bindBuffer(gl.ARRAY_BUFFER, this.GLAttributesBuffer[shaderAttribute]);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.bufferMesh[shaderAttribute]), gl.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, this.bufferMesh[shaderAttribute], gl.STATIC_DRAW);
             this.GLAttributesBuffer[shaderAttribute].numItems = this.bufferMesh[shaderAttribute].length / this.GLAttributesBuffer[shaderAttribute].itemSize;
 
         }
@@ -236,7 +251,6 @@ export class SurfaceGL {
 
 
     render() {
-
         this.initBuffers();
 
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -252,11 +266,8 @@ export class SurfaceGL {
 
         for (const shaderAttribute in this.GLShader.vertexAttributeNames) {
             let i = shaderAttribute + "Attribute";
-            let v = this.GLShader.vertexAttributeNames[shaderAttribute];
-
             gl.bindBuffer(gl.ARRAY_BUFFER, this.GLAttributesBuffer[shaderAttribute]);
             gl.vertexAttribPointer(shaderProgram[i], this.GLAttributesBuffer[shaderAttribute].itemSize, gl.FLOAT, false, 0, 0);
-
         }
 
         this.setMatrixUniforms();

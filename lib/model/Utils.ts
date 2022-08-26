@@ -14,6 +14,17 @@ export function byteLength(str) {
     return s;
 }
 
+export function arrayGetAverage(a) {
+    let ret = 0;
+    if (a.length && a.length !== 0) {
+        a.forEach(function (list) {
+            ret += list;
+        });
+        return (ret / a.length)
+    }
+    return 0;
+}
+
 export function findInArray(arr: any[], prop: string, value?) {
     let found = undefined;
     arr.forEach((e) => {
@@ -314,4 +325,11 @@ export function arrayMedian(values){
         return values[half];
 
     return (values[half - 1] + values[half]) / 2.0;
+}
+
+export function mergeTypedArraysUnsafe(a, b) {
+    var c = new a.constructor(a.length + b.length);
+    c.set(a);
+    c.set(b, a.length);
+    return c;
 }

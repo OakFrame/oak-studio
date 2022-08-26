@@ -1,15 +1,18 @@
 import {Vec3} from "../math/Vec3";
 import {Vec2} from "../math/Vec2";
 import {RGB} from "../RGB";
-import {AssetLoader} from "../AssetLoader";
 import {Camera} from "../interactive/Camera";
-import { replaceAll } from "../Utils";
+import {replaceAll} from "../Utils";
+import {Surface} from "./Surface";
+import {PLYVertexProperty} from "./PLYVertexProperty";
+import {PlyPropertyType} from "./PlyPropertyType";
+import {PlyPropertyTypeToValue} from "./PLYPropertyTypeToValue";
 
 var Tri3_Temp = {
     a: 0, i: 0, t: 0, e: 0, u: 0, v: 0, f: 0, g: 0, s: 0, c: 0, h: 0, M: 0
 };
 
-function rayTriangle(origin:Vec3, direction:Vec3, tri:Face3) { // rayTriangle(from:Vec3, direction:Vec3 triangle:Face3)
+function rayTriangle(origin: Vec3, direction: Vec3, tri: Face3) { // rayTriangle(from:Vec3, direction:Vec3 triangle:Face3)
     Tri3_Temp.a = (tri.pos2.y - tri.pos1.y) * (tri.pos3.z - tri.pos1.z) - (tri.pos3.y - tri.pos1.y) * (tri.pos2.z - tri.pos1.z);
     Tri3_Temp.i = (tri.pos2.z - tri.pos1.z) * (tri.pos3.x - tri.pos1.x) - (tri.pos3.z - tri.pos1.z) * (tri.pos2.x - tri.pos1.x);
     Tri3_Temp.t = (tri.pos2.x - tri.pos1.x) * (tri.pos3.y - tri.pos1.y) - (tri.pos3.x - tri.pos1.x) * (tri.pos2.y - tri.pos1.y);
@@ -39,20 +42,20 @@ function rayTriangle(origin:Vec3, direction:Vec3, tri:Face3) { // rayTriangle(fr
  */
 export class Face3 {
 
-    public pos1:Vec3;
-    public uv1:Vec2;
-    public pos2:Vec3;
-    public uv2:Vec2;
-    public pos3:Vec3;
-    public uv3:Vec2;
+    public pos1: Vec3;
+    public uv1: Vec2;
+    public pos2: Vec3;
+    public uv2: Vec2;
+    public pos3: Vec3;
+    public uv3: Vec2;
     public color1: RGB;
     public color2: RGB;
     public color3: RGB;
-    public center:Vec3;
-    public normal:Vec3;
-    public _cullvec:Vec3;
-    public _dotvec:Vec3;
-    public _depth:number;
+    public center: Vec3;
+    public normal: Vec3;
+    public _cullvec: Vec3;
+    public _dotvec: Vec3;
+    public _depth: number;
 
     constructor() {
 
@@ -77,10 +80,10 @@ export class Face3 {
     }
 
 
-    set(x1:number, y1:number, z1:number, u1:number, v1:number,
-        x2:number, y2:number, z2:number, u2:number, v2:number,
-        x3:number, y3:number, z3:number, u3:number, v3:number,
-        r1:number, g1:number, b1:number, r2:number, g2:number, b2:number, r3:number, g3:number, b3:number):Face3 {
+    set(x1: number, y1: number, z1: number, u1: number, v1: number,
+        x2: number, y2: number, z2: number, u2: number, v2: number,
+        x3: number, y3: number, z3: number, u3: number, v3: number,
+        r1: number, g1: number, b1: number, r2: number, g2: number, b2: number, r3: number, g3: number, b3: number): Face3 {
         this.pos1.set(x1, y1, z1);
         this.uv1.set(u1, v1);
 
@@ -103,14 +106,14 @@ export class Face3 {
     /**
      * @type {function():Vec3}
      */
-    getcenter():Vec3 {
+    getcenter(): Vec3 {
         return new Vec3().set((this.pos1.x + this.pos2.x + this.pos3.x) / 3, (this.pos1.y + this.pos2.y + this.pos3.y) / 3, (this.pos1.z + this.pos2.z + this.pos3.z) / 3);
     };
 
     /**
      * @type {function():Vec3}
      */
-    recalc():Face3 {
+    recalc(): Face3 {
         this.center.set((this.pos1.x + this.pos2.x + this.pos3.x) / 3, (this.pos1.y + this.pos2.y + this.pos3.y) / 3, (this.pos1.z + this.pos2.z + this.pos3.z) / 3);
         return this;
     };
@@ -118,7 +121,7 @@ export class Face3 {
     /**
      * @type {function():Vec3}
      */
-    getnormal():Vec3 {
+    getnormal(): Vec3 {
 
         var ax, ay, az, bx, by, bz, rx, ry, rz, m;
 
@@ -147,7 +150,7 @@ export class Face3 {
     /**
      * @type {function():Face3}
      */
-    clone():Face3 {
+    clone(): Face3 {
         return new Face3().set(this.pos1.x, this.pos1.y, this.pos1.z, this.uv1.x, this.uv1.y,
             this.pos2.x, this.pos2.y, this.pos2.z, this.uv2.x, this.uv2.y,
             this.pos3.x, this.pos3.y, this.pos3.z, this.uv3.x, this.uv3.y,
@@ -158,7 +161,7 @@ export class Face3 {
     /**
      * @type {function(Face3):Face3}
      */
-    copy(face3:Face3):Face3 {
+    copy(face3: Face3): Face3 {
         this.pos1.copy(face3.pos1);
         this.pos2.copy(face3.pos2);
         this.pos3.copy(face3.pos3);
@@ -169,7 +172,7 @@ export class Face3 {
     };
 
 
-    flipX():Face3 {
+    flipX(): Face3 {
         //this.pos1.flipX(vec3);
         //this.pos2.flipX(vec3);
         // this.pos3.flipX(vec3);
@@ -184,7 +187,7 @@ export class Face3 {
         return this;
     };
 
-    rotate(rx:number, ry:number, rz:number) {
+    rotate(rx: number, ry: number, rz: number) {
         this.pos1.rotX(rx);
         this.pos2.rotX(rx);
         this.pos3.rotX(rx);
@@ -200,7 +203,7 @@ export class Face3 {
     /**
      * @type {function(number):Face3}
      */
-    rotX(rot:number) {
+    rotX(rot: number) {
         this.pos1.rotX(rot);
         this.pos2.rotX(rot);
         this.pos3.rotX(rot);
@@ -210,7 +213,7 @@ export class Face3 {
     /**
      * @type {function(number):Face3}
      */
-    rotY(rot:number) {
+    rotY(rot: number) {
         this.pos1.rotY(rot);
         this.pos2.rotY(rot);
         this.pos3.rotY(rot);
@@ -220,7 +223,7 @@ export class Face3 {
     /**
      * @type {function(number):Face3}
      */
-    rotZ(rot:number) {
+    rotZ(rot: number) {
         this.pos1.rotZ(rot);
         this.pos2.rotZ(rot);
         this.pos3.rotZ(rot);
@@ -237,7 +240,7 @@ export class Face3 {
         return this;
     };
 
-    size():number {
+    size(): number {
 
         var r: any = {},
             n: any = {},
@@ -249,6 +252,12 @@ export class Face3 {
 
 export class Mesh {
 
+    _buffered: {
+        position: Float32Array,
+        color?,
+        uv?,
+        normal?
+    }
     public _children: Face3[];
     private _bounds;
     private _tmpv;
@@ -270,6 +279,73 @@ export class Mesh {
         }
 
     }
+
+    generateMeshBuffer() {
+
+        let offset_3 = 9;
+        let offset_2 = 6;
+
+        this._buffered = {
+            position: new Float32Array(this._children.length * offset_3),
+            color: new Float32Array(this._children.length * offset_3),
+            uv: new Float32Array(this._children.length * offset_2),
+            normal: new Float32Array(this._children.length * offset_3)
+        }
+
+        for (var i = 0; i < this._children.length; i++) {
+
+            this._buffered.position[(i * offset_3) + 0] = -this._children[i].pos1.x;
+            this._buffered.position[(i * offset_3) + 1] = this._children[i].pos1.y;
+            this._buffered.position[(i * offset_3) + 2] = this._children[i].pos1.z;
+
+            this._buffered.position[(i * offset_3) + 3] = -this._children[i].pos2.x;
+            this._buffered.position[(i * offset_3) + 4] = this._children[i].pos2.y;
+            this._buffered.position[(i * offset_3) + 5] = this._children[i].pos2.z;
+
+            this._buffered.position[(i * offset_3) + 6] = -this._children[i].pos3.x;
+            this._buffered.position[(i * offset_3) + 7] = this._children[i].pos3.y;
+            this._buffered.position[(i * offset_3) + 8] = this._children[i].pos3.z;
+
+            let v1Normal = this._children[i].getnormal();
+
+            this._buffered.normal[(i * offset_3) + 0] = -v1Normal.x;
+            this._buffered.normal[(i * offset_3) + 1] = v1Normal.y;
+            this._buffered.normal[(i * offset_3) + 2] = v1Normal.z;
+
+            this._buffered.normal[(i * offset_3) + 3] = -v1Normal.x;
+            this._buffered.normal[(i * offset_3) + 4] = v1Normal.y;
+            this._buffered.normal[(i * offset_3) + 5] = v1Normal.z;
+
+            this._buffered.normal[(i * offset_3) + 6] = -v1Normal.x;
+            this._buffered.normal[(i * offset_3) + 7] = v1Normal.y;
+            this._buffered.normal[(i * offset_3) + 8] = v1Normal.z;
+
+            this._buffered.uv[(i * offset_2) + 0] = this._children[i].uv1.x;
+            this._buffered.uv[(i * offset_2) + 1] = this._children[i].uv1.y;
+
+            this._buffered.uv[(i * offset_2) + 2] = this._children[i].uv2.x;
+            this._buffered.uv[(i * offset_2) + 3] = this._children[i].uv2.y;
+
+            this._buffered.uv[(i * offset_2) + 4] = this._children[i].uv3.x;
+            this._buffered.uv[(i * offset_2) + 5] = this._children[i].uv3.y;
+
+            this._buffered.color[(i * offset_3) + 0] = this._children[i].color1.r / 255;
+            this._buffered.color[(i * offset_3) + 1] = this._children[i].color1.g / 255;
+            this._buffered.color[(i * offset_3) + 2] = this._children[i].color1.b / 255;
+
+            this._buffered.color[(i * offset_3) + 3] = this._children[i].color2.r / 255;
+            this._buffered.color[(i * offset_3) + 4] = this._children[i].color2.g / 255;
+            this._buffered.color[(i * offset_3) + 5] = this._children[i].color2.b / 255;
+
+            this._buffered.color[(i * offset_3) + 6] = this._children[i].color3.r / 255;
+            this._buffered.color[(i * offset_3) + 7] = this._children[i].color3.g / 255;
+            this._buffered.color[(i * offset_3) + 8] = this._children[i].color3.b / 255;
+
+        }
+
+        return this;
+    }
+
 
     clear() {
         this._children = [];
@@ -304,24 +380,16 @@ export class Mesh {
     }
 
     join(mesh, parent) {
-        //this._children = this._children.concat(mesh._children);
         var target = this;
-
         mesh._children.forEach(function (face) {
             target._children.push(face.clone().scale(parent.scale).rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z).translate(parent.position).recalc());
         });
-        // this._bounds = [Math.min(mesh._bounds[0],this._bounds[0]),0,0,0,0,0];
-        //console.warn('Mesh.prototype.join() is incomplete!');
         return this;
     };
 
-//console.warn("function Mesh().draw() should have tri._cullvec moved into mesh, not children");
-
-    draw(canvas, camera, parent) {
+    draw(surface2d: Surface, camera, parent) {
         this._children.forEach(function (tri) {
-
-            camera.drawFace3(canvas, tri.pos1, tri.pos2, tri.pos3, tri.color1.toHex());
-
+            camera.drawFace3(surface2d, tri.pos1, tri.pos2, tri.pos3, tri.color1.toHex());
         });
         return this;
     };
@@ -344,7 +412,6 @@ export class Mesh {
         return this;
     };
 
-
     drawUV(surface, camera: Camera, parent, texture, scale, depth?) {
         this._children.forEach(function (tri) {
             //  tri.center=tri.getcenter().rotY(parent.rotation.y).add(parent.position)
@@ -356,69 +423,21 @@ export class Mesh {
         return this;
     };
 
-    /*
-    Mesh.prototype.draw = function (camera, surface, parent) {
-        //var vecFrom = new Vec3();
-
-
-        if (surface._draw_outline&&!parent._static) {
-            surface._context.beginPath();
-            surface._context.fillStyle = "rgba(0,0,0,255)";
-            this._children.forEach(function (tri) {
-                //vecFrom.set(camera.from).pointTo();
-                //tri._cullvec.clear().add(tri.normal).dot(tri.center.clone().add().pointTo(camera.from))
-                // if (dotproduct(tri.normal(), vecFromVecs(camera.from, this._children[index].getCenter())) > 0) {
-                if (tri._cullvec.copy(tri._dotvec.copy(tri.normal).mul(parent.scale).normalize().rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z)).dot(tri._dotvec.copy(tri.center).mul(parent.scale).rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z).add(parent.position).pointTo(camera.from)) > 0) {
-                    surface.drawFaceOutline(camera, tri, parent);
-                } else {
-                    surface._tmp.culltris++;
-                }
-
-            });
-            surface._context.fill();
-        }
-
-
-        this._children.forEach(function (tri) {
-            //vecFrom.set(camera.from).pointTo();
-            //tri._cullvec.clear().add(tri.normal).dot(tri.center.clone().add().pointTo(camera.from))
-            // if (dotproduct(tri.normal(), vecFromVecs(camera.from, this._children[index].getCenter())) > 0) {
-            if (tri._cullvec.copy(tri._dotvec.copy(tri.normal).mul(parent.scale).normalize().rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z)).dot(tri._dotvec.copy(tri.center).mul(parent.scale).rotZ(parent.rotation.z).add(parent.position).pointTo(camera.from).invert()) > 0) {
-                surface.drawFace(camera, tri, parent);
-            } else {
-                surface._tmp.culltris++;
-            }
-
-        });
-
-        return this;
-    };*/
-
     sort(from, parent) {
         this.sortmeta.co = 0;
-        this.sortmeta.sw = 0; // ti = performance.now();
+        this.sortmeta.sw = 0;
 
         for (this.sortmeta.index = 0; this.sortmeta.index < this._children.length; this.sortmeta.index++) {
             this._children[this.sortmeta.index]._depth = this._tmpv.copy(from).sub(parent.position).dist(this._tmpr.copy(this._children[this.sortmeta.index].center).mul(parent.scale).rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z));
-            //dc++;
         }
         this.sortmeta.loop = true;
         this.sortmeta.times = 0;
 
-
-        // quickSort(this._children);
-
-
-        // BAD BUBBLE SORT
-        //ti = performance.now();
         do {
             this.sortmeta.loop = false;
 
             for (var i = 0; i < this._children.length - (1 + this.sortmeta.times); i++) {
-                //co += 1;
-
                 if (this._children[i]._depth < this._children[i + 1]._depth) {
-                    //sw += 1;
                     this.sortmeta.val = this._children[i];
                     this._children[i] = this._children[i + 1];
                     this._children[i + 1] = this.sortmeta.val;
@@ -436,29 +455,19 @@ export class Mesh {
 
     sortQ(from, parent) {
         this.sortmeta.co = 0;
-        this.sortmeta.sw = 0; // ti = performance.now();
+        this.sortmeta.sw = 0;
 
         for (this.sortmeta.index = 0; this.sortmeta.index < this._children.length; this.sortmeta.index++) {
             this._children[this.sortmeta.index]._depth = this._tmpv.copy(from).dist(this._tmpr.copy(this._children[this.sortmeta.index].center)) + (this._children[this.sortmeta.index].size() / 2);
-
-            // this._children[this.sortmeta.index]._depth = this._tmpv.copy(from).dist(this._tmpr.copy(this._children[this.sortmeta.index].center).mul(parent.scale).rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z));
-            //dc++;
         }
         this.sortmeta.loop = true;
         this.sortmeta.times = 0;
 
-
-        // quickSort(this._children);
-
-
-        // BAD BUBBLE SORT
-        //ti = performance.now();
         do {
             this.sortmeta.loop = false;
 
             for (var i = 0; i < this._children.length - (1 + this.sortmeta.times); i++) {
                 //co += 1;
-
                 if (this._children[i]._depth < this._children[i + 1]._depth) {
                     //sw += 1;
                     this.sortmeta.val = this._children[i];
@@ -478,7 +487,6 @@ export class Mesh {
 
     parsePLY(a) {
         var model = this;
-
 
         var plyProperties = {
                 verticesCount: 0,
@@ -500,10 +508,7 @@ export class Mesh {
             checkLineIndices = 0, //0-headers,verticesCount,indecesCount
             read_pos = 0;
 
-
-        arr = replaceAll(a,"\r","").split('\n');
-
-        //console.log(arr);
+        arr = replaceAll(a, "\r", "").split('\n');
 
         for (var i = 0; i < arr.length; i++) {
             var line_arr = arr[i].split(' ');
@@ -522,20 +527,16 @@ export class Mesh {
                     plyProperties.formatVersion = line_arr[2];
                 } else if (line_arr[0] === 'property') {
 
-
                     let prop: PlyPropertyType = {
                         name: line_arr[2],
                         type: line_arr[1]
                     }
 
-                    // if (prop.type == "list") {
-
-                    // } else {
                     plyProperties.properties.push(prop);
-                    //}
+
 
                 } else if (line_arr[0] === 'ply') {
-                    // properties.comments.push(line_arr.slice(1));
+
                 } else if (line_arr[0] === 'end_header') {
                     checkLineIndices = 1;
                 }
@@ -543,7 +544,7 @@ export class Mesh {
                 if (line_arr[0]) {
 
                     // @ts-ignore
-                    let vertex:PLYVertexProperty = {};
+                    let vertex: PLYVertexProperty = {};
                     for (let p = 0; p < plyProperties.properties.length; p++) {
                         let prop = plyProperties.properties[p];
                         vertex[prop.name] = PlyPropertyTypeToValue(prop.type, line_arr[p]);
@@ -566,26 +567,6 @@ export class Mesh {
                     model._bounds[3] = Math.max(model._bounds[3], vertex["x"]);
                     model._bounds[4] = Math.max(model._bounds[4], vertex["y"]);
                     model._bounds[5] = Math.max(model._bounds[5], vertex["z"]);
-
-
-                    // OLD
-
-                    /*  elements.vertices.push(parseFloat(line_arr[0])); //x
-                      elements.vertices.push(parseFloat(line_arr[1])); //y
-                      elements.vertices.push(parseFloat(line_arr[2])); //z
-                      elements.vertices.push(parseFloat(line_arr[3])); //u
-                      elements.vertices.push(parseFloat(line_arr[4])); //v
-                      elements.vertices.push(parseInt(line_arr[5], 10)); //r
-                      elements.vertices.push(parseInt(line_arr[6], 10)); //g
-                      elements.vertices.push(parseInt(line_arr[7], 10)); //b
-
-                      model._bounds[0] = Math.min(model._bounds[0], parseFloat(line_arr[0]));
-                      model._bounds[1] = Math.min(model._bounds[1], parseFloat(line_arr[1]));
-                      model._bounds[2] = Math.min(model._bounds[2], parseFloat(line_arr[2]));
-
-                      model._bounds[3] = Math.max(model._bounds[3], parseFloat(line_arr[0]));
-                      model._bounds[4] = Math.max(model._bounds[4], parseFloat(line_arr[1]));
-                      model._bounds[5] = Math.max(model._bounds[5], parseFloat(line_arr[2]));*/
 
                 }
                 plyProperties.verticesCount--;
@@ -647,39 +628,9 @@ export class Mesh {
 
         }
 
-        //console.log(model);
-        //model._mesh_id = ModelManager._children.length;
-        //ModelManager._children.push(model);
-        console.log(plyProperties, elements);
-
         return this;
     };
 
 }
 
-export interface PLYVertexProperty {
-    x:number;
-    y:number;
-    z:number;
-    s:number;
-    t:number;
-    red:number;
-    green:number;
-    blue:number;
-}
 
-export interface PlyPropertyType {
-    type: string;
-    name: string;
-}
-
-
-export function PlyPropertyTypeToValue(type, input) {
-    switch (type) {
-        case "float":
-            return parseFloat(input)
-
-        default:
-            return parseInt(input, 10)
-    }
-}
