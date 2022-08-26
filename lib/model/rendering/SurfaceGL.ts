@@ -1,19 +1,16 @@
 // @ts-ignore
 import {mat4, mat3, vec3, glMatrix} from "gl-matrix";
-import {GLShader, GLShaderBasic} from "./GLShaderBasic";
 import {Mesh} from "./Mesh";
 import {Camera} from "../interactive/Camera";
 import {Vec3} from "../math/Vec3";
+import {GLShader } from "./GLShader";
+import {GLPositionColorShader} from "./GLPositionColorShader";
 
 
 var gl;
-var vertexPositionBuffer;
-var vertexColorBuffer;
 var modelMatrix = mat4.create();
 var projectionMatrix = mat4.create();
 var shaderProgram;
-var cubeRotation = 0.0;
-
 
 const camera = {
     from: (new Vec3()).set(0, 20, 20),
@@ -21,14 +18,13 @@ const camera = {
     up: (new Vec3()).set(0, 0, 1)
 };
 
-
 export class SurfaceGL {
 
     element;
     _scaling;
     bufferMesh;
     GLShader: GLShader;
-    GLAttributesBuffer : {
+    GLAttributesBuffer: {
         position?,
         color?
     }
@@ -38,7 +34,7 @@ export class SurfaceGL {
 
         this.element = canvas;
         this.initGL(canvas);
-        this.initShaders(GLShaderBasic);
+        this.initShaders(GLPositionColorShader);
 
         this.GLAttributesBuffer = {};
         this.clearBuffers();
@@ -61,7 +57,8 @@ export class SurfaceGL {
         this.bufferMesh = {
             position: [],
             uv: [],
-            color: []
+            color: [],
+            normal: []
         }
     }
 
@@ -79,6 +76,20 @@ export class SurfaceGL {
             this.bufferMesh.position.push(mesh._children[i].pos3.y);
             this.bufferMesh.position.push(mesh._children[i].pos3.z);
 
+            let v1Normal = mesh._children[i].getnormal();
+            this.bufferMesh.normal.push(-v1Normal.x);
+            this.bufferMesh.normal.push(v1Normal.y);
+            this.bufferMesh.normal.push(v1Normal.z);
+
+            this.bufferMesh.normal.push(-v1Normal.x);
+            this.bufferMesh.normal.push(v1Normal.y);
+            this.bufferMesh.normal.push(v1Normal.z);
+
+            this.bufferMesh.normal.push(-v1Normal.x);
+            this.bufferMesh.normal.push(v1Normal.y);
+            this.bufferMesh.normal.push(v1Normal.z);
+
+
             this.bufferMesh.uv.push(mesh._children[i].uv1.x);
             this.bufferMesh.uv.push(mesh._children[i].uv1.y);
 
@@ -92,10 +103,12 @@ export class SurfaceGL {
             this.bufferMesh.color.push(mesh._children[i].color1.g / 255);
             this.bufferMesh.color.push(mesh._children[i].color1.b / 255);
             //this.bufferMesh.color.push(1);
+
             this.bufferMesh.color.push(mesh._children[i].color2.r / 255);
             this.bufferMesh.color.push(mesh._children[i].color2.g / 255);
             this.bufferMesh.color.push(mesh._children[i].color2.b / 255);
             //this.bufferMesh.color.push(1);
+
             this.bufferMesh.color.push(mesh._children[i].color3.r / 255);
             this.bufferMesh.color.push(mesh._children[i].color3.g / 255);
             this.bufferMesh.color.push(mesh._children[i].color3.b / 255);
@@ -126,7 +139,7 @@ export class SurfaceGL {
         } catch (e) {
         }
         if (!gl) {
-            alert("Could not initialise WebGL, sorry :-(");
+            alert("Could not initialise WebGL.");
         }
 
         gl.disable(gl.CULL_FACE);
@@ -181,12 +194,6 @@ export class SurfaceGL {
             gl.enableVertexAttribArray(shaderProgram[i]);
         }
 
-        //shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "vertPosition");
-        //gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-
-        //shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "vertColor");
-        //gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
-
         shaderProgram.projectionMatrixUniform = gl.getUniformLocation(shaderProgram, "mProj");
         shaderProgram.modelMatrixUniform = gl.getUniformLocation(shaderProgram, "mWorld");
     }
@@ -199,15 +206,13 @@ export class SurfaceGL {
 
     initBuffers() {
 
-        console.log('init buffers', this.GLShader.vertexAttributeNames);
-
         for (const shaderAttribute in this.GLShader.vertexAttributeNames) {
             let i = shaderAttribute + "Attribute";
             let v = this.GLShader.vertexAttributeNames[shaderAttribute];
 
-            //if (!this.GLAttributesBuffer[shaderAttribute]){
+            if (!this.GLAttributesBuffer[shaderAttribute]) {
                 this.GLAttributesBuffer[shaderAttribute] = gl.createBuffer();
-            //}
+            }
 
             switch (shaderAttribute) {
                 case "position":
@@ -216,26 +221,17 @@ export class SurfaceGL {
                 case "color":
                     this.GLAttributesBuffer[shaderAttribute].itemSize = 3;
                     break;
+                case "normal":
+                    this.GLAttributesBuffer[shaderAttribute].itemSize = 3;
+                    break;
             }
 
-            //if (this.bufferMesh[shaderAttribute]) {
-                gl.bindBuffer(gl.ARRAY_BUFFER, this.GLAttributesBuffer[shaderAttribute]);
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.bufferMesh[shaderAttribute]), gl.STATIC_DRAW);
-                this.GLAttributesBuffer[shaderAttribute].numItems = this.bufferMesh[shaderAttribute].length / this.GLAttributesBuffer[shaderAttribute].itemSize;
-            //}
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.GLAttributesBuffer[shaderAttribute]);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.bufferMesh[shaderAttribute]), gl.STATIC_DRAW);
+            this.GLAttributesBuffer[shaderAttribute].numItems = this.bufferMesh[shaderAttribute].length / this.GLAttributesBuffer[shaderAttribute].itemSize;
 
         }
 
-        /*gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.bufferMesh.position), gl.STATIC_DRAW);
-        vertexPositionBuffer.itemSize = 3;
-        vertexPositionBuffer.numItems = this.bufferMesh.position.length / vertexPositionBuffer.itemSize;
-
-        vertexColorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.bufferMesh.color), gl.STATIC_DRAW);
-        vertexColorBuffer.itemSize = 3;
-        vertexColorBuffer.numItems = this.bufferMesh.color.length / vertexColorBuffer.itemSize;*/
     }
 
 
@@ -263,13 +259,8 @@ export class SurfaceGL {
 
         }
 
-     //   gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-      //  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-       // gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
-        //gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
         this.setMatrixUniforms();
-        console.log("YOLO",this.GLAttributesBuffer);
+
         gl.drawArrays(gl.TRIANGLES, 0, this.GLAttributesBuffer['position'].numItems);
     }
 
