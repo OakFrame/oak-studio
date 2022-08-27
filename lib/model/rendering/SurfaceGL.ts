@@ -6,6 +6,7 @@ import {Vec3} from "../math/Vec3";
 import {GLShader} from "./GLShader";
 import {mergeTypedArraysUnsafe} from "../Utils";
 import {GLPositionColorShader} from "./GLPositionColorShader";
+import {GLPositionColorNormalPhongShader} from "./GLPositionColorNormalPhongShader";
 
 
 var gl;
@@ -36,7 +37,7 @@ export class SurfaceGL {
 
         this.element = canvas;
         this.initGL(canvas);
-        this.initShaders(GLPositionColorShader);
+        this.initShaders(GLPositionColorNormalPhongShader);
 
         this.GLAttributesBuffer = {};
         this.clearBuffers();
@@ -57,10 +58,10 @@ export class SurfaceGL {
     clearBuffers() {
 
         this.bufferMesh = {
-            position: new Float32Array(),
-            uv: new Float32Array(),
-            color: new Float32Array(),
-            normal: new Float32Array()
+            position: new Float32Array(0),
+            uv: new Float32Array(0),
+            color: new Float32Array(0),
+            normal: new Float32Array(0)
         }
     }
 

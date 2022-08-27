@@ -5,6 +5,7 @@
 //import lightBufferFragment from "./shader/lightBufferFragment.glsl";
 
 export interface GLShader {
+    _program?;
     vertexShader: string;
     fragmentShader: string;
     vertexAttributeNames?: {
@@ -13,6 +14,7 @@ export interface GLShader {
         normal?: string;
         uv?: string;
     }
+    vertexUniformNames?;
 }
 
 /*
