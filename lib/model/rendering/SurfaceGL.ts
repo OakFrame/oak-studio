@@ -4,8 +4,8 @@ import {Mesh} from "./Mesh";
 import {Camera} from "../interactive/Camera";
 import {Vec3} from "../math/Vec3";
 import {GLShader} from "./GLShader";
-import {GLPositionColorShader} from "./GLPositionColorShader";
 import {mergeTypedArraysUnsafe} from "../Utils";
+import {GLPositionColorShader} from "./GLPositionColorShader";
 
 
 var gl;
@@ -91,18 +91,20 @@ export class SurfaceGL {
             this.bufferMesh.position.push(mesh._children[i].pos3.y);
             this.bufferMesh.position.push(mesh._children[i].pos3.z);
 
-            let v1Normal = mesh._children[i].getnormal();
+            let v1Normal = mesh._children[i].norm1;
             this.bufferMesh.normal.push(-v1Normal.x);
             this.bufferMesh.normal.push(v1Normal.y);
             this.bufferMesh.normal.push(v1Normal.z);
 
-            this.bufferMesh.normal.push(-v1Normal.x);
-            this.bufferMesh.normal.push(v1Normal.y);
-            this.bufferMesh.normal.push(v1Normal.z);
+            let v2Normal = mesh._children[i].norm2;
+            this.bufferMesh.normal.push(-v2Normal.x);
+            this.bufferMesh.normal.push(v2Normal.y);
+            this.bufferMesh.normal.push(v2Normal.z);
 
-            this.bufferMesh.normal.push(-v1Normal.x);
-            this.bufferMesh.normal.push(v1Normal.y);
-            this.bufferMesh.normal.push(v1Normal.z);
+            let v3Normal = mesh._children[i].norm3;
+            this.bufferMesh.normal.push(-v3Normal.x);
+            this.bufferMesh.normal.push(v3Normal.y);
+            this.bufferMesh.normal.push(v3Normal.z);
 
 
             this.bufferMesh.uv.push(mesh._children[i].uv1.x);

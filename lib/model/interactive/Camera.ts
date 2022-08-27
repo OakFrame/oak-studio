@@ -3,7 +3,7 @@ import {Projection} from "../math/Projection";
 import {Vec2} from "../math/Vec2";
 import {Surface} from "../rendering/Surface";
 import {RoomObject} from "./RoomObject";
-import {Face3} from "../rendering/Mesh";
+import {Face3} from "../rendering/Face3";
 
 export class Camera {
 

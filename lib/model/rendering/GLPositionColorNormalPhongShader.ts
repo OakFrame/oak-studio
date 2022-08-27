@@ -1,5 +1,5 @@
-import shaderPositionColorNormalPhongVertex from "./shader/shaderPositionColorNormalGouraudNormal.glsl";
-import shaderPositionColorNormalPhongFragment from "./shader/shaderPositionColorNormalGouraudFragment.glsl";
+import shaderPositionColorNormalPhongVertex from "./shader/shaderPositionColorNormalPhongVertex.glsl";
+import shaderPositionColorNormalPhongFragment from "./shader/shaderPositionColorNormalPhongFragment.glsl";
 import {GLShader} from "./GLShader";
 
 export class GLPositionColorNormalPhongShader implements GLShader {
