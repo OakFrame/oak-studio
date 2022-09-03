@@ -13,14 +13,19 @@ export class Camera {
     public up: Vec3;
     private tmpv: Vec3;
     public fov: number;
-    private zoom: number;
+    public zoom: number;
     public aspect: number;
     public projection: Projection;
     private animation;
     private _tmp;
 
+    public userRotation;
+    public userPosition;
+
     constructor() {
         this.from = new Vec3().set(0, 100, 30);
+        this.userRotation = new Vec3();
+        this.userPosition = new Vec3();
         this.to = new Vec3();
         this.up = new Vec3().set(0, 0, 1);
         this.tmpv = new Vec3();
@@ -59,6 +64,28 @@ export class Camera {
             vy: 0,
             lightingvec: 0
         }
+    }
+
+    getFromWithUserZoom() {
+        return this.from.clone().mulI(this.zoom);
+    }
+    getFromWithUserZoomPosition() {
+        return this.from.clone().add(this.userPosition).mulI(this.zoom);
+    }
+    getFromWithUserZoomPositionRotationGL() {
+        return this.from.clone().rotX(this.userRotation.x).rotZ(this.userRotation.z).mulI(this.zoom).add(this.to).add(this.userPosition.clone().flipX());
+    }
+
+    getFromWithUserZoomPositionRotation() {
+        return this.from.clone().rotX(this.userRotation.x).rotZ(-this.userRotation.z).mulI(this.zoom).add(this.to).add(this.userPosition);
+    }
+
+    getToWithUserPosition() {
+        return this.to.clone().add(this.userPosition);
+    }
+
+    getToWithUserPositionGL() {
+        return this.to.clone().add(this.userPosition.clone().flipX());
     }
 
     getProjection() {
@@ -179,9 +206,9 @@ export class Camera {
 
     drawFace3(surface: Surface, v1, v2, v3, color) {
 
-        this.projection.toScreen(surface, v1, this.from, this._tmp.p1);
-        this.projection.toScreen(surface, v2, this.from, this._tmp.p2);
-        this.projection.toScreen(surface, v3, this.from, this._tmp.p3);
+        this.projection.toScreen(surface, v1, this.getFromWithUserZoomPositionRotation(), this._tmp.p1);
+        this.projection.toScreen(surface, v2, this.getFromWithUserZoomPositionRotation(), this._tmp.p2);
+        this.projection.toScreen(surface, v3, this.getFromWithUserZoomPositionRotation(), this._tmp.p3);
 
         //triangleGrow(this._tmp.p1, this._tmp.p2, this._tmp.p3, 2);
         surface.getContext().fillStyle = color || "#000";
@@ -194,8 +221,8 @@ export class Camera {
     };
 
     drawLine2D(surface, x1, y1, x2, y2) {
-        this.projection.toScreen(surface, (new Vec3().set(x1, y1, 0)), this.from, this._tmp.p1);
-        this.projection.toScreen(surface, (new Vec3().set(x2, y2, 0)), this.from, this._tmp.p2);
+        this.projection.toScreen(surface, (new Vec3().set(x1, y1, 0)), this.getFromWithUserZoomPositionRotation(), this._tmp.p1);
+        this.projection.toScreen(surface, (new Vec3().set(x2, y2, 0)), this.getFromWithUserZoomPositionRotation(), this._tmp.p2);
 
         surface.getContext().beginPath();
         surface.getContext().moveTo(this._tmp.p1.x, this._tmp.p1.y);
@@ -309,69 +336,69 @@ export class Camera {
             return false;
         } else {
 
-        surface.getContext().beginPath();
-        surface.getContext().moveTo((0.5 + this._tmp.p1.x), (0.5 + this._tmp.p1.y));
-        surface.getContext().lineTo((0.5 + this._tmp.p2.x), (0.5 + this._tmp.p2.y));
-        surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
+            surface.getContext().beginPath();
+            surface.getContext().moveTo((0.5 + this._tmp.p1.x), (0.5 + this._tmp.p1.y));
+            surface.getContext().lineTo((0.5 + this._tmp.p2.x), (0.5 + this._tmp.p2.y));
+            surface.getContext().lineTo((0.5 + this._tmp.p3.x), (0.5 + this._tmp.p3.y));
 
-        //     surface.getContext().closePath();
-        // surface.getContext().stroke();
+            //     surface.getContext().closePath();
+            // surface.getContext().stroke();
 
-        this._tmp._t[20] = 0;
-        this._tmp._t[21] = 0;
-        this._tmp._t[22] = texture.width;
-        this._tmp._t[23] = texture.height;
+            this._tmp._t[20] = 0;
+            this._tmp._t[21] = 0;
+            this._tmp._t[22] = texture.width;
+            this._tmp._t[23] = texture.height;
 
-        this._tmp._t[8] = this._tmp.p1.x;
-        this._tmp._t[9] = this._tmp.p1.y;
+            this._tmp._t[8] = this._tmp.p1.x;
+            this._tmp._t[9] = this._tmp.p1.y;
 
-        this._tmp._t[10] = this._tmp.p2.x;
-        this._tmp._t[11] = this._tmp.p2.y;
+            this._tmp._t[10] = this._tmp.p2.x;
+            this._tmp._t[11] = this._tmp.p2.y;
 
-        this._tmp._t[12] = this._tmp.p3.x;
-        this._tmp._t[13] = this._tmp.p3.y;
+            this._tmp._t[12] = this._tmp.p3.x;
+            this._tmp._t[13] = this._tmp.p3.y;
 
-        this._tmp._t[14] = (face3.uv1.x + this._tmp._t[20]) * this._tmp._t[22];
-        this._tmp._t[15] = (face3.uv1.y + this._tmp._t[21]) * this._tmp._t[23];
+            this._tmp._t[14] = (face3.uv1.x + this._tmp._t[20]) * this._tmp._t[22];
+            this._tmp._t[15] = (face3.uv1.y + this._tmp._t[21]) * this._tmp._t[23];
 
-        this._tmp._t[16] = (face3.uv2.x + this._tmp._t[20]) * this._tmp._t[22];
-        this._tmp._t[17] = (face3.uv2.y + this._tmp._t[21]) * this._tmp._t[23];
+            this._tmp._t[16] = (face3.uv2.x + this._tmp._t[20]) * this._tmp._t[22];
+            this._tmp._t[17] = (face3.uv2.y + this._tmp._t[21]) * this._tmp._t[23];
 
-        this._tmp._t[18] = (face3.uv3.x + this._tmp._t[20]) * this._tmp._t[22];
-        this._tmp._t[19] = (face3.uv3.y + this._tmp._t[21]) * this._tmp._t[23];
+            this._tmp._t[18] = (face3.uv3.x + this._tmp._t[20]) * this._tmp._t[22];
+            this._tmp._t[19] = (face3.uv3.y + this._tmp._t[21]) * this._tmp._t[23];
 
-        this._tmp._t[10] -= this._tmp._t[8];
-        this._tmp._t[11] -= this._tmp._t[9];
-        this._tmp._t[12] -= this._tmp._t[8];
-        this._tmp._t[13] -= this._tmp._t[9];
+            this._tmp._t[10] -= this._tmp._t[8];
+            this._tmp._t[11] -= this._tmp._t[9];
+            this._tmp._t[12] -= this._tmp._t[8];
+            this._tmp._t[13] -= this._tmp._t[9];
 
-        this._tmp._t[16] -= this._tmp._t[14];
-        this._tmp._t[17] -= this._tmp._t[15];
-        this._tmp._t[18] -= this._tmp._t[14];
-        this._tmp._t[19] -= this._tmp._t[15];
+            this._tmp._t[16] -= this._tmp._t[14];
+            this._tmp._t[17] -= this._tmp._t[15];
+            this._tmp._t[18] -= this._tmp._t[14];
+            this._tmp._t[19] -= this._tmp._t[15];
 
-        this._tmp._t[6] = this._tmp._t[16] * this._tmp._t[19] - this._tmp._t[18] * this._tmp._t[17];
+            this._tmp._t[6] = this._tmp._t[16] * this._tmp._t[19] - this._tmp._t[18] * this._tmp._t[17];
 
-        if (this._tmp._t[6] === 0) {
-            return false;
-        }
+            if (this._tmp._t[6] === 0) {
+                return false;
+            }
 
-        this._tmp._t[7] = 1 / this._tmp._t[6];
+            this._tmp._t[7] = 1 / this._tmp._t[6];
 
-        this._tmp._t[0] = (this._tmp._t[19] * this._tmp._t[10] - this._tmp._t[17] * this._tmp._t[12]) * this._tmp._t[7];
-        this._tmp._t[1] = (this._tmp._t[19] * this._tmp._t[11] - this._tmp._t[17] * this._tmp._t[13]) * this._tmp._t[7];
-        this._tmp._t[2] = (this._tmp._t[16] * this._tmp._t[12] - this._tmp._t[18] * this._tmp._t[10]) * this._tmp._t[7];
-        this._tmp._t[3] = (this._tmp._t[16] * this._tmp._t[13] - this._tmp._t[18] * this._tmp._t[11]) * this._tmp._t[7];
+            this._tmp._t[0] = (this._tmp._t[19] * this._tmp._t[10] - this._tmp._t[17] * this._tmp._t[12]) * this._tmp._t[7];
+            this._tmp._t[1] = (this._tmp._t[19] * this._tmp._t[11] - this._tmp._t[17] * this._tmp._t[13]) * this._tmp._t[7];
+            this._tmp._t[2] = (this._tmp._t[16] * this._tmp._t[12] - this._tmp._t[18] * this._tmp._t[10]) * this._tmp._t[7];
+            this._tmp._t[3] = (this._tmp._t[16] * this._tmp._t[13] - this._tmp._t[18] * this._tmp._t[11]) * this._tmp._t[7];
 
-        this._tmp._t[4] = this._tmp._t[8] - this._tmp._t[0] * this._tmp._t[14] - this._tmp._t[2] * this._tmp._t[15];
-        this._tmp._t[5] = this._tmp._t[9] - this._tmp._t[1] * this._tmp._t[14] - this._tmp._t[3] * this._tmp._t[15];
+            this._tmp._t[4] = this._tmp._t[8] - this._tmp._t[0] * this._tmp._t[14] - this._tmp._t[2] * this._tmp._t[15];
+            this._tmp._t[5] = this._tmp._t[9] - this._tmp._t[1] * this._tmp._t[14] - this._tmp._t[3] * this._tmp._t[15];
 
 
-        surface.getContext().save();
-        surface.getContext().clip();
-        surface.getContext().transform(this._tmp._t[0], this._tmp._t[1], this._tmp._t[2], this._tmp._t[3], this._tmp._t[4], this._tmp._t[5]);
-        surface.getContext().drawImage(texture, 0, 0);
-        surface.getContext().restore();
+            surface.getContext().save();
+            surface.getContext().clip();
+            surface.getContext().transform(this._tmp._t[0], this._tmp._t[1], this._tmp._t[2], this._tmp._t[3], this._tmp._t[4], this._tmp._t[5]);
+            surface.getContext().drawImage(texture, 0, 0);
+            surface.getContext().restore();
 
         }
 

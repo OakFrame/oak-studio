@@ -5,7 +5,6 @@ import {Camera} from "../interactive/Camera";
 import {Vec3} from "../math/Vec3";
 import {GLShader} from "./GLShader";
 import {mergeTypedArraysUnsafe} from "../Utils";
-import {GLPositionColorShader} from "./GLPositionColorShader";
 import {GLPositionColorNormalPhongShader} from "./GLPositionColorNormalPhongShader";
 
 
@@ -72,10 +71,6 @@ export class SurfaceGL {
             this.bufferMesh.color = mergeTypedArraysUnsafe(this.bufferMesh.color, mesh._buffered.color);
             this.bufferMesh.uv = mergeTypedArraysUnsafe(this.bufferMesh.uv, mesh._buffered.uv);
             this.bufferMesh.normal = mergeTypedArraysUnsafe(this.bufferMesh.normal, mesh._buffered.normal);
-            //  this.bufferMesh.position = this.bufferMesh.position.concat(mesh._buffered.position);
-            // this.bufferMesh.color = this.bufferMesh.color.concat(mesh._buffered.color);
-            // this.bufferMesh.uv = this.bufferMesh.uv.concat(mesh._buffered.uv);
-            //this.bufferMesh.normal = this.bufferMesh.normal.concat(mesh._buffered.normal);
         }
         return;
 
@@ -201,6 +196,7 @@ export class SurfaceGL {
 
         if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
             alert("Could not initialise shaders");
+            console.error('SHADER LINK ERROR', gl.getProgramInfoLog(shader));
         }
 
         gl.useProgram(shaderProgram);
@@ -299,8 +295,10 @@ export class SurfaceGL {
     }
 
     resize(width, height) {
+
         this.element.width = width;
         this.element.height = height;
+
         gl.width = width;
         gl.height = height;
         gl.viewportWidth = width;
@@ -314,6 +312,5 @@ export class SurfaceGL {
 
         return this;
     }
-
 
 }

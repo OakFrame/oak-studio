@@ -106,11 +106,11 @@ export class Vec3 {
     }
 
     /** @type {function(number):Vec3} */
-    rotZ(deg) {
+    rotZ(rad) {
         //deg *= (Math.PI / 180);
         //let b = new Vec3().set((this.x * Math.cos(a) - this.y * Math.sin(a)), (this.x * Math.sin(a) + this.y * Math.cos(a)), this.z);
-        Vec3_TempV.x = (this.x * Math.cos(deg) - this.y * Math.sin(deg));
-        Vec3_TempV.y = (this.x * Math.sin(deg) + this.y * Math.cos(deg));
+        Vec3_TempV.x = (this.x * Math.cos(rad) - this.y * Math.sin(rad));
+        Vec3_TempV.y = (this.x * Math.sin(rad) + this.y * Math.cos(rad));
         this.x = Vec3_TempV.x;
         this.y = Vec3_TempV.y;
         return this;
@@ -119,6 +119,10 @@ export class Vec3 {
     /** @type {function():Vec3} */
     flipX() {
         this.x *= -1;
+        return this;
+    }
+flipZ() {
+        this.z *= -1;
         return this;
     }
 
@@ -173,7 +177,7 @@ export class Vec3 {
 
     /** @type {function():Vec3} */
     clone() {
-        return (new Vec3().set(this.x, this.y, this.z));
+        return (new Vec3().set(this.x*1, this.y*1, this.z*1));
     }
 
     /** @type {function():Vec3} */
@@ -196,6 +200,10 @@ export class Vec3 {
 
     static fromValues(x, y, z) {
         return (new Vec3()).set(x, y, z);
+    }
+
+    static fromArray(arr) {
+        return (new Vec3()).set(arr[0], arr[1], arr[2]);
     }
 }
 

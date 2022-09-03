@@ -4,6 +4,8 @@
 import {Vec3} from "./Vec3";
 import {Vec2} from "./Vec2";
 import {Surface} from "../rendering/Surface";
+import {Camera} from "../interactive/Camera";
+import {GameSurfaceGL} from "../../../../maagtv/client/model/shader/GameSurfaceGL";
 
 export class Projection {
 
@@ -37,9 +39,9 @@ export class Projection {
         this.tfovpoweraspect = 1;
     }
 
-    set(camera) {
+    set(camera: Camera) {
         this._set = true;
-        this.d.copy(camera.to).sub(camera.from);
+        this.d.copy(camera.getToWithUserPosition()).sub(camera.getFromWithUserZoomPositionRotation());
 
         this.mm = Math.sqrt(this.d.x * this.d.x + this.d.y * this.d.y + this.d.z * this.d.z);
 
@@ -64,13 +66,17 @@ export class Projection {
 
     }
 
-    toWorld(surface: Surface, mousePosition, from, target) {
+    toWorld(surface: Surface|GameSurfaceGL, mousePosition, from, target?) {
         if (!this._set) {
             console.error("Projection has not been set from Camera source");
             this._set = true;
         }
-        this.s.x = 2 * mousePosition.x / surface.getWidth() - 1;
-        this.s.y = 1 - 2 * mousePosition.y / surface.getHeight();
+        if (!target) {
+            target = new Vec3();
+        }
+        this.s.x = (2 * (mousePosition.x)) / surface.getWidth() - 1;
+        this.s.y = 1 - (2 * (mousePosition.y)) / surface.getHeight();
+        //console.log("screen space", this.s);
         this.p.x = this.d.x + this.u.x * this.s.y + this.v.x * this.s.x;
         this.p.y = this.d.y + this.u.y * this.s.y + this.v.y * this.s.x;
         this.p.z = this.d.z + this.u.z * this.s.y + this.v.z * this.s.x;
@@ -79,13 +85,17 @@ export class Projection {
         } else {
             target.set(from.x - from.z * this.p.x, from.y - from.z * this.p.y, 0);
         }
-
+        return target;
     }
 
-    toScreen(surface: Surface, position: Vec3, from, target) {
+    // @ts-ignore
+    toScreen(surface: Surface|GameSurfaceGL, position: Vec3, from, target?) {
         if (!this._set) {
             console.error("Projection has not been set from Camera source");
             this._set = true;
+        }
+        if (!target) {
+            target = new Vec2();
         }
         this.p.set(position.x - from.x, position.y - from.y, position.z - from.z);
         this.mm = this.p.dot(this.d);
@@ -98,6 +108,6 @@ export class Projection {
         } else {
             target.set(-99, -99);
         }
-
+        return target;
     }
 }
