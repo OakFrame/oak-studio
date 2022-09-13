@@ -186,7 +186,7 @@ describe('SHIPP', () => {
             }
         }
 
-        // expect(drop.velocity.x).lt(0);
+     //   expect(drop.velocity.x).lt(0);
 
         //expect(shipp.getMap().length).equal(9 * 9);
 
@@ -199,18 +199,19 @@ describe('SHIPP', () => {
 
 
 
-    it('get normal', () => {
+    it('get normal flat', () => {
 
         let shipp = new SHIPP({width: 3, height: 3});
-        shipp.placeCluster(0, 0, 1, 3, 0);
-        shipp.placeCluster(1, 0, 1, 3, 0.5);
-        shipp.placeCluster(2, 0, 1, 3, 1);
+        shipp.run(()=>{
+            return 0.5;
+        });
 
         //shipp.blur(1);
 
-        let normal = shipp.getNormalAtPosition(1,1);
+        let normal = shipp.CalculateNormal(1,1);
+        console.log(normal);
 
-        let drop = new ErosionDrop();
+      /*  let drop = new ErosionDrop();
         drop.position.set(3, 4);
 
         for (let i = 0; i < 3; i++) {
@@ -219,12 +220,55 @@ describe('SHIPP', () => {
         }
         console.log(drop);
         drop.end(shipp);
-        expect(drop.velocity.x).lte(0);
+        expect(drop.velocity.x).lte(0);*/
         if (export_shipp_to_image) {
             renderSHIPPToImage('./tmp/shipp/03.png', shipp);
         }
-        expect(shipp.getMap().length).equal(9 * 9);
+        expect(normal.z).gt(0.99);
+        expect(Math.abs(normal.x)).lt(0.0001);
+        expect(Math.abs(normal.y)).lt(0.0001);
 
+
+    });
+ it('get normal angle left', () => {
+
+        let shipp = new SHIPP({width: 3, height: 3});
+        shipp.placeCluster(0, 0, 1, 3, 0);
+        shipp.placeCluster(1, 0, 1, 3, 0.5);
+        shipp.placeCluster(2, 0, 1, 3, 1);
+
+        //shipp.blur(1);
+
+        let normal = shipp.CalculateNormal(1,1);
+        console.log(normal);
+
+        if (export_shipp_to_image) {
+            renderSHIPPToImage('./tmp/shipp/04.png', shipp);
+        }
+        expect(shipp.getMap().length).equal(9);
+        expect(normal.x).lt(0);
+        expect(normal.y).equal(0);
+
+    });
+
+ it('get normal angle down', () => {
+
+        let shipp = new SHIPP({width: 3, height: 3});
+        shipp.placeCluster(0, 0, 3, 1, 1);
+        shipp.placeCluster(0, 1, 3, 1, 0.5);
+        shipp.placeCluster(0, 2, 3, 1, 0);
+
+        //shipp.blur(1);
+
+        let normal = shipp.CalculateNormal(1,1);
+        console.log(normal);
+
+        if (export_shipp_to_image) {
+            renderSHIPPToImage('./tmp/shipp/05.png', shipp);
+        }
+        expect(shipp.getMap().length).equal(9);
+        expect(normal.y).gt(0);
+        expect(normal.x).equal(0);
 
     });
 
@@ -246,7 +290,7 @@ describe('SHIPP', () => {
         drop.end(shipp);
         expect(drop.velocity.x).lte(0);
         if (export_shipp_to_image) {
-            renderSHIPPToImage('./tmp/shipp/03.png', shipp);
+            renderSHIPPToImage('./tmp/shipp/06.png', shipp);
         }
         expect(shipp.getMap().length).equal(9 * 9);
 

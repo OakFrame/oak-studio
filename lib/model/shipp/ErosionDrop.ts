@@ -29,7 +29,7 @@ export class ErosionDrop {
         let currentHeight = shipp.getPosition(this.position.x, this.position.y);
        // console.log('current', this.position);
 
-        for (let ix = -checksize; ix <= checksize; ix++) {
+      /*  for (let ix = -checksize; ix <= checksize; ix++) {
             for (let iy = -checksize; iy <= checksize; iy++) {
                 if (!(Math.abs(ix) == 0 && Math.abs(iy) == 0)) {
                     let v = new Vec3();
@@ -62,8 +62,9 @@ export class ErosionDrop {
                     //direction.add(v);
                 }
             }
-        }
+        }*/
 
+        direction = shipp.CalculateNormal(this.position.x, this.position.y);
        // console.log(direction, 'checks', checks);
        // console.log("A",direction);
         direction.normalize().mulI(1.5);//divI(Math.max(1,checks));

@@ -173,6 +173,7 @@ export class Vec2 {
     fromArray(arr){
         this.x = arr[0];
         this.y = arr[1];
+        return this;
     }
 
     /** @type {function():String} */

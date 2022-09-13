@@ -6,7 +6,8 @@ export interface SurfaceTextOptions {
     size?: number;
     color?: string;
     background?: string;
-    align?:string;
+    align?: string;
+    font?: string;
 }
 
 export interface SurfaceImageOptions {
@@ -42,10 +43,14 @@ export class Surface {
         if (!options) {
             options = {};
         }
-        this.context.font = ((options.size || 20) * this._scaling) + "px" // + Font Name;
+        this.context.font = ((options.size?options.size:20) * this._scaling) + "px " + ((options && options.font) ? " " + (options.font) : "mono") // + Font Name;
+
+        if (options.align) {
+            this.context.textAlign = options.align;
+        }
+        let w = this.context.measureText(text).width;
+        let h = (((options.size || 20)) * this._scaling);
         if (options.background) {
-            let w = this.context.measureText(text).width;
-            let h = (((options.size || 20)) * this._scaling);
             let padding = 10;
             this.context.fillStyle = options.background;
             this.getContext().beginPath();
@@ -54,6 +59,9 @@ export class Surface {
         }
         this.context.fillStyle = options.color || '#000';
         this.context.fillText(text, x, y);
+        if (options.align) {
+            this.context.textAlign = "left";
+        }
     }
 
     resize(_width, _height) {
@@ -63,6 +71,10 @@ export class Surface {
         }
         let width = _width * this._scaling;
         let height = _height * this._scaling;
+
+        if (width === this.getWidth() && height === this.getHeight()) {
+            return;
+        }
 
         height = Math.min(height, window.innerHeight * this._scaling);
         width = Math.min(width, window.innerWidth * this._scaling);
@@ -86,16 +98,17 @@ export class Surface {
         return this;
     };
 
-    maximize() {
-        let node = this.getElement().parentNode;
-        if (node) {
-            let w = node.offsetWidth - (parseInt(node.style.paddingRight || "0", 10) + parseInt(node.style.paddingLeft || "0", 10) + parseInt(node.style.borderLeftWidth || "0", 10)) || 1;
-            let h = node.offsetHeight || this.getHeight() || 1;
-            if (this._width !== w * this._scaling || this._height !== h * this._scaling) {
-                this.resize(w, h);
-            }
+    maximize(fixed = false) {
+        let parent = this.element.parentNode;
+        if (!parent) {
+            return;
         }
-        this._set_size = true;
+        let w = Math.min(window.innerWidth, parent.offsetWidth);
+        let h = Math.min(window.innerHeight, parent.offsetHeight);
+
+        // if (this.setSize(w, h) && fixed) {
+        //    this.element.classList.add("fixed-canvas");
+        //}
     }
 
     setSize(w, h) {
@@ -164,23 +177,23 @@ export class Surface {
         this.context.drawImage(sprite.getImage(), x, y);
     }
 
-    drawSprite(sprite:Sprite, options?: SurfaceImageOptions) {
+    drawSprite(sprite: Sprite, options?: SurfaceImageOptions) {
         options = {
             position: options.position || (new Vec2()),
             origin: options.origin || (new Vec2()),
-            scale: options.scale || ((new Vec2()).set(1,1)),
+            scale: options.scale || ((new Vec2()).set(1, 1)),
             rotation: options.rotation || 0
         }
 
         let from_camera_scale_x = 1;
 
-        let w = options.scale.x*sprite.getImage().width;
-        let h = options.scale.y*sprite.getImage().height;
+        let w = options.scale.x * sprite.getImage().width;
+        let h = options.scale.y * sprite.getImage().height;
 
         let offx = 0;//w*options.origin.x;
         let offy = 0;// h*options.origin.y;
 
-        this.context.drawImage(sprite.getImage(), options.position.x-offx, options.position.y-offy, w, h);
+        this.context.drawImage(sprite.getImage(), options.position.x - offx, options.position.y - offy, w, h);
 
         let lower_x = offx + (0.5 - (sprite.getImage().width * options.scale.x * from_camera_scale_x / 2));
         let lower_y = offy + (-(0.5 + (sprite.getImage().height * options.scale.x * from_camera_scale_x / 2)));
