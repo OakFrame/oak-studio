@@ -25,6 +25,7 @@ export class SHIPP<T> {
     private map: any[];
     private width: number;
     private height: number;
+    private _cachedNormals:SHIPP<any>;
 
     constructor(shipp?: any) {
         this.map = [];
@@ -56,7 +57,7 @@ export class SHIPP<T> {
             for (let x = 0; x < this.getWidth(); x++) {
                 for (let y = 0; y < this.getHeight(); y++) {
                     drop.position.set(Math.random() * this.getWidth(), Math.random() * this.getHeight());
-                    for (let z = 0; z < 500; z++) {
+                    for (let z = 0; z < 150; z++) {
                         drop.simulate(this);
                         if (z > 100 && drop.velocity.mag() < 0.001) {
                             break;
@@ -575,6 +576,15 @@ export class SHIPP<T> {
 
 
     CalculateNormal(x, y) {
+        if (!this._cachedNormals){
+            this._cachedNormals = new SHIPP({width:this.width, height:this.height});
+        }
+        let _c = this._cachedNormals.getPosition(x,y);
+        if (_c){
+           // console.log('CACHE HIT');
+            return _c;
+        }
+
         // Value from trial & error.
         // Seems to work fine for the scales we are dealing with.
         let strength = 1 / 16;
@@ -607,7 +617,7 @@ export class SHIPP<T> {
         //Vector3 scale = new Vector3(0.5f, 0.5f, 0.5f);
         //Vector3.Multiply(ref N, ref scale, out N);
         //Vector3.Add(ref N, ref scale, out N);
-
+        this._cachedNormals.setPosition(x,y, N);
         return N;
     }
 

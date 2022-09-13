@@ -14,55 +14,19 @@ export class ErosionDrop {
         this.velocity = new Vec2();
         this.sediment = 0;
         this.rateDeposit = 0.85;
-        this.rateErosion = 0.003;
+        this.rateErosion = 0.006;
     }
 
     simulate(shipp:SHIPP<number>) {
-        let checksize = 2;
-        let checks = 0;
+
         let direction = new Vec3();
 
-        let friction = 0.8;
+        let friction = 0.9;
 
         let last_position = this.position.clone();
 
         let currentHeight = shipp.getPosition(this.position.x, this.position.y);
-       // console.log('current', this.position);
 
-      /*  for (let ix = -checksize; ix <= checksize; ix++) {
-            for (let iy = -checksize; iy <= checksize; iy++) {
-                if (!(Math.abs(ix) == 0 && Math.abs(iy) == 0)) {
-                    let v = new Vec3();
-                    let check_vector = new Vec2();
-                    check_vector.set(ix, iy);
-                    let x = this.position.x + check_vector.x;//(friction * this.velocity.x)
-                    let y = this.position.y + check_vector.y;
-
-                    let check_height = shipp.getPosition(x, y);
-
-                    let dv = 1 - ((getDistance(0, 0, ix, iy) / (checksize * 1.45)));
-                    v.set(ix, iy, 0);
-                    if (dv > 0 && check_height < currentHeight) {
-                      //  console.log('found lesser', x, y, check_height);
-                        v.mulI(dv);
-                        // v.rotZ(180);
-                        // v.z = check_height;
-                        //direction.x += check_vector.x;
-                        //direction.y += check_vector.y;
-
-                        direction.add(v);
-                        checks++;
-                    }
-
-                    //let h_d = check_height - currentHeight;
-                    //  v.set(ix, iy, h_d);
-                    //if (h_d > 0) {
-                    //  v.rotZ(180);
-                    //}
-                    //direction.add(v);
-                }
-            }
-        }*/
 
         direction = shipp.CalculateNormal(this.position.x, this.position.y);
        // console.log(direction, 'checks', checks);
@@ -118,9 +82,9 @@ export class ErosionDrop {
     end(shipp){
         let currentHeight = shipp.getPosition(this.position.x, this.position.y);
         shipp.setPosition(this.position.x, this.position.y, currentHeight + this.sediment);
-        if (this.sediment<0){
-            console.log('sediment', this);
-        }
+      //  if (this.sediment<0){
+       //     console.log('sediment', this);
+        //}
         this.sediment = 0;
         this.velocity.set(0,0);
     }
