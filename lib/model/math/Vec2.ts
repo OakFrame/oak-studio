@@ -1,7 +1,12 @@
 /**
  * @constructor
  */
-export class Vec2 {
+export interface Vec2Interface {
+    x:number;
+    y:number;
+}
+
+export class Vec2 implements Vec2Interface{
 
     x:number;
     y:number;

@@ -9,13 +9,13 @@ export class RGB {
     constructor(r=0, g=0, b=0) {
         this.r = r;
         this.g = g;
-        this.b= b;
+        this.b = b;
     }
 
     set = (r, g, b) => {
-        this.r = r | 0;
-        this.g = g | 0;
-        this.b = b | 0;
+        this.r = r;
+        this.g = g;
+        this.b = b;
         return this;
     }
     copy = (rgb) => {
@@ -27,7 +27,7 @@ export class RGB {
 // Thanks to @cwolves on Stack Exchange
 // http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
     toHex = () => {
-        return "#" + ((1 << 24) + (this.r << 16) + (this.g << 8) + this.b).toString(16).slice(1);
+        return "#" + ((1 << 24) + ((this.r|0) << 16) + ((this.g|0) << 8) + (this.b|0)).toString(16).slice(1);
     };
     toArray = () => {
         return [this.r, this.g, this.b]
@@ -40,6 +40,13 @@ export class RGB {
         this.g = parseInt(hex.substring(2, 4), 16);
         this.b = parseInt(hex.substring(4, 6), 16);
         return this;
+    }
+    toReals = ()=>{
+        return {
+            r:this.r/255,
+            g:this.g/255,
+            b:this.b/255
+        }
     }
 }
 

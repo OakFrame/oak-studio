@@ -312,11 +312,11 @@ export function shuffleArray(array) {
 }
 
 
-export function arrayMedian(values){
-    if(values.length ===0) throw new Error("No inputs");
+export function arrayMedian(values) {
+    if (values.length === 0) throw new Error("No inputs");
 
-    values.sort(function(a,b){
-        return a-b;
+    values.sort(function (a, b) {
+        return a - b;
     });
 
     var half = Math.floor(values.length / 2);
@@ -328,8 +328,16 @@ export function arrayMedian(values){
 }
 
 export function mergeTypedArraysUnsafe(a, b) {
-    var c = new a.constructor(a.length + b.length);
+    var c = new Float32Array(a.length + b.length);
     c.set(a);
     c.set(b, a.length);
     return c;
+}
+
+
+export function Modulo1(idx:number, v: number): number {
+    let m = null;
+   let remainder = v % 1;
+   return (v - idx);
+
 }

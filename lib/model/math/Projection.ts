@@ -66,7 +66,7 @@ export class Projection {
 
     }
 
-    toWorld(surface: Surface|GameSurfaceGL, mousePosition, from, target?) {
+    toWorld(surface: Surface|GameSurfaceGL, mousePosition, from, target?):Vec3 {
         if (!this._set) {
             console.error("Projection has not been set from Camera source");
             this._set = true;
@@ -89,7 +89,7 @@ export class Projection {
     }
 
     // @ts-ignore
-    toScreen(surface: Surface|GameSurfaceGL, position: Vec3, from, target?) {
+    toScreen(surface: Surface|GameSurfaceGL, position: Vec3, from, target?):Vec2 {
         if (!this._set) {
             console.error("Projection has not been set from Camera source");
             this._set = true;

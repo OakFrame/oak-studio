@@ -90,7 +90,7 @@ export class CacheModel extends GameEventEmitter {
     }
 
     async registerSprite(src) {
-        let res = new Resource();
+        let res = new Resource<Sprite>();
         res.data = new Sprite(src);
         await this.cache.addResource('sprite', res);
         //this.mutate();
@@ -278,13 +278,13 @@ export class CacheModel extends GameEventEmitter {
 
 
     async getByteSize() {
-        if (localStorage && !localStorage.getItem('kp-cachesize')) {
+        if (window.localStorage && !window.localStorage.getItem('kp-cachesize')) {
             var i = 0;
             const starting_size = (this.byteLength(JSON.stringify(this.getSerializedResources())) / 1024);
             try {
                 // Test up to 10 MB
                 for (i = starting_size; i <= starting_size + (1024 * 10); i += 1024) {
-                    localStorage.setItem('kp-sizetest', new Array((i * 1024) + 1).join('a'));
+                    window.localStorage.setItem('kp-sizetest', new Array((i * 1024) + 1).join('a'));
                     this.maxByteSize = i * 1024;
                     await new Promise((r) => {
                         window.setTimeout(() => {
@@ -297,13 +297,13 @@ export class CacheModel extends GameEventEmitter {
                 // localStorage.setItem('kp-cachesize', (i*1024).toString());
                 //localStorage.removeItem('test');
             }
-            localStorage.setItem('kp-cachesize', ((i) * 1024).toString());
-            localStorage.removeItem('kp-sizetest');
+            window.localStorage.setItem('kp-cachesize', ((i) * 1024).toString());
+            window.localStorage.removeItem('kp-sizetest');
             return i * 1024;
         }
 
-        if (localStorage && localStorage.getItem('kp-cachesize')) {
-            return this.maxByteSize = parseInt(localStorage.getItem('kp-cachesize'));
+        if (window.localStorage && window.localStorage.getItem('kp-cachesize')) {
+            return this.maxByteSize = parseInt(window.localStorage.getItem('kp-cachesize'));
         }
 
         return 1024 * 1024;
@@ -318,6 +318,10 @@ export enum CacheResourceStatus {
     FULL = 3
 }
 
+export interface ResourceData {
+    getClientRequestView():any;
+}
+
 export class Resource<T> {
 
     _owner: string;
@@ -326,9 +330,11 @@ export class Resource<T> {
     _last_modified: number;
     uuid: string;
     type: string;
-    data;
+    // @ts-ignore
+    data: any;
     _thumbnail: any;
     status: CacheResourceStatus;
+    res: Sprite;
 
 
     constructor(props?, dataObject?) {
@@ -385,6 +391,14 @@ export class Resource<T> {
 
     getDataObject() {
         return this.data;
+    }
+
+    getClientRequestView(){
+        return {
+            uuid:this.uuid,
+            type:this.type,
+            data:this.data.getClientRequestView()
+        }
     }
 
     serialize() {

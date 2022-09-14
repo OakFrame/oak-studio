@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {replaceAll, slugify, combine} from "./Utils";
+import {replaceAll, slugify, combine, Modulo1} from "./Utils";
 
 describe('Utils', () => {
 
@@ -54,6 +54,20 @@ describe('Utils', () => {
         expect(combined_object.a).equal(1);
         expect(combined_object.b).equal(2);
         expect(combined_object.c).equal(3);
+
+    });
+
+
+
+    it('fake modulo 1', () => {
+
+        expect(Modulo1(0,0)).equal(0);
+        expect(Modulo1(0,1)).equal(1);
+        expect(Modulo1(1,1)).equal(0);
+        expect(Modulo1(1,2)).equal(1);
+
+        expect(Modulo1(-1, -1)).equal(0);
+        expect(Modulo1(-1, 0)).equal(1);
 
     });
 

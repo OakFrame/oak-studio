@@ -64,8 +64,8 @@ export class Face3 {
         this.pos3.set(x3, y3, z3);
         this.uv3.set(u3, v3);
 
-        this.center.copy(this.pos1).add(this.pos2).add(this.pos3).divI(3);
-        this.getnormal();
+       // this.center.copy(this.pos1).add(this.pos2).add(this.pos3).divI(3);
+        //this.getnormal();
 
         this.color1.set(r1, g1, b1);
         this.color2.set(r2, g2, b2);
@@ -123,10 +123,14 @@ export class Face3 {
      * @type {function():Face3}
      */
     clone(): Face3 {
-        return new Face3().set(this.pos1.x, this.pos1.y, this.pos1.z, this.uv1.x, this.uv1.y,
+
+      //  let f = new Face3();
+        return (new Face3()).copy(this);
+
+       /* return new Face3().set(this.pos1.x, this.pos1.y, this.pos1.z, this.uv1.x, this.uv1.y,
             this.pos2.x, this.pos2.y, this.pos2.z, this.uv2.x, this.uv2.y,
             this.pos3.x, this.pos3.y, this.pos3.z, this.uv3.x, this.uv3.y,
-            this.color1.r, this.color1.g, this.color1.b, this.color2.r, this.color2.g, this.color2.b, this.color3.r, this.color3.g, this.color3.b);
+            this.color1.r, this.color1.g, this.color1.b, this.color2.r, this.color2.g, this.color2.b, this.color3.r, this.color3.g, this.color3.b);*/
     };
 
 //console.warn("function Face3().copy() is broken!");

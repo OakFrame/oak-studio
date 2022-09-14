@@ -1,7 +1,8 @@
 import {EventModel} from "../EventModel";
 import {v4 as uuidv4} from "uuid";
+import { ResourceData } from "../Cache";
 
-export class Sprite implements EventModel {
+export class Sprite implements EventModel, ResourceData {
     public src: Array<string>;
     public images: Array<HTMLImageElement>;
     private image_index;
@@ -85,6 +86,10 @@ export class Sprite implements EventModel {
             this.listeners[notice] = [];
         }
         this.listeners[notice].push(callback);
+    }
+
+    getClientRequestView(): any {
+        console.warn('Not Implemented.');
     }
 
 }

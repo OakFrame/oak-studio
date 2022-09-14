@@ -3,6 +3,62 @@ import {ErosionDrop} from "./shipp/ErosionDrop";
 import {bias} from "./math/Parametric";
 import {Vec3} from "./math/Vec3";
 
+export class EDrop {
+    volume: number;
+    sediment: number;
+    position: Vec2;
+    last: Vec2;
+    velocity: Vec2;
+
+    constructor() {
+        this.velocity = new Vec2();
+        this.position = new Vec2();
+        this.last = new Vec2();
+        this.volume = 1;
+        this.sediment = 0;
+    }
+
+
+    simulate(shipp: SHIPP<number>) {
+
+        const dt = 1.2;
+        const density = 1.0;  //This gives varying amounts of inertia and stuff...
+        const evapRate = 0.001;
+        const depositionRate = 0.1;
+        const friction = 0.05;
+
+        const n = shipp.CalculateNormal(this.position.x, this.position.y);
+        this.velocity.add(n.clone().divI(dt * this.volume * density));//F = ma, so a = F/m
+        this.position.add(this.velocity.clone().mulI(dt))
+        this.velocity.mulI(1.0 - dt * friction);
+
+        let height = shipp.getPosition(this.position.x, this.position.y);
+        let heightLast = shipp.getPosition(this.last.x, this.last.y);
+
+        let maxsediment = this.volume * this.velocity.mag() * (heightLast - height);
+        if (maxsediment < 0.0) maxsediment = 0.0;
+        let sdiff = maxsediment - this.sediment;
+
+        let c_eq = this.volume * (this.velocity.mag()) * (heightLast - height);
+        if (c_eq < 0.0) c_eq = 0.0;
+
+        //Act on the Heightmap and Droplet!
+        this.sediment += dt * depositionRate * sdiff;
+        shipp.setPosition(this.last.x, this.last.y, heightLast - (dt * this.volume * depositionRate * sdiff));
+
+        //Evaporate the Droplet (Note: Proportional to Volume! Better: Use shape factor to make proportional to the area instead.)
+        this.volume *= (1.0 - dt * evapRate);
+
+        this.last.copy(this.position);
+    }
+
+    end(shipp) {
+        this.volume = 1;
+        this.sediment = 0;
+        this.velocity.set(0, 0);
+    }
+}
+
 function lerp(v0, v1, t) {
     return v0 * (1 - t) + v1 * t
 }
@@ -25,7 +81,7 @@ export class SHIPP<T> {
     private map: any[];
     private width: number;
     private height: number;
-    private _cachedNormals:SHIPP<any>;
+    private _cachedNormals: SHIPP<any>;
 
     constructor(shipp?: any) {
         this.map = [];
@@ -50,23 +106,48 @@ export class SHIPP<T> {
     }
 
     erode(c: number) {
+        const minVol = 0.01;
+
+        let drop = new EDrop();
+        for (let i = 0; i < c; i++) {
+
+            for (let x = 0; x < this.getWidth(); x++) {
+                for (let y = 0; y < this.getHeight(); y++) {
+                    drop.position.set(x + Math.random(), y + Math.random());
+                    drop.last.copy(drop.position);
+                    drop.velocity.set((Math.random() - 2) / 1000, (Math.random() - 2) / 1000);
+                    for (let z = 0; z < 2000; z++) {
+                        drop.simulate(this);
+                        if (z > 255 && drop.volume < minVol) {
+                        //     break;
+                          }
+                    }
+                    drop.end(this);
+                }
+            }
+            console.log("eroding... ", i, "/", c);
+        }
+    }
+
+    erode32(c: number) {
 
         let drop = new ErosionDrop();
         for (let i = 0; i < c; i++) {
 
             for (let x = 0; x < this.getWidth(); x++) {
                 for (let y = 0; y < this.getHeight(); y++) {
-                    drop.position.set(Math.random() * this.getWidth(), Math.random() * this.getHeight());
-                    for (let z = 0; z < 150; z++) {
+                    drop.position.set(x + Math.random(), y + Math.random());
+                    drop.velocity.set((Math.random() - 2) / 1000, (Math.random() - 2) / 1000);
+                    for (let z = 0; z < 2000; z++) {
                         drop.simulate(this);
-                        if (z > 100 && drop.velocity.mag() < 0.001) {
+                        if (z > 255 && drop.velocity.mag() < 0.0001) {
                             break;
                         }
                     }
                     drop.end(this);
                 }
             }
-
+            console.log("eroding... ", i, "/", c);
         }
     }
 
@@ -519,6 +600,7 @@ export class SHIPP<T> {
         });
 
         for (let i = 1; i <= octaves; i += 1) {
+
             let d = new SHIPP({width: i * octave_size, height: i * octave_size});
             d.run((m, x, y) => {
                 return 1 + (bias(smooth, Math.random()) / 20); //0.5 noisy 0.9-smooth
@@ -531,6 +613,7 @@ export class SHIPP<T> {
             if (block_scaling > 1) {
                 this.blur(block_scaling);
             }
+            console.log("octave", i,octaves);
         }
         this.normalize();
     }
@@ -552,6 +635,7 @@ export class SHIPP<T> {
 
         for (let x = 0; x < xcount; x++) {
             for (let y = 0; y < xcount; y++) {
+                console.log(idx, "/", shipps.length);
                 shipp.placeSHIPP(shipps[idx], x * width, y * width);
                 idx++;
             }
@@ -565,7 +649,7 @@ export class SHIPP<T> {
     addNoise(octave_size, smooth = 0.8) {
         let d = new SHIPP({width: octave_size, height: octave_size});
         d.run((m, x, y) => {
-            return 1 + (bias(smooth, Math.random()) / 20); //0.5 noisy 0.9-smooth
+            return 1 + (bias(smooth, Math.random()) / 5); //0.5 noisy 0.9-smooth
         });
         //let block_scaling = Math.floor((this.getWidth() / ( octave_size)));
         //for (let o = 1; o <= 4 * (1 - (i / octaves)); o++) {
@@ -576,12 +660,12 @@ export class SHIPP<T> {
 
 
     CalculateNormal(x, y) {
-        if (!this._cachedNormals){
-            this._cachedNormals = new SHIPP({width:this.width, height:this.height});
+        if (!this._cachedNormals) {
+            this._cachedNormals = new SHIPP({width: this.width, height: this.height});
         }
-        let _c = this._cachedNormals.getPosition(x,y);
-        if (_c){
-           // console.log('CACHE HIT');
+        let _c = this._cachedNormals.getPosition(x, y);
+        if (_c) {
+            // console.log('CACHE HIT');
             return _c;
         }
 
@@ -617,7 +701,7 @@ export class SHIPP<T> {
         //Vector3 scale = new Vector3(0.5f, 0.5f, 0.5f);
         //Vector3.Multiply(ref N, ref scale, out N);
         //Vector3.Add(ref N, ref scale, out N);
-        this._cachedNormals.setPosition(x,y, N);
+        this._cachedNormals.setPosition(x, y, N);
         return N;
     }
 
@@ -684,7 +768,7 @@ export class SHIPP<T> {
             for (let i = 0; i < maxIterations; ++i) {
 // Get the surface normal of the terrain at the current location
                 const surfaceNormal = this.CalculateNormal(x + ox, y + oy);
-                 // console.log(surfaceNormal);
+                // console.log(surfaceNormal);
 // If the terrain is flat, stop simulating, the snowball cannot roll any further
                 if (surfaceNormal.z === 1)
                     break;
@@ -707,8 +791,8 @@ export class SHIPP<T> {
                 y += vy;
             }
             if (sediment) {
-            //    let h = this.getPosition(xp, yp);
-             //   this.setPosition(xp, yp, h + sediment);
+                //    let h = this.getPosition(xp, yp);
+                //   this.setPosition(xp, yp, h + sediment);
             }
         };
 
