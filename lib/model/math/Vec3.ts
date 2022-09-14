@@ -62,7 +62,7 @@ export class Vec3 {
     }
 
     /** @type {function(number):Vec3} */
-    mulI(a:number) {
+    mulI(a: number) {
         this.x *= a;
         this.y *= a;
         this.z *= a;
@@ -70,7 +70,7 @@ export class Vec3 {
     }
 
     /** @type {function(number):Vec3} */
-    divI(a:number) {
+    divI(a: number) {
         this.x /= a;
         this.y /= a;
         this.z /= a;
@@ -121,7 +121,8 @@ export class Vec3 {
         this.x *= -1;
         return this;
     }
-flipZ() {
+
+    flipZ() {
         this.z *= -1;
         return this;
     }
@@ -137,6 +138,13 @@ flipZ() {
         return (this.x * a.x + this.y * a.y + this.z * a.z);
     }
 
+    round() {
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
+        this.z = Math.round(this.z);
+        return this;
+    }
+
     /** @type {function(Vec3):Vec3} */
     copy(a) {
         this.x = a.x;
@@ -146,7 +154,7 @@ flipZ() {
     }
 
     /** @type {function(Vec3):Vec3} */
-    pointTo(vec) {
+    pointTo(vec:Vec3) {
         //let a = this.clone();
         // a.sub(vec).divI(a.dist(vec));
         // let d = this.dist(vec);
@@ -168,7 +176,7 @@ flipZ() {
 
     /** @type {function():Vec3} */
     normalize() {
-        Vec3_TempI = this.mag()+0.0000000000001;
+        Vec3_TempI = this.mag() + 0.0000000000001;
         this.x /= Vec3_TempI;
         this.y /= Vec3_TempI;
         this.z /= Vec3_TempI;
@@ -177,7 +185,7 @@ flipZ() {
 
     /** @type {function():Vec3} */
     clone() {
-        return (new Vec3().set(this.x*1, this.y*1, this.z*1));
+        return (new Vec3().set(this.x * 1, this.y * 1, this.z * 1));
     }
 
     /** @type {function():Vec3} */
