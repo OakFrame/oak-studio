@@ -98,9 +98,9 @@ export class SHIPP<T> {
                 }
             }
         } else {
-            // for (let i = 0; i < this.width * this.height; i++) {
-            //     this.map[i] = 0;
-            //}
+            for (let i = 0; i < this.width * this.height; i++) {
+                this.map[i] = 0;
+            }
         }
 
     }
@@ -113,14 +113,15 @@ export class SHIPP<T> {
 
             for (let x = 0; x < this.getWidth(); x++) {
                 for (let y = 0; y < this.getHeight(); y++) {
+                    if (Math.random() < 0.9){continue;}
                     drop.position.set(x + Math.random(), y + Math.random());
                     drop.last.copy(drop.position);
                     drop.velocity.set((Math.random() - 2) / 1000, (Math.random() - 2) / 1000);
                     for (let z = 0; z < 2000; z++) {
                         drop.simulate(this);
                         if (z > 255 && drop.volume < minVol) {
-                        //     break;
-                          }
+                            //     break;
+                        }
                     }
                     drop.end(this);
                 }
@@ -416,6 +417,7 @@ export class SHIPP<T> {
     }
 
     selectPortion(x, y, width, height) {
+
         let map = new SHIPP({width: width, height: height});
         for (let ix = 0; ix < width; ix++) {
             for (let iy = 0; iy < height; iy++) {
@@ -446,6 +448,12 @@ export class SHIPP<T> {
 
             this.map[i] = Math.max(0, (this.map[i] - u) / (m - u));
         }
+    }
+
+    clamp() {
+       this.run((v)=>{
+          return Math.max(0,Math.min(1,v));
+       });
     }
 
 
@@ -613,7 +621,6 @@ export class SHIPP<T> {
             if (block_scaling > 1) {
                 this.blur(block_scaling);
             }
-            console.log("octave", i,octaves);
         }
         this.normalize();
     }
@@ -649,7 +656,7 @@ export class SHIPP<T> {
     addNoise(octave_size, smooth = 0.8) {
         let d = new SHIPP({width: octave_size, height: octave_size});
         d.run((m, x, y) => {
-            return 1 + (bias(smooth, Math.random()) / 5); //0.5 noisy 0.9-smooth
+            return 1 + (Math.random()*smooth); //0.5 noisy 0.9-smooth
         });
         //let block_scaling = Math.floor((this.getWidth() / ( octave_size)));
         //for (let o = 1; o <= 4 * (1 - (i / octaves)); o++) {
@@ -660,14 +667,14 @@ export class SHIPP<T> {
 
 
     CalculateNormal(x, y) {
-        if (!this._cachedNormals) {
-            this._cachedNormals = new SHIPP({width: this.width, height: this.height});
-        }
-        let _c = this._cachedNormals.getPosition(x, y);
-        if (_c) {
+       // if (!this._cachedNormals) {
+         //   this._cachedNormals = new SHIPP({width: this.width, height: this.height});
+       // }
+       // let _c = this._cachedNormals.getPosition(x, y);
+        //if (_c) {
             // console.log('CACHE HIT');
-            return _c;
-        }
+        //    return _c;
+       // }
 
         // Value from trial & error.
         // Seems to work fine for the scales we are dealing with.
@@ -701,7 +708,7 @@ export class SHIPP<T> {
         //Vector3 scale = new Vector3(0.5f, 0.5f, 0.5f);
         //Vector3.Multiply(ref N, ref scale, out N);
         //Vector3.Add(ref N, ref scale, out N);
-        this._cachedNormals.setPosition(x, y, N);
+        //this._cachedNormals.setPosition(x, y, N);
         return N;
     }
 

@@ -1,12 +1,11 @@
 import {EventModel} from "../EventModel";
 import {v4 as uuidv4} from "uuid";
-import { ResourceData } from "../Cache";
 
-export class Sprite implements EventModel, ResourceData {
+export class Sprite implements EventModel {
     public src: Array<string>;
     public images: Array<HTMLImageElement>;
-    private image_index;
-    private image_speed;
+    public image_index;
+    public image_speed;
 
     public ready;
     private listeners;

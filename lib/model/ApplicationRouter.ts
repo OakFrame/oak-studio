@@ -21,11 +21,16 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         this.stack = [];
         this.error_stack = [];
 
-        document.body.addEventListener('click', function (event) {
+        document.body.addEventListener('click',  (event) =>{
             const clickedElem: any = event.target;
             let target = clickedElem.closest("a");
 
             if (target && target.hasAttribute('href')) {
+                if ((target.getAttribute('href') || "").slice(0, 7) === "/logout") {
+                    this.publish('logout',{});
+                    window.location = target.hasAttribute('href')
+                    return;
+                }
                 if ((target.getAttribute('href') || "").slice(0, 5) === "/api/") {
                     window.location = target.hasAttribute('href')
                 } else {
@@ -63,6 +68,10 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
             event.stopPropagation();
             return false;
         }
+    }
+
+    getRoute(){
+        return this._route;
     }
 
     public focusModule(module: Module) {

@@ -1,6 +1,11 @@
 /**
  * @constructor
  */
+export interface Vec3Interface {
+    x: number;
+    y: number;
+    z: number;
+}
 export class Vec3 {
     x: number;
     y: number;
@@ -197,7 +202,7 @@ export class Vec3 {
     }
 
     /** @type {function():Array} */
-    toArray() {
+    toArray():number[] {
         return [this.x, this.y, this.z];
     }
 

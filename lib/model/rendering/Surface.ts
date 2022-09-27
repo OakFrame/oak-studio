@@ -26,15 +26,8 @@ export class Surface {
     private _set_size;
 
     constructor(canvas?: HTMLElement | HTMLCanvasElement) {
-        this.element = canvas || <HTMLCanvasElement>document.createElement('canvas');
-        if (!this.element.getContext || !this.element.getContext("2d")) {
-            console.error('canvas is not supported.');
-        }
-        this._set_size = false;
-        this.context = this.element.getContext('2d');
-        this._width = this.context.width || 300;
-        this._height = this.context.height || 150;
-        this._scaling = 2;//(window.innerWidth < 600 ? 1 : window.devicePixelRatio) || 1;
+        this.setElement(canvas);
+        this._scaling = (window.innerWidth < 600 ? 1 : window.devicePixelRatio) || 1;
         this.context.font = (20 * this._scaling) + "px" //+" Font Name";
         return this;
     }
@@ -143,6 +136,17 @@ export class Surface {
     clear() {
         this.context.clearRect(0, 0, this._width, this._height);
         return this;
+    }
+
+    setElement(canvas){
+        this.element = canvas || <HTMLCanvasElement>document.createElement('canvas');
+        if (!this.element.getContext || !this.element.getContext("2d")) {
+            console.error('canvas is not supported.');
+        }
+        this._set_size = false;
+        this.context = this.element.getContext('2d');
+        this._width = this.context.width || 300;
+        this._height = this.context.height || 150;
     }
 
     getElement() {
