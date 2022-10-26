@@ -4,6 +4,7 @@ export function replaceAll(str: any, search: any, replace: any) {
 
 export function byteLength(str) {
     // returns the byte length of an utf8 string
+    str = str.toString();
     var s = str.length;
     for (var i = str.length - 1; i >= 0; i--) {
         var code = str.charCodeAt(i);

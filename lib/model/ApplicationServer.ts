@@ -55,7 +55,8 @@ export class ApplicationServer implements StackInterface {
                     }).catch(function (e) {
                         route.getResponse().end(`CHAIN FAILED`);
                         console.trace(e, "chain failure");
-                        reject('Chain Failed');
+                       return reject('Chain Failed');
+                       // return reject();
                     });
                 } else {
                     resolve();

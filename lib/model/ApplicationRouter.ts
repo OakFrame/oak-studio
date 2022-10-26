@@ -167,30 +167,7 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
                 (function (app, i, elem) {
                     // let u = uuidv4();
                     //elem.id = u;
-                    //elem.setAttribute('id', u);
-                    let id = elem.getAttribute('data-bind');
-                    module._binds.push({
-                        identifier: id, uuid: app.subscribe(id, function (d) {
 
-                           /* let _s_dom = document.createElement('div');
-                            console.log('RENDER B ',data, d);
-                            _s_dom.innerHTML = renderer(view, data);
-
-                            let _ea = document.querySelectorAll(`[data-bind]`);
-                            let _es = _s_dom.querySelectorAll(`[data-bind]`);*/
-                            //_ea[i].innerHTML = _es[i].innerHTML;
-                            /*for (let x = 0; x < _ea.length; x++) {
-                                if (_ea[x].getAttribute('data-bind') === id) {
-                                    console.log('FOUND MATCHING ELEMENT', id);
-
-                                    //console.log(elem.innerHTML, _ea[x].innerHTML);
-                                    //elem.innerHTML = _ea[x].innerHTML+"";// = renderer(inner_html, d);
-                                    //document.getElementById(u).innerHTML = (_ea[x].innerHTML+"");
-                                }
-                            }*/
-
-                        })
-                    });
                 })(self, i, _es[i]);
 
             }

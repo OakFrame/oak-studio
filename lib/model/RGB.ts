@@ -11,7 +11,15 @@ export class RGB {
         this.g = g;
         this.b = b;
     }
-
+    mix = (rgb, a1, a2) => {
+        let mixed = new RGBA();
+        mixed.a = 1 - (1 - a2) * (1 - a1);
+        mixed.set(Math.round((rgb.r * a2 / mixed.a) + (this.r * a1 * (1 -a2) / mixed.a)),
+            Math.round((rgb.g * a2 / mixed.a) + (this.g * a1 * (1 - a2) / mixed.a)),
+            Math.round((rgb.b * a2 / mixed.a) + (this.b * a1 * (1 - a2) / mixed.a)),
+            mixed.a);
+        return mixed;
+    }
     set = (r, g, b) => {
         this.r = r;
         this.g = g;
@@ -47,6 +55,9 @@ export class RGB {
             g:this.g/255,
             b:this.b/255
         }
+    }
+    clone = ()=>{
+        return new RGB(this.r, this.g, this.b);
     }
 }
 
