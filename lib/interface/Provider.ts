@@ -8,7 +8,7 @@ export interface Provider {
 
 //** @interface SchemaProvider is like a serializable promise
 export interface SchemaProvider extends Provider, GameEventEmitter {
-    register(schema:string, res:Resource);
+    register(schema:string, res:Resource<any>);
 
     load(schema: string, id: string);
 }

@@ -9,8 +9,9 @@ import {isApplicationWrapped} from "../../utils/wrapper";
 export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
 
     public _modules: Module[] = [];
-    private stack: Array<Layer>;
-    private error_stack: Array<Layer>;
+    private stack: Array<Layer>;// TODO Arrange by queued index
+    private apply_stack: Array<Layer>; // TODO  Arrange by queued index
+    private error_stack: Array<Layer>;// TODO Arrange by queued index
     private _subscribers: any[];
     private _route:string;
 
@@ -19,6 +20,7 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         let app = this;
         this._modules = [];
         this.stack = [];
+        this.apply_stack = [];
         this.error_stack = [];
 
         document.body.addEventListener('click',  (event) =>{
@@ -28,11 +30,11 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
             if (target && target.hasAttribute('href')) {
                 if ((target.getAttribute('href') || "").slice(0, 7) === "/logout") {
                     this.publish('logout',{});
-                    window.location = target.hasAttribute('href')
+                    window.location = target.hasAttribute('href');
                     return;
                 }
                 if ((target.getAttribute('href') || "").slice(0, 5) === "/api/") {
-                    window.location = target.hasAttribute('href')
+                    window.location = target.hasAttribute('href');
                 } else {
                     console.log("application router target href",target.getAttribute('href'));
                     let relative_link=target.getAttribute('href');
@@ -55,7 +57,6 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
 
     public goToPage(route: string, event?) {
         let rel_route = route.replace(`//${window.location.hostname}`, "");
-
 
         if (!window.navigator['standalone'] && !isApplicationWrapped()) {
             /* iOS hides Safari address bar */
@@ -82,6 +83,10 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         this.stack.push(new Layer(route, fn));
     }
 
+    public apply(route, fn?): void {
+        this.apply_stack.push(new Layer(route, fn));
+    }
+
     public error(route, fn?): void {
         this.error_stack.push(new Layer(route, fn));
     }
@@ -94,6 +99,7 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         this._route = request_url;
 
         let chain: Array<Layer> = [];
+
         this.stack.forEach(function (layer: Layer) {
             let match = request_url.match(layer.route);
             if (match) {
@@ -108,12 +114,26 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
             });
             module._binds = [];
         });
+
         this._modules = [];
+
+
+        console.log('CURRENT CHAIN', chain);
+
+        const chain_apply_stack = ()=>{
+            this.apply_stack.forEach(function (layer: Layer) {
+                let match = request_url.match(layer.route);
+                if (match) {
+                    chain.push(layer);
+                }
+            });
+        };
 
         return new Promise<void>(function (resolve, reject) {
             function process() {
                 if (chain.length > 0) {
                     let layer: Layer = chain.shift();
+                    console.log('RUNNING LAYER', layer);
                     layer.fn(self).then(function () {
                         process();
                     }).catch(function (e) {
@@ -140,9 +160,11 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
             }
 
             if (chain.length > 0) {
+                chain_apply_stack();
                 process();
             } else {
                 chain = self.error_stack.slice(0, self.error_stack.length);
+                chain_apply_stack();
                 process_error();
             }
 
@@ -167,12 +189,10 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
                 (function (app, i, elem) {
                     // let u = uuidv4();
                     //elem.id = u;
-
                 })(self, i, _es[i]);
 
             }
         }
-
 
         return renderer(view, data);
     }
@@ -183,7 +203,6 @@ export class ApplicationRouter implements ModuleRouter, SubscribeInterface {
         }
         let u = uuidv4();
         this._subscribers[identifier].push({uuid: u, fn: callback});
-        //TODO return UUID here
         return u;
     }
 

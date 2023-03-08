@@ -1,4 +1,5 @@
 import {Vec2} from "./Vec2";
+import {Vec3} from "./Vec3";
 
 export function rayIntersection(from1: Vec2, to1: Vec2, from2: Vec2, to2: Vec2): Vec2 {
  //  const ray1 = to1.clone().sub(from1);
@@ -76,8 +77,28 @@ export function lineIntersection(from1: Vec2, to1: Vec2, from2: Vec2, to2: Vec2)
     // check if there is an intersection
     if (!(0 <= lambda && lambda <= 1) || !(0 <= gamma && gamma <= 1)) return vec;
 
-    vec.set(from1.x + lambda * dX, from1.y + lambda * dY)
+    vec.set(from1.x + lambda * dX, from1.y + lambda * dY);
 
     return vec;
 
+}
+
+export function closestPointOnLine2(point: Vec3, line: Vec3): Vec3 {
+    const lineLengthSquared = line.lengthSquared();
+    if (lineLengthSquared === 0) {
+        return point.clone();
+    }
+    let t = point.dot(line) / lineLengthSquared;
+    t = Math.max(0, Math.min(1, t));
+    return line.clone().mulI(t).add(point);
+}
+
+
+export function closestPointOnLine(point: Vec3, p0: Vec3, dir: Vec3): Vec3 {
+    const lineLengthSquared = dir.lengthSquared();
+    if (lineLengthSquared === 0) {
+        return point.clone();
+    }
+    let t = point.clone().sub(p0).dot(dir) / lineLengthSquared;
+    return dir.clone().mulI(t).add(p0);
 }

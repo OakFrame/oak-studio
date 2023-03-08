@@ -1,4 +1,4 @@
-export const ejs = (function(){
+export const ejs = (function(){/*!  EJS * Copyright(c) 2012 TJ Holowaychuk <tj@vision-media.ca> * MIT Licensed */
 
 // CommonJS require()
 
@@ -50,12 +50,6 @@ export const ejs = (function(){
 
 
     require.register("ejs.js", function(module, exports, require){
-
-        /*!
-         * EJS
-         * Copyright(c) 2012 TJ Holowaychuk <tj@vision-media.ca>
-         * MIT Licensed
-         */
 
         /**
          * Module dependencies.
@@ -416,11 +410,6 @@ export const ejs = (function(){
     }); // module: ejs.js
 
     require.register("filters.js", function(module, exports, require){
-        /*!
-         * EJS - Filters
-         * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
-         * MIT Licensed
-         */
 
         /**
          * First element of the target `obj`.

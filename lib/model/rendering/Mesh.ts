@@ -25,7 +25,7 @@ var Tri3_Temp = {
 export class Mesh {
 
     _buffered: {
-        position: Float32Array,
+        position: number[],
         color?,
         uv?,
         normal?
@@ -35,6 +35,7 @@ export class Mesh {
     private _tmpv;
     private _tmpr;
     private sortmeta;
+    _meshLODs:Mesh[];
 
     constructor() {
         this._children = [];
@@ -49,6 +50,12 @@ export class Mesh {
             val: {},
             times: 0
         }
+        this._buffered = {
+            position: [],//new Float32Array(this._children.length * offset_3),
+            color: [],//new Float32Array(this._children.length * offset_3),
+            uv: [],//new Float32Array(this._children.length * offset_2),
+            normal: []//new Float32Array(this._children.length * offset_3)
+        };
 
     }
 
@@ -57,16 +64,16 @@ export class Mesh {
         let offset_3 = 9;
         let offset_2 = 6;
 
-        this._buffered = {
-            position: new Float32Array(this._children.length * offset_3),
-            color: new Float32Array(this._children.length * offset_3),
-            uv: new Float32Array(this._children.length * offset_2),
-            normal: new Float32Array(this._children.length * offset_3)
-        };
+       // this._buffered = {
+       //     position: [],//new Float32Array(this._children.length * offset_3),
+        //    color: [],//new Float32Array(this._children.length * offset_3),
+         //   uv: [],//new Float32Array(this._children.length * offset_2),
+          //  normal: []//new Float32Array(this._children.length * offset_3)
+        //};
 
         for (var i = 0; i < this._children.length; i++) {
 
-            this._buffered.position[(i * offset_3) + 0] = -this._children[i].pos1.x;
+            this._buffered.position[(i * offset_3) ] = -this._children[i].pos1.x;
             this._buffered.position[(i * offset_3) + 1] = this._children[i].pos1.y;
             this._buffered.position[(i * offset_3) + 2] = this._children[i].pos1.z;
 
@@ -80,7 +87,7 @@ export class Mesh {
 
             let v1Normal = this._children[i].getnormal();
 
-            this._buffered.normal[(i * offset_3) + 0] = -v1Normal.x;
+            this._buffered.normal[(i * offset_3) ] = -v1Normal.x;
             this._buffered.normal[(i * offset_3) + 1] = v1Normal.y;
             this._buffered.normal[(i * offset_3) + 2] = v1Normal.z;
 
@@ -151,15 +158,22 @@ export class Mesh {
         return this;
     }
 
-    join(mesh, parent) {
+    join(mesh, parent?) {
+        if  (!parent){
+            parent = {
+                position:Vec3.fromValues(0,0,0),
+                scale:Vec3.fromValues(1,1,1),
+                rotation:Vec3.fromValues(0,0,0),
+            }
+        }
         var target = this;
         mesh._children.forEach(function (face) {
-            target._children.push(face.clone().scale(parent.scale).rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z).translate(parent.position).recalc());
+            target._children.push(face.clone().scale(parent.scale).rotY(parent.rotation.y).rotX(parent.rotation.x).rotZ(parent.rotation.z).translate(parent.position));
         });
         return this;
     };
 
-    draw(surface2d: Surface, camera, parent) {
+    draw(surface2d: Surface, camera, parent?) {
         this._children.forEach(function (tri) {
             camera.drawFace3(surface2d, tri.pos1, tri.pos2, tri.pos3, tri.color1.toHex());
         });
@@ -195,7 +209,14 @@ export class Mesh {
         return this;
     };
 
-    sort(from, parent) {
+    sort(from, parent?) {
+        if  (!parent){
+            parent = {
+                position:Vec3.fromValues(0,0,0),
+                scale:Vec3.fromValues(1,1,1),
+                rotation:Vec3.fromValues(0,0,0),
+            }
+        }
         this.sortmeta.co = 0;
         this.sortmeta.sw = 0;
 
@@ -329,16 +350,16 @@ export class Mesh {
                     elements.vertices.push(vertex["y"]); //y
                     elements.vertices.push(vertex["z"]); //z
 
-                    elements.vertices.push(vertex["s"] || 0); //u
-                    elements.vertices.push(vertex["t"] || 0); //v
+                    elements.vertices.push(vertex["s"] ); //u
+                    elements.vertices.push(vertex["t"] ); //v
 
                     elements.vertices.push(vertex["red"]); //r
                     elements.vertices.push(vertex["green"]); //g
                     elements.vertices.push(vertex["blue"]); //b
 
-                    elements.vertices.push(vertex["nx"]||0); //nx
-                    elements.vertices.push(vertex["ny"]||0); //ny
-                    elements.vertices.push(vertex["nz"]||0); //nz
+                    elements.vertices.push(vertex["nx"] ); //nx
+                    elements.vertices.push(vertex["ny"] ); //ny
+                    elements.vertices.push(vertex["nz"] ); //nz
 
                     model._bounds[0] = Math.min(model._bounds[0], vertex["x"]);
                     model._bounds[1] = Math.min(model._bounds[1], vertex["y"]);
@@ -423,6 +444,86 @@ export class Mesh {
 
         return this;
     };
+
+
+    generatePLY() {
+        this.generateMeshBuffer();
+        let lines = [`ply`, `format ascii 1.0`, `comment Generated by Oak-Studio - oakframe.org`];
+
+        let vertex_count = this._children.length *  3;
+        let face_count = this._children.length;
+
+        // element vertex count
+        lines.push(`element vertex ${vertex_count}`);
+
+        // vertex properties
+        lines.push(`property float x`);
+        lines.push(`property float y`);
+        lines.push(`property float z`);
+
+     //   lines.push(`property float nx`);
+       // lines.push(`property float ny`);
+      //  lines.push(`property float nz`);
+
+      //  lines.push(`property float s`);
+      //  lines.push(`property float t`);
+
+        lines.push(`property uchar red`);
+        lines.push(`property uchar green`);
+        lines.push(`property uchar blue`);
+        lines.push(`property uchar alpha`);
+
+        lines.push(`element face ${face_count}`);
+
+        lines.push(`property list uchar uint vertex_indices`);
+        lines.push(`end_header`);
+
+        // vertex list
+        for (let i = 0; i < vertex_count; i++) {
+
+            lines.push([
+                ...Array.from(this._buffered.position.slice((i * 3), (i + 1) * 3)).map((v) => {
+                    if (isNaN(v)) {
+                        v = 0;
+                    }
+                    return (v.toFixed(6));
+                }),
+             /*   ...this._buffered.normal.slice((i * 3), (i + 1) * 3).map(v => {
+                    if (isNaN(v)) {
+                        return 0;
+                    }
+                    return (v.toFixed(6));
+                }),
+                ...this._buffered.uv.slice((i * 2), (i + 1) * 2).map(v => {
+                    if (isNaN(v)) {
+                        return 0;
+                    }
+                    return (v.toFixed(6));
+                }),*/
+                ...this._buffered.color.slice((i * 3), (i + 1) * 3).map(c => {
+                    if (isNaN(c)) {
+                        return 0;
+                    }
+                    return Math.floor(c * 255)
+                }),
+                255
+            ].join(" "));
+
+        }
+
+        for (let i = 0; i < face_count; i++) {
+            lines.push(
+                [3, (i * 3), ((i) * 3) + 2, ((i) * 3) + 1].join(" ")
+            );
+        }
+
+
+        // vertices
+
+
+        return lines.join(`
+`);
+    }
 
 }
 

@@ -2,19 +2,20 @@
  * @constructor
  */
 export interface Vec2Interface {
-    x:number;
-    y:number;
+    x: number;
+    y: number;
 }
 
-export class Vec2 implements Vec2Interface{
+export class Vec2 implements Vec2Interface {
 
-    x:number;
-    y:number;
+    x: number;
+    y: number;
 
     constructor() {
         this.x = 0;
         this.y = 0;
     }
+
     /** @type {function():Vec2} */
     clear() {
         this.x = 0;
@@ -89,7 +90,7 @@ export class Vec2 implements Vec2Interface{
     }
 
     /** @type {function(Vec2):Vec2} */
-    div(vec2:Vec2) {
+    div(vec2: Vec2) {
         this.x /= vec2.x;
         this.y /= vec2.y;
         return this;
@@ -122,8 +123,8 @@ export class Vec2 implements Vec2Interface{
 
     /** @type {function():Vec2} */
     random() {
-        this.x = Math.random()-Math.random();
-        this.y = Math.random()-Math.random();
+        this.x = Math.random() - Math.random();
+        this.y = Math.random() - Math.random();
         return this;
     }
 
@@ -151,7 +152,7 @@ export class Vec2 implements Vec2Interface{
 
     /** @type {function():Vec2} */
     clone() {
-        return (new Vec2().set(this.x *  1, this.y *  1));
+        return (new Vec2().set(this.x * 1, this.y * 1));
     }
 
     /** @type {function(Vec2):Vec2} */
@@ -175,7 +176,7 @@ export class Vec2 implements Vec2Interface{
         return [this.x, this.y];
     }
 
-    fromArray(arr){
+    fromArray(arr) {
         this.x = arr[0];
         this.y = arr[1];
         return this;
@@ -186,6 +187,10 @@ export class Vec2 implements Vec2Interface{
         return JSON.stringify(this);
     }
 
+    static fromValues(x, y) {
+        return (new Vec2()).set(x, y);
+    }
+
 }
 
 
@@ -193,6 +198,6 @@ export function lerp(v0, v1, t) {
     return v0 * (1 - t) + v1 * t
 }
 
-export function lerpVec2(real:number, v1: Vec2, v2: Vec2){
-    return ((new Vec2()).set(lerp(v1.x,v2.x,real),lerp(v1.y,v2.y,real)));
+export function lerpVec2(real: number, v1: Vec2, v2: Vec2) {
+    return ((new Vec2()).set(lerp(v1.x, v2.x, real), lerp(v1.y, v2.y, real)));
 }

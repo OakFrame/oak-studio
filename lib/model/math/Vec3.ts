@@ -12,9 +12,9 @@ export class Vec3 {
     z: number;
 
     constructor() {
-        this.x = 0 | 0;
-        this.y = 0 | 0;
-        this.z = 0 | 0
+        this.x = 0;
+        this.y = 0;
+        this.z = 0 ;
         return this;
     }
 
@@ -51,7 +51,7 @@ export class Vec3 {
     }
 
     /** @type {function(Vec3):Vec3} */
-    mul(vec3) {
+    mul(vec3:Vec3) {
         this.x *= vec3.x;
         this.y *= vec3.y;
         this.z *= vec3.z;
@@ -72,6 +72,18 @@ export class Vec3 {
         this.y *= a;
         this.z *= a;
         return this;
+    }
+
+    addScaledVector(v: Vec3, scale: number): Vec3 {
+        this.x += v.x * scale;
+        this.y += v.y * scale;
+        this.z += v.z * scale;
+        return this;
+    }
+
+    reflect(normal) {
+        const dotProduct = this.dot(normal);
+        return this.clone().sub(normal.clone().mulI(2 * dotProduct));
     }
 
     /** @type {function(number):Vec3} */
@@ -168,6 +180,21 @@ export class Vec3 {
         // return a;
     }
 
+    distanceToSquared(v: Vec3): number {
+        const dx = this.x - v.x;
+        const dy = this.y - v.y;
+        const dz = this.z - v.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    cross(b:Vec3){
+        return Vec3.fromValues(
+            this.y * b.z - this.z * b.y,
+            this.z * b.x - this.x * b.z,
+            this.x * b.y - this.y * b.x
+        )
+    }
+
     /** @type {function(Vec3):number} */
     dist(vec) {
         return Math.sqrt((this.x - vec.x) * (this.x - vec.x) + (this.y - vec.y) * (this.y - vec.y) + (this.z - vec.z) * (this.z - vec.z));
@@ -178,6 +205,18 @@ export class Vec3 {
     mag() {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
+
+    lengthSquared(){
+        return this.x * this.x + this.y * this.y + this.z * this.z;
+    }
+
+    distanceSquared(v: Vec3): number {
+        const dx = this.x - v.x;
+        const dy = this.y - v.y;
+        const dz = this.z - v.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
 
     /** @type {function():Vec3} */
     normalize() {

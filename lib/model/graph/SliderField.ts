@@ -38,15 +38,18 @@ export class SliderField extends Field {
         this._inputArea.max = this._upper.toString();
         this._inputArea.step = this._step.toString();
         this._inputArea.onmousemove = (w) => {
-           // this._value = parseFloat(this._inputArea.value);
-            label_value.innerText = this._value.toString();
-            //this.publish('update', this._value);
-        }
+            let q = parseFloat(this._inputArea.value);
+            if (q !== this._value) {
+                this._value = parseFloat(this._inputArea.value);
+                label_value.innerText = this._value.toString();
+                this.publish('update', this._value);
+            }
+        };
         this._inputArea.onchange =  (w) => {
             this._value = parseFloat(this._inputArea.value);
             label_value.innerText = this._value.toString();
             this.publish('update', this._value);
-        }
+        };
 
         this._inputArea.value = value||0;
         let label = document.createElement('label');

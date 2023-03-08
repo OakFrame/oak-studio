@@ -14,6 +14,5 @@ varying vec4 shadowPos;
 void main (void) {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
-    shadowPos = texUnitConverter * lightProjectionMatrix *
-    lightMViewMatrix * vec4(aVertexPosition, 1.0);
+    shadowPos = texUnitConverter * lightProjectionMatrix * lightMViewMatrix * vec4(aVertexPosition, 1.0);
 }

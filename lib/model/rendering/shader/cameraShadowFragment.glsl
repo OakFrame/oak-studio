@@ -1,6 +1,5 @@
 precision mediump float;
 
-varying vec2 vDepthUv;
 varying vec4 shadowPos;
 
 uniform sampler2D depthColorTexture;
@@ -26,8 +25,11 @@ void main(void) {
 
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            float texelDepth = decodeFloat(texture2D(depthColorTexture,
-            fragmentDepth.xy + vec2(x, y) * texelSize));
+
+            vec2 sampleLocation = fragmentDepth.xy + vec2(x, y) * texelSize;
+
+            float texelDepth = decodeFloat(texture2D(depthColorTexture, sampleLocation));
+
             if (fragmentDepth.z < texelDepth) {
                 amountInLight += 1.0;
             }

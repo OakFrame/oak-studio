@@ -1,10 +1,19 @@
 import {Subscribe} from "../subscribe/Subscribe";
 
+const LZUTF8 = require("lzutf8");
+
 var getCookie = function (name) {
     var value = "; " + document.cookie;
     var parts = value.split("; " + name + "=");
     if (parts.length == 2) return parts.pop().split(";").shift();
 };
+
+
+function DecodeWSMessage(str:string){
+      var output = JSON.parse(LZUTF8.decompress(str,{inputEncoding:"Base64"}));
+    return output;//JSON.parse(str);
+}
+
 
 /** @class Socket is an interface to a WebSocketServer **/
 export class Socket {
@@ -44,7 +53,7 @@ export class Socket {
                 if (!this.endpoint) {
                     return;
                 }
-               // this.connect(this.endpoint);
+                // this.connect(this.endpoint);
 
             } else {
                 this._socket.send(JSON.stringify({
@@ -84,12 +93,13 @@ export class Socket {
         this._socket.onopen = (e) => {
             console.log('connected:', e);
             this.connected = true;
-            _socket._socket.send(JSON.stringify({
-                handshake: true
-            }));
-            _socket._socket.send(JSON.stringify({
-                auth: localStorage.getItem('oakframe-uuid') || ''
-            }));
+            // _socket._socket.send(JSON.stringify({
+            //     handshake: true
+            // }));
+
+            //  _socket._socket.send(JSON.stringify({
+            //      auth: window.localStorage.getItem('oakframe-uuid') || ''
+            // }));
 
             this._queue.forEach((data) => {
                 console.log('SENDING FROM QUEUE', data);
@@ -102,23 +112,33 @@ export class Socket {
             this.publish('connect', {});
         };
         this._socket.onmessage = function (e) {
-
-            let json = JSON.parse(e.data);
+            console.log('a',e.data);
+            let json = DecodeWSMessage(e.data);
+            console.log(json)
             for (var key in json) {
                 if (json.hasOwnProperty(key)) {
                     let data = json[key];
                     _socket._subscribe.publish(key, data);
                 }
             }
-            _socket.publish(JSON.parse(e.data), this);
+            _socket.publish(json, this);
         };
 
         this._socket.onclose = this._socket.onerror = function (e) {
 
-            _socket.connected = false;
+            this.close();
             console.error('socket disconnected');
         };
 
+    }
+
+    close() {
+        if (!this._socket || !this.isConnected()) {
+            return true;
+        }
+        this._socket.close();
+        this.connected = false;
+        this._queue = [];
     }
 
     subscribe(slug: string, fn): any {

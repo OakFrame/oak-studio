@@ -19,6 +19,7 @@ export class EDrop {
     }
 
 
+
     simulate(shipp: SHIPP<number>) {
 
         const dt = 1.2;
@@ -103,6 +104,14 @@ export class SHIPP<T> {
             }
         }
 
+    }
+
+    clone(){
+        let m = new SHIPP({width:this.width,height:this.height});
+        for (let i = 0; i < this.width * this.height; i++) {
+            m.map[i] = this.map[i];
+        }
+        return m;
     }
 
     erode(c: number) {

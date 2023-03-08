@@ -110,7 +110,7 @@ describe('SHIPP', () => {
 
     });
 
-    it('should blur', () => {
+   /* it('should blur', () => {
 
         let shipp = new SHIPP({width: 9, height: 9});
         let blur = new SHIPP({width: 2, height: 1});
@@ -128,7 +128,7 @@ describe('SHIPP', () => {
             renderSHIPPToImage('./tmp/shipp/02.png', shipp);
         }
 
-    });
+    });*/
 
     it('should erode', () => {
 

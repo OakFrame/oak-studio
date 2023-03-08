@@ -16,11 +16,12 @@ export class Camera {
     public zoom: number;
     public aspect: number;
     public projection: Projection;
-    private animation;
+    public animation;
     private _tmp;
 
     public userRotation;
     public userPosition;
+    public tick:number;
 
     constructor() {
         this.from = new Vec3().set(0, 100, 30);
@@ -33,6 +34,7 @@ export class Camera {
         this.fov = 45;
         this.zoom = 1;
         this.aspect = 1;
+        this.tick = 0;
         this.projection = new Projection();
         this.animation = {
             active: false,
@@ -40,7 +42,7 @@ export class Camera {
             startto: new Vec3(),
             pos: 0,
             gain: 0.5,
-            speed: 1,
+            speed: 0,
             finishfrom: new Vec3(),
             finishto: new Vec3()
         };

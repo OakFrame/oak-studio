@@ -5,7 +5,6 @@ import {Vec3} from "./Vec3";
 import {Vec2} from "./Vec2";
 import {Surface} from "../rendering/Surface";
 import {Camera} from "../interactive/Camera";
-import {GameSurfaceGL} from "../../../../maagtv/client/model/shader/GameSurfaceGL";
 
 export class Projection {
 
@@ -66,7 +65,7 @@ export class Projection {
 
     }
 
-    toWorld(surface: Surface|GameSurfaceGL, mousePosition, from, target?):Vec3 {
+    toWorld(surface: Surface|any, mousePosition, from, target?):Vec3 {
         if (!this._set) {
             console.error("Projection has not been set from Camera source");
             this._set = true;
@@ -89,7 +88,7 @@ export class Projection {
     }
 
     // @ts-ignore
-    toScreen(surface: Surface|GameSurfaceGL, position: Vec3, from, target?):Vec2 {
+    toScreen(surface: Surface|any, position: Vec3, from, target?):Vec2 {
         if (!this._set) {
             console.error("Projection has not been set from Camera source");
             this._set = true;

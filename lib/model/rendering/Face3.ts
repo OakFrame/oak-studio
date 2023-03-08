@@ -1,6 +1,7 @@
 import {Vec3} from "../math/Vec3";
 import {Vec2} from "../math/Vec2";
 import {RGB} from "../RGB";
+import {closestPointOnLine} from "../math/LineIntersection";
 
 /**
  * @constructor
@@ -89,6 +90,83 @@ export class Face3 {
         return this;
     };
 
+
+    closestPointToPoint(point: Vec3): Vec3 {
+        let vab = this.pos2.clone().sub(this.pos1);
+        let vac = this.pos3.clone().sub(this.pos1);
+        let vap = point.clone().sub(this.pos1);
+
+        let d1 = vab.dot(vap);
+        let d2 = vac.dot(vap);
+
+        if (d1 <= 0 && d2 <= 0) {
+            return this.pos1.clone(); // closest to pos1
+        }
+
+        let vbp = point.clone().sub(this.pos2);
+        let d3 = vab.dot(vbp);
+        let d4 = vac.dot(vbp);
+
+        if (d3 >= 0 && d4 <= d3) {
+            return this.pos2.clone(); // closest to pos2
+        }
+
+        let vc = d1 * d4 - d3 * d2;
+
+        if (vc <= 0 && d1 >= 0 && d3 <= 0) {
+            let v = d1 / (d1 - d3);
+            return this.pos1.clone().addScaledVector(vab, v); // closest to edge pos1-pos2
+        }
+
+        let vcp = point.clone().sub(this.pos3);
+        let d5 = vab.dot(vcp);
+        let d6 = vac.dot(vcp);
+
+        if (d6 >= 0 && d5 <= d6) {
+            return this.pos3.clone(); // closest to pos3
+        }
+
+        let vb = d5 * d2 - d1 * d6;
+
+        if (vb <= 0 && d2 >= 0 && d6 <= 0) {
+            let w = d2 / (d2 - d6);
+            return this.pos1.clone().addScaledVector(vac, w); // closest to edge pos1-pos3
+        }
+
+        let va = d3 * d6 - d5 * d4;
+
+        if (va <= 0 && (d4 - d3) >= 0 && (d5 - d6) >= 0) {
+            let w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+            return this.pos2.clone().addScaledVector(this.pos3.clone().sub(this.pos2), w); // closest to edge pos2-pos3
+        }
+
+        let denom = 1.0 / (va + vb + vc);
+        let v = vb * denom;
+        let w = vc * denom;
+
+        return this.pos1.clone().addScaledVector(vab, v).addScaledVector(vac, w); // closest to interior of triangle
+    }
+
+
+
+
+    pointInTriangle(point: Vec3): boolean {
+        const v1 = this.pos1.clone();
+        const v2 = this.pos2.clone();
+        const v3 = this.pos3.clone();
+        const u = v2.clone().sub(v1);
+        const v = v3.clone().sub(v1);
+        const w = point.clone().sub(v1);
+        const uu = u.dot(u);
+        const uv = u.dot(v);
+        const vv = v.dot(v);
+        const uw = u.dot(w);
+        const vw = v.dot(w);
+        const denominator = uv * uv - uu * vv;
+        let s = (uv * vw - vv * uw) / denominator;
+        let t = (uv * uw - uu * vw) / denominator;
+        return s >= 0 && t >= 0 && s + t <= 1;
+    }
 
     /**
      * @type {function():Vec3}
