@@ -1,0 +1,74 @@
+<div class="container">
+
+    <h1>
+        Upgrades
+    </h1>
+    <div class="multi-window">
+    <% for (var z = 0; z < items.length; z++) { %><div class="card">
+
+            <a href="/upgrade/<%= z %>">
+               <h3> <%= items[z].text %> </h3> Cost Coins: <%= items[z].cost.coins %><br /> Gems: <%= items[z].cost.gems %></a>
+    </div><% } %>
+    </div>
+
+<% for (let i = 0; i < topics.length; i++) { %>
+        <h1><%= topics[i].name %></h1>                        <div class="btn" id="resource.create.<%= topics[i].name %>">create</div>
+
+        <div class="cards" data-bind="schema.<%= topics[i].name %>">
+            <% for (let z = 0; z < topics[i].items.length; z++) { %>
+                <div class="card">
+
+                    <% if (topics[i].name === "image") { %>
+                        <a href="/paint/view/<%= topics[i].items[z].uuid %>">
+                            <img src="<%= topics[i].items[z]._thumbnail || topics[i].items[z].data.getImage() %>"
+                                 style=""></a>
+                    <% } %>
+                    <% if (topics[i].name === "comment") { %>
+                        <p><%= topics[i].items[z].data.body %>
+                            on
+                            <a href="/paint/view/<%= topics[i].items[z].data.parent %>"><%= topics[i].items[z].data.parent %></a>
+                        </p>
+                    <% } %>
+
+                        <% if (topics[i].name === "map") { %>
+                        <p><%= topics[i].items[z].data.name %>
+                       <%= topics[i].items[z].uuid %>
+                        </p>
+                    <% } %>
+                        <% if (topics[i].name === "character") { %>
+                        <p><%= topics[i].items[z].data.name %>
+                        </p>
+                    <% } %>
+
+                    <br/>
+
+                    <div>
+                    <span id="schema.toggle.like.<%= topics[i].items[z].uuid %>"
+                          class="<% if (state.account && state.account.user && state.account.user.liked_resources.indexOf(topics[i].items[z].uuid) !== -1) { %>is-liked<% } %>">
+                        <% if (state.account && state.account.user && state.account.user.liked_resources.indexOf(topics[i].items[z].uuid) !== -1) { %>
+                            <i class="fa-solid fa-fw fa-heart"></i>
+                        <% }else{ %>
+                            <i class="far fa-fw fa-heart"></i>
+                        <% } %>
+                    </span>
+
+                        <span id="schema.toggle.status.<%= topics[i].items[z].uuid %>"
+                          class="<% if (topics[i].items[z].status >= 2) { %>is-liked<% } %>">
+                        <% if (topics[i].items[z].status >= 2) { %>
+                            <i class="fa-solid fa-fw fa-bookmark"></i>
+                        <% }else{ %>
+                            <i class="far fa-fw fa-bookmark"></i>
+                        <% } %>
+                    </span>
+
+                        <span style="font-size:72%;"><%= utils.timeago(topics[i].items[z]._last_modified) %>
+                    by <%= topics[i].items[z]._owner %>
+                        </span>
+
+                        <div class="btn error" id="resource.delete.<%= topics[i].items[z].uuid %>">delete</div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
+</div>

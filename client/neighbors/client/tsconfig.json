@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "ES6",
+    "target": "ES2015",
+    "sourceMap": true,
+    "allowJs": true
+  },
+  "files": [
+    "./app.ts"
+  ],
+  "include": [
+    "./index.d.ts"
+  ]
+}

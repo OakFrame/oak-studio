@@ -1,0 +1,68 @@
+<div class="hero">
+
+    <div class="container med">
+        <h1>Resource Cache</h1>
+        <p>Go ahead:</p>
+        <p><%= JSON.stringify({is_online,standalone}) %></p>
+        <p><%= JSON.stringify(state.account) %></p>
+        <p class="flex">
+            <input type="text" placeholder="Search..." value="<%= search_safe %>"/>
+            <button>Search</button>
+        </p>
+        <div class="">
+            Device Storage Usages<br/>
+            <div class="flex">
+                <div><%= stats.device_used %>MB used</div>
+                <progress id="progress-device" max="100" min="0" value="<%= stats.device_pct %>"
+                          width="100%"></progress>
+                <div> <%= stats.device_total %>MB total</div>
+            </div>
+            <br/><br/>
+            Cloud Account Usages<br/>
+            <div class="flex">
+                <div>59MB used</div>
+                <progress id="progress-cloud" max="100" min="0" value="5" width="100%"></progress>
+                <div> 1GB total</div>
+            </div>
+        </div>
+        <h3>Projects:</h3><button id="create-project">Create</button>
+        <div id="window-project">
+            <% for (const project in serialized.projects) { %>
+                <li id="project-<%= serialized.projects[project].uuid %>">
+                </li>
+            <% } %>
+        </div>
+        <h3>Sprites:</h3><button id="create-sprite">Create</button>
+        <div id="window-sprites">
+            <% for (const sprite in serialized.sprites) { %>
+                <li id="sprite-<%= serialized.sprites[sprite].uuid %>">
+                   </li>
+            <% } %>
+        </div>
+        <h3>Images:</h3><button id="create-project">Create</button>
+        <div id="window-images">
+            <% for (const image in serialized.images) { %>
+                <li id="image-<%= serialized.images[image].uuid %>">
+                </li>
+            <% } %>
+        </div>
+        <h3>Comments:</h3><button id="create-comment">Create</button>
+        <div id="window-comments">
+            <% for (const comment in serialized.comments) { %>
+                <li id="comment-<%= serialized.comments[comment].uuid %>">
+                </li>
+            <% } %>
+        </div>
+        <h3>Maps:</h3><button id="create-map">Create</button>
+        <div id="window-comments">
+            <% for (const hashMap in serialized.maps) { %>
+                <li id="map-<%= serialized.maps[map].uuid %>">
+                </li>
+            <% } %>
+        </div>
+        <h3>Data Packs:</h3>
+        <div id="window-datapack"></div>
+        <h3>All Resources:</h3>
+        <div id="window-resource"></div>
+    </div>
+</div>

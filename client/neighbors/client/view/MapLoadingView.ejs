@@ -1,0 +1,5 @@
+<h1><%= message %></h1>
+<% if (!state.account || !state.account.isAuthenticated()) { %><br/>
+<small class='btn disabled' style='margin-bottom: 4px;'>Log In to gain access to all worlds.</small>
+<small><a href='/login' class='btn primary' style='pointer-events: all;'>Log In</a></small>
+<% } %>

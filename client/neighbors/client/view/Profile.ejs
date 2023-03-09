@@ -1,0 +1,8 @@
+<div class="hero flex" data-bind="state.account">
+    <div class="container med">
+        <h1>
+            Good day, <em><%= (state.account&&state.account.isAuthenticated())?state.account._firstName:"Adventurer" %></em>.
+        </h1>
+        <a class="btn error" href="/logout">Logout</a>
+    </div>
+</div>

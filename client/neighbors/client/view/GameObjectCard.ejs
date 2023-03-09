@@ -1,0 +1,23 @@
+<div class="card">
+    <h3><%= object.gameObjectAttributes.name ? object.gameObjectAttributes.name : "Unknown" %></h3>
+    <% if (object.gameObjectAttributes.health) { %>
+        <div>
+            <div class="progressbar" style="color: #fff;
+    background: #e84d4d;
+
+    overflow: hidden;">
+                <div class="filler" style="
+                        width: <%= (Math.floor(object.gameObjectAttributes.health.current / object.gameObjectAttributes.health.max) * 100) %>%;
+                        background: #84cb3d;
+                        top: 0;
+                        left: 0;">
+
+                    <%= object.gameObjectAttributes.health.current %> / <%= object.gameObjectAttributes.health.max %>
+
+                </div>
+            </div>
+        </div>
+    <% } %>
+    <h3><%= object.gameObjectAttributes.sprite ? object.gameObjectAttributes.sprite : "No image available" %></h3>
+
+</div>

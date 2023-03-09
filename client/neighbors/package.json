@@ -1,0 +1,31 @@
+{
+  "name": "PACKAGE_NAME",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "cd client && bash compile.sh",
+    "clean": "bash clean.sh",
+    "start": "cd service && ts-node express.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "OakFrame CLI",
+  "license": "ISC",
+  "types": "./index.d.ts",
+  "devDependencies": {
+    "body-parser": "^1.20.1",
+    "bson": "^4.7.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.8",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "express-ws": "^5.0.2",
+    "lzutf8": "^0.6.3",
+    "oak-studio": "file:/Users/gordon/Desktop/oakframe/oak-studio"
+  },
+  "dependencies": {
+    "@types/node": "^18.14.6"
+  }
+}

@@ -1,0 +1,12 @@
+<div class="hero with-footer" id="canvas-area">
+    <div id="window-project">
+        Projects <a href="/studio/project/new">
+            <button>Create New</button>
+        </a><br/>
+        <ol>
+            <% for (i = 0; i < projects.length; i++) { %>
+                <li><a href="/studio/project/<%= utils.slugify(projects[i].name) %>"><%= projects[i].name %></a></li>
+            <% } %>
+        </ol>
+    </div>
+</div>

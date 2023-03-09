@@ -1,0 +1,24 @@
+<div class="hero flex">
+
+    <div class="container med" style="padding-bottom:0;" data-bind="state.account">
+
+        <% if (!state.account || !state.account.isAuthenticated()) { %>
+            <h1>Sign in to MaaG</h1>
+            <p>
+                <a href="/api/login/google"><img style="height:3em;" src="/asset/lg-w-g.png"
+                                                 alt="Sign in with Google"></a>
+            <p>This evil will never sell your personal data.</p>
+            <p style="font-size:9.5pt;">If you can't see the "Sign in with Google" button above, you may need to disable
+                your ad blocker.</p>
+            <small>Read our <a href="/privacy">Privacy Policy</a> for more information about keeping you and your information safe.</small>
+            </p>
+
+        <% } else { %>
+            <h1>You are already logged in!</h1>
+            <p>
+                <a href="/profile">View your profile</a> or <a href="/settings">Update Account Settings</a>.
+            </p>
+        <% } %>
+
+    </div>
+</div>

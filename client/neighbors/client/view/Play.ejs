@@ -1,0 +1,20 @@
+<div class="container stories">
+    <h1>Interactive Stories</h1>
+
+    <% for (var i = 0; i < projects.length;i++){ %>
+
+        <div class="flex align-stretch">
+            <div class="view-preview">
+                <img src="<%= projects[i].data.preview %>" style="max-height:128px;">
+            </div>
+            <div class="view-description">
+                <h2><%= projects[i].data.name %></h2>
+                <p><%= projects[i].data.description %></p>
+            </div>
+            <div class="view-play"><a href="/play/<%= utils.slugify(projects[i].data.name) %>">
+                    <button class="primary" >Play <i class="fa-solid fa-angle-right"></i></button>
+                </a></div>
+        </div>
+    <% } %>
+
+</div>

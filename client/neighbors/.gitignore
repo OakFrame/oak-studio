@@ -1,0 +1,15 @@
+.idea
+*.iml
+out
+gen
+tmp
+insp
+_client
+.DS_Store
+.nyc_output
+node_modules
+wrapper/*
+release/*
+secret/*
+service/ticker-service/*
+.env

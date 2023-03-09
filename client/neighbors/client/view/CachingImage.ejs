@@ -1,0 +1,11 @@
+<div id="view-image-<%- resource.uuid %>">
+    <img class="gui-thumbnail" src="<%- resource._thumbnail %>" />
+    <img class="gui-thumbnail" src="<%- image.getImage() %>" style="max-height: 64px;" />
+    Server _id: <span id="name"><%- resource._id?resource._id:("N/A") %></span><br />
+    Local uuid: <span id="name"><%- resource.uuid?resource.uuid:("N/A") %></span><br />
+    Server _uuid: <span id="name"><%- resource._uuid?resource._uuid:("N/A") %></span><br />
+    Name: <span id="name">{name}</span><br />
+    Actions: <a href="/paint/view/<%= resource.uuid %>">View</a> <a href="/paint/edit/<%= resource.uuid %>">Edit</a><br />
+    Size: <%= (byteLength(JSON.stringify(image))/(1024 * 1024)).toFixed(4) %>MB<br/>
+    <label for="status-<%- resource.uuid %>">Status:</label>
+</div>

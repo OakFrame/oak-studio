@@ -1,0 +1,8 @@
+<div id="view-sprite-<%- resource.uuid %>">
+
+    <img class="gui-thumbnail" src="<%- sprite.src[0] %>" />
+    Name: <span id="name">{name}</span><br />
+        Size: <%= (byteLength(JSON.stringify(sprite))/(1024 * 1024)).toFixed(4) %>MB<br/>
+    <label for="status-<%- resource.uuid %>">Status:</label>
+
+</div>

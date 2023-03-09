@@ -1,0 +1,24 @@
+<h1>Select Map</h1>
+<% if (!state.account || !state.account.isAuthenticated()) { %><br/>
+<small class='btn disabled' style='margin-bottom: 4px;'>Log In to gain access to all worlds.</small>
+<small><a href='/login' class='btn primary' style='pointer-events: all;'>Log In</a></small>
+<% } %>
+
+<% if (maps) { %>
+    <% for (var i = 0; i < 3; i++) { %>
+
+        <div class="ui-card-wrapper map-select" data-uuid="<%= (maps[i] && maps[i].status === ResourceStatusEnum.READY && maps[i].resource)?maps[i].resource.UUID:"" %>">
+            <div class="ui-card">
+
+                <% if (maps[i] && maps[i].status === ResourceStatusEnum.READY && maps[i].resource) { %>
+                    <h3><%= JSON.stringify(maps[i].resource.data.name) %></h3>
+                <% }else if ((i===0 && (!state || !state.account || !state.account.isAuthenticated())) || (maps[i] && maps[i].status !== ResourceStatusEnum.READY && maps[i].resource)) { %>
+                    <h3>Loading....</h3>
+                <% } else { %>
+                        <div class="btn disabled" disabled="disabled">No Map Available</div>
+                <% } %>
+            </div>
+        </div>
+
+    <% } %>
+<% } %>

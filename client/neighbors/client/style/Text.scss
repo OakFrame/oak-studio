@@ -1,0 +1,197 @@
+@import "Globals";
+
+h1, h2, h3, h4 {
+  padding-top: $leading;
+  padding-bottom: calc($leading / 2);
+  font-weight: 100;
+  color: $text-color;
+  font-family: $header-font, 'Krona One', sans-serif;
+}
+
+h1 {
+  font-size: 32pt;
+  line-height: 32pt;
+  font-weight: bolder;
+}
+
+h2 {
+  font-size: 26pt;
+  line-height: 26pt;
+}
+
+h3 {
+  font-size: 22pt;
+  line-height: 22pt;
+}
+
+h4 {
+  font-size: 20pt;
+  line-height: 20pt;
+}
+
+li > h4 {
+  padding-bottom: 0;
+}
+
+.dropcap {
+  float: left;
+  font-size: 78pt;
+  margin-right: 5px;
+  height: 80pt;
+  line-height: 92pt;
+  background-color: #222;
+  background-image: url(/asset/pattern/black01.png);
+  margin-top: -24pt;
+  color: #fff;
+  padding: 0 8pt;
+  border-radius: $radius-size;
+}
+
+
+.display-1 {
+  font-size: 78pt;
+  line-height: 42pt;
+}
+
+@media screen and (max-width: $mobile) {
+  h1 {
+    font-size: 22pt;
+    line-height: 22pt;
+    font-weight: bolder;
+  }
+  h2 {
+    font-size: 18pt;
+    line-height: 18pt;
+  }
+  h3 {
+    font-size: 16pt;
+    line-height: 16pt;
+  }
+  h4 {
+    font-size: 14pt;
+    line-height: 14pt;
+  }
+
+  .dropcap {
+    font-size: 78pt;
+    height: 71pt;
+    line-height: 82pt;
+  }
+}
+
+.text-center {
+  text-align: center;
+}
+
+.icon-huge {
+  text-align: center;
+  font-size: 200pt;
+  color: rgba(5, 5, 5, 0.3);
+}
+
+@media screen and (max-width: $mobile) {
+  .icon-huge {
+    font-size: 120pt;
+  }
+}
+
+label {
+  text-transform: uppercase;
+  font-size: 10pt;
+  color: #80786f;
+  font-weight: bolder;
+}
+
+
+small {
+  font-size: 8pt;
+}
+sup {
+  font-size: 22%;
+}
+
+.new-sup {
+  position: absolute;
+  top: 1px;
+  right: -35px;
+  font-size: 80%;
+  color: #ffcc1d;
+}
+
+a.no-decoration .new-sup {
+ // color: #80786f;
+}
+
+.infobar {
+  background: #ffcc1d;
+  font-family: $secondary-font;
+  padding: 2px 0;
+  font-size: 90%;
+  z-index: 1;
+  position: relative;
+}
+
+p, small, li, .container {
+  font-family: $secondary-font, sans-serif;
+}
+
+p {
+  text-align: justify;
+}
+
+
+.float-right{
+  float:right;
+  display:block;
+}
+
+.alt{
+  color: $background-color;
+  background-color:$text-color;
+}
+
+.comment {
+  margin-bottom: $leading;
+  line-height: $base_line_height;
+  background-color: #fff4d3;
+  position: relative;
+  padding: $leading*0.5 $leading $leading*0.5 $leading;
+  color: #8c6c52;
+  margin-left: 17px;
+
+  h3 {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+}
+
+.comment::before {
+  content: "\f02e";
+  font-family: "Font Awesome 5 Free";
+  position: absolute;
+  font-weight: 900;
+  left: -17px;
+  color: rgb(244, 126, 32);
+}
+
+.comment-bad {
+  font-size: 11pt;
+  margin-bottom: $leading;
+  line-height: $base_line_height;
+  background-color: #ffdddf;
+  position: relative;
+  padding: $leading*0.5 $leading $leading*0.5 $leading;
+  //border-radius: 5px;
+  color: #750008;
+
+}
+
+.comment-bad::before {
+  content: "\f0f3";
+  font-family: "Font Awesome 5 Free";
+  position: absolute;
+  left: -17px;
+  color: rgb(255, 82, 99);
+}
+

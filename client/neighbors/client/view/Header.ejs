@@ -1,0 +1,45 @@
+<div class="navbar <%= (!no_header_bg ? "bg" : "") %>" id="navbar">
+    <div class="navbar-inner nav-container">
+        <a id="beacon" class="pill site-title no-decoration <%= (!is_online ? "offline" : "") %>" style="font-weight:bolder;"
+           href="//<%= hostname %>/">
+            <div class="left"><i class="fa-solid fa-fw fa-dungeon"></i> MaaG <sup class="new-sup">Alpha</sup></div>
+        </a>
+        <div class="pill dropdown right"><span><i class="fa-solid fa-bars"></i></span>
+            <div class="dropdown-content">
+                <div class="dropdown-inner">
+
+                    <a href="//<%= hostname %>/library"><i class="fa-solid fa-fw fa-book-dead"></i> Library</a>
+                    <a href="//<%= hostname %>/play"><i class="fa-solid fa-fw fa-dragon"></i> Play</a>
+                    <!--<a href="//<%= hostname %>/blog">Blog</a><br>
+                    <a href="//<%= hostname %>/analytics">Analytics</a><br>
+                    <a href="//<%= hostname %>/camera">Camera</a><br>-->
+                    <!--<a href="//<%= hostname %>/contact"><i class="fa-solid fa-fw fa-skull-crossbones"></i> Alchemy</a>-->
+                    <a href="//<%= hostname %>/contact"><i class="fa-solid fa-fw fa-crow"></i> Contact</a>
+                    <!--<a href="//<%= hostname %>/ask">Voice</a><br>
+                    <a href="//<%= hostname %>/studio">Studio</a><br>-->
+                    <a href="//<%= hostname %>/analytics"><i class="fa-solid fa-fw fa-hat-wizard"></i> Analytics</a>
+                    <a href="//<%= hostname %>/cache"><i class="fa-solid fa-fw fa-feather-alt"></i> Data Cache</a>
+                    <a href="//<%= hostname %>/map"><i class="fa-solid fa-fw fa-book-dead"></i> Map</a>
+                    <a href="//<%= hostname %>/privacy"><i class="fa-solid fa-fw fa-archway"></i> Privacy Policy</a>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="right" id="pill-search-expand" style="z-index:-3;"><input id="pill-search" placeholder="Search ..."
+                                                                              type="text"
+                                                                              value="<%= search_safe %>"><i
+                    id="pill-search-icon" class="fa-solid fa-fw fa-search"></i></div>
+
+        <% if (state && state.account && state.account.isAuthenticated()) { %>
+            <a href="//<%= hostname %>/profile" class="pill right" style="z-index:-3;" data-bind="state.account"><i
+                        class="far fa-fw fa-user-circle"></i></a>
+        <% }else { %><a href="//<%= hostname %>/login" class="pill right" style="z-index:-3;" data-bind="state.account"><i
+                    class="far fa-fw fa-user-circle"></i><span
+                    class="hide-mobile"> Log In</span></a>
+        <% } %>
+
+        <div id="health-area" class="right" style="z-index:-3;padding:0;"></div>
+    </div>
+</div>

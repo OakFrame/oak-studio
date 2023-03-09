@@ -1,0 +1,39 @@
+<h3>GameMap Server Info</h3>
+<h4><%= edgeInfo.hostname %></h4>
+<table>
+
+<tr><td>uptime</td><td><%= utils.timeago(Date.now() - edgeInfo.uptime) %></td></tr>
+<tr><td>platform</td><td><%= edgeInfo.platform %> <%= edgeInfo.arch %></td></tr>
+<tr><td>IP</td><td><%= edgeInfo.ip %></td></tr>
+
+<tr><td>cpu</td><td><%= cpuPCT %>%</td><td>
+<progress id="file" value="<%= cpuPCT %>" max="100"> <%= cpuPCT %>% </progress>
+</td></tr>
+
+<tr><td>memory</td><td><%= edgeInfo.ramTotal-edgeInfo.ramFree %>/<%= edgeInfo.ramTotal %></td><td>
+<progress id="file" value="<%= ramPCT %>" max="100"> <%= ramPCT %>% </progress>
+</td></tr>
+
+</table>
+
+<h3>Active Characters</h3>
+<h3>Active Connections</h3>
+<ul class="text-small">
+<% for (var i=0; i<connections.length;i++){ %>
+    <li><%= JSON.stringify(connections[i]) %></li>
+<% } %>
+</ul>
+<h3>Active Inputs</h3>
+<ul class="text-small">
+<% for (var i=0; i<inputs.length;i++){ %>
+    <li><%= JSON.stringify(inputs[i]) %></li>
+<% } %>
+</ul>
+<h3>Artifacts</h3>
+<ul class="text-small">
+<% for (var i=0; i<artifacts.length;i++){ %>
+    <li><%= JSON.stringify(artifacts[i]) %></li>
+<% } %>
+</ul>
+
+

@@ -1,0 +1,14 @@
+CACHE MANIFEST
+# Version 0.0.8
+
+/
+/app.html
+/bundle.js
+/style.css
+/favicon.ico
+
+NETWORK: *
+
+CACHE:
+
+FALLBACK:

@@ -1,0 +1,30 @@
+<h1>Select Character</h1>
+<% if (!state.account || !state.account.isAuthenticated()) { %><br/>
+<small class='btn disabled' style='margin-bottom: 4px;'>You are not logged in, your Character <strong>will not</strong>
+    be saved.</small>
+<small><a href='/login' class='btn primary' style='pointer-events: all;'>Log In</a></small>
+<% } %>
+
+<% if (characters) { %>
+    <% for (var i = 0; i < 3; i++) { %>
+
+        <div class="ui-card-wrapper character-select" data-uuid="<%= (characters[i] && characters[i].status === ResourceStatusEnum.READY && characters[i].resource)?characters[i].resource.UUID:"" %>">
+            <div class="ui-card">
+
+                <% if (characters[i] && characters[i].status === ResourceStatusEnum.READY && characters[i].resource) { %>
+                    <h3><%= characters[i].resource.data.gameObjectAttributes.name %></h3>
+                <% }else if ((i===0 && (!state || !state.account || !state.account.isAuthenticated())) || (characters[i] && characters[i].status !== ResourceStatusEnum.READY && characters[i].resource)) { %>
+                    <h3>Loading....</h3>
+                <% } else { %>
+
+                    <% if (state && state.account && state.account.isAuthenticated()) { %>
+                        <div class="btn primary">create new character</div>
+                    <% } else { %>
+                        <div class="btn disabled" disabled="disabled">Log In to unlock Character Slot</div>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+
+    <% } %>
+<% } %>

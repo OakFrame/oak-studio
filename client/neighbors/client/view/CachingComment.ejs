@@ -1,0 +1,8 @@
+<div id="view-comment-<%- resource.uuid %>">
+    Server _id: <span id="name"><%- resource._id ? resource._id : ("N/A") %></span><br/>
+    Actions: <a href="/studio/project/<%= resource.uuid %>">Edit</a><a href="/delete/<%= resource.uuid %>">Delete</a><br/>
+    Size: <%= (byteLength(JSON.stringify(resource.data)) / (1024 * 1024)).toFixed(4) %>MB<br/>
+    Parent: <span id="parent"><%- comment.parent %></span><br/>
+    Body: <span id="body"><%- comment.body %></span><br/>
+    <label for="status-<%- resource.uuid %>">Status:</label>
+</div>

@@ -1,0 +1,36 @@
+<div class="container">
+    <% if (standalone) { %>
+        <a href="#" onclick="window.history.back();"><h4>back</h4></a>
+        <% } %>
+
+        <span id="schema.toggle.status.<%- resource.uuid %>"
+              class="<% if (resource.status >= 2) { %>is-liked<% } %>">
+            <% if (resource.status >= 2) { %>
+                <i class="fa-solid fa-fw fa-bookmark"></i>
+            <% }else{ %>
+                <i class="far fa-fw fa-bookmark"></i>
+            <% } %>
+        </span>
+
+
+<div class="text-center" id="canvas-area">
+    <div style="max-width: 1280px;margin: auto;padding:3em 0;">
+        <h1 class="display-0 text-line line-right text-shadow" style="margin:0;">
+            <img src="<%- image.getImage() %>" style="max-height: 42vh;" >
+        </h1></div>
+</div>
+    <p>
+        <label>Status</label>
+        <table class="text-center" style="width: 100%;">
+        <tr><th width="33%">Likes</th><th width="33%">Favorites</th><th width="33%">Comments</th></tr>
+        <tr><td><h4 data-bind="stats.<%- resource.uuid %>.likes">15</h4></td><td><h4 data-bind="stats.<%- resource.uuid %>.favorites">5</h4></td><td><h4 data-bind="x.schema.comment.load.*.parent.<%- resource.uuid %>"><%- stats.comments %></h4></td></tr>
+    </table>
+    </p>
+    <p></p>
+<p>
+    <label>Comments</label>
+    <div id="comments">
+        <i class="fa-solid fa-2x fa-spin fa-circle-notch muted"></i>
+    </div>
+</p>
+</div>

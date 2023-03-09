@@ -1,0 +1,19 @@
+<div class="hero with-footer" id="canvas-area">
+    <div id="window-project">
+        Projects
+        <ol>
+            <% for (i=0; i<projects.length; i++) { %>
+                <li><a href="/studio/project/<%= utils.slugify(projects[i].name) %>"><%= projects[i].name %></a></li>
+            <% } %>
+        </ol>
+        <button id="create-project">Create Project</button><button class="primary" id="save-project">Save</button><br />
+        Objects <button id="create-object">Create Object</button><br /><br />
+        Images <button id="create-image">Create Image</button><br />
+        Rooms <button id="create-room">Create Room</button><br />
+    </div>
+    <div id="window-workspace">
+        workspace
+    </div>
+
+
+</div>

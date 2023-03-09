@@ -1,0 +1,19 @@
+<div class="display-image">
+    <img src="<%- image %>"/>
+</div>
+<div class="display-text">
+    <div class="limits">
+        <%- text %>
+
+        <% if (options.length) { %>
+            <div class="limits">
+                <% for (const prop of options) {
+                %>
+                    <button class=""><%= prop %></button>
+                <%
+                } %>
+            </div>
+        <%
+        } %>
+    </div>
+</div>

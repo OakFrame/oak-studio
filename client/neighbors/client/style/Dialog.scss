@@ -1,0 +1,67 @@
+.dialog-window {
+  //targetPosition: absolute;
+  //bottom: -512px;
+  width: 100%;
+  max-width: 920pt;
+  webkit-transition: bottom 600ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  -moz-transition: bottom 600ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  -o-transition: bottom 600ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: bottom 600ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  align-items: center;
+  padding: 0 $base_padding;
+  margin: 0 auto;
+
+  .display-image {
+    border-radius: 50%;
+    height: 64px;
+    width: 64px;
+    overflow: hidden;
+    //border: 4px solid #fff;
+    background-color: rgb(119 136 153 / 8%);
+    //margin: 0 auto;
+    //top: 25px;
+    //    targetPosition: relative;
+
+    img {
+      position: relative;
+      top: 15%;
+      width: 100%;
+    }
+  }
+
+  .display-text {
+    background-color: #ecdbcc;
+    color: $text-color;
+    border-radius: 8px;
+    //width:100%;
+    //border-top: 4px solid #fff;
+    padding: $base_padding $base_padding;
+    font-size: 24pt;
+    margin-left: $base-padding;
+    max-width: 75%;
+    font-family: $secondary-font;
+    @media screen and (max-width: $mobile) {
+      font-size: 14pt;
+    }
+
+    textarea, input, button, ul {
+      margin-bottom: 0;
+      margin-right: $base_padding;
+      font-family: $secondary-font;
+      font-size: 20pt;
+      line-height: 20pt;
+      padding: 8pt;
+      @media screen and (max-width: $mobile) {
+        font-size: 14pt;
+        line-height: 8pt;
+      }
+      background-color: #fff;
+
+      &:hover {
+        background-color: #f8efe8;
+        cursor: pointer;
+      }
+    }
+  }
+}

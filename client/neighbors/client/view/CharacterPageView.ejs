@@ -1,0 +1,30 @@
+<div class="container creator">
+    <h1>Character Creator</h1>
+
+    tests in123
+
+    <div class="multi-window">
+        <% for (var i=0; i<3; i++){ %>
+            <div class="">
+                <% if (slots[i]) { %>
+
+                    CHATACTER HERE
+
+                <% }else{
+                %> empty + <%
+                }%>
+            </div>
+        <% } %>
+    </div>
+
+    <%- JSON.stringify(character)%>
+    <div class="multi-window">
+        <img class="base-selection" id="base-0" src="/asset/character/00.png">
+        <img class="base-selection" id="base-1" src="/asset/character/01.png">
+        <img class="base-selection" id="base-2" src="/asset/character/02.png">
+        <img class="base-selection" id="base-3" src="/asset/character/03.png">
+        <img class="base-selection" id="base-4" src="/asset/character/04.png">
+        <img class="base-selection" id="base-5" src="/asset/character/05.png">
+    </div>
+
+</div>

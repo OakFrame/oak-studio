@@ -1,0 +1,58 @@
+/*.fa-heart {
+  targetPosition: absolute;
+  font-size: var(--like-font-size);
+  -webkit-text-stroke: 2px #e5e5e5;
+  color: whitesmoke;
+  transition: all ease-in-out;
+}*/
+
+.is-liked > i {
+  color: #c083ff;
+}
+
+.just-liked > i{
+  transition: all ease-in-out;
+  //color: red;
+  //-webkit-text-stroke: 1px red;
+  animation: .5s linear burst;
+}
+
+@keyframes burst{
+  0%,10%{
+    transform: scale(1);
+    opacity: .5;
+    top:0;
+    color: black;
+    //color:lavender;
+  }
+  25%{
+    transform: scale(.0.2);// rotate(30deg);
+    opacity: .75;
+  }
+  50%{
+    transform: scale(1.125);// rotate(-37.5deg);
+    opacity: 1;
+    //color: red;
+
+    text-shadow: 2px 2px 20px rgb(255, 0, 240);
+  }
+  65%{
+    transform: scale(1.625);// rotate(-37.5deg);
+    opacity: 0.8;
+    color: #c083ff;
+    text-shadow: 2px 2px 80px rgb(255, 0, 240);
+  }
+  90%,95%{
+    transform: scale(0.95);// rotate(10deg);
+    text-shadow: none;
+    top:-4px;
+   // color: red;
+  }
+  100% {
+    top:0;
+    color: #c083ff;
+    transform: scale(1);
+    //ransform: rotate(-2.5deg);
+  }
+
+}
